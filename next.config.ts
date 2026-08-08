@@ -20,6 +20,44 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
+  async headers() {
+    return [
+      {
+        // S'applique à toutes les routes.
+        source: "/:path*",
+        headers: [
+          // Empêche toute intégration du site dans une iframe externe —
+          // vise en particulier les routes de streaming de contenu
+          // (Étape 15), qui ne doivent jamais être embarquées ailleurs.
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+          // Décision d'architecture (voir PLAYBOOK-CONSTRUCTION.md, Étape 19) :
+          // une CSP stricte avec script-src à base de nonce (le modèle
+          // recommandé par Next.js) exige un nonce différent à chaque
+          // requête, ce qui force TOUTES les pages en rendu dynamique —
+          // annulerait directement le travail de l'Étape 5 (pages marketing
+          // statiques et rapides). On pose ici les directives qui ne posent
+          // pas ce compromis (frame-ancestors, object-src, base-uri) ; la
+          // directive script-src stricte à base de nonce reste un chantier
+          // documenté à part, à activer seulement si mesuré nécessaire.
+          {
+            key: "Content-Security-Policy",
+            value: [
+              "frame-ancestors 'none'",
+              "object-src 'none'",
+              "base-uri 'self'",
+            ].join("; "),
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

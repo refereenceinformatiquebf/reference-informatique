@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma/client";
 import { createClient } from "@/lib/supabase/server";
 import { devisSchema } from "@/lib/validations/devis";
 import { sendDevisReceived } from "@/lib/email/send";
+import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
 
 export type DevisFormState =
   | {
@@ -17,6 +18,13 @@ export async function requestDevis(
   _state: DevisFormState,
   formData: FormData,
 ): Promise<DevisFormState> {
+  try {
+    await enforceRateLimit("devis", 5, 60);
+  } catch (error) {
+    if (error instanceof RateLimitError) return { message: error.message };
+    throw error;
+  }
+
   const validated = devisSchema.safeParse({
     serviceId: formData.get("serviceId"),
     name: formData.get("name"),

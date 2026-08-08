@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma/client";
 import { contactSchema } from "@/lib/validations/contact";
+import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
 
 export type ContactFormState =
   | {
@@ -15,6 +16,13 @@ export async function sendContactMessage(
   _state: ContactFormState,
   formData: FormData,
 ): Promise<ContactFormState> {
+  try {
+    await enforceRateLimit("contact", 5, 60);
+  } catch (error) {
+    if (error instanceof RateLimitError) return { message: error.message };
+    throw error;
+  }
+
   const validated = contactSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),

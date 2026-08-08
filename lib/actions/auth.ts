@@ -9,6 +9,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
 } from "@/lib/validations/auth";
+import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
 
 export type AuthFormState =
   | {
@@ -22,6 +23,13 @@ export async function signIn(
   _state: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  try {
+    await enforceRateLimit("sign-in", 10, 60);
+  } catch (error) {
+    if (error instanceof RateLimitError) return { message: error.message };
+    throw error;
+  }
+
   const validated = signInSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
@@ -48,6 +56,13 @@ export async function signUp(
   _state: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  try {
+    await enforceRateLimit("sign-up", 5, 60);
+  } catch (error) {
+    if (error instanceof RateLimitError) return { message: error.message };
+    throw error;
+  }
+
   const validated = signUpSchema.safeParse({
     name: formData.get("name"),
     phone: formData.get("phone"),
@@ -101,6 +116,13 @@ export async function requestPasswordReset(
   _state: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  try {
+    await enforceRateLimit("forgot-password", 5, 60);
+  } catch (error) {
+    if (error instanceof RateLimitError) return { message: error.message };
+    throw error;
+  }
+
   const validated = forgotPasswordSchema.safeParse({
     email: formData.get("email"),
   });

@@ -50,6 +50,12 @@ export function Footer() {
           >
             Créer un compte
           </Link>
+          <Link
+            href="/politique-de-confidentialite"
+            className="text-ink-soft hover:text-ink text-sm"
+          >
+            Confidentialité
+          </Link>
         </div>
 
         <div className="flex flex-col gap-3">
