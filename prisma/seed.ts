@@ -85,12 +85,48 @@ async function seedServiceCategories() {
           slug: "assistant-whatsapp",
           name: "Assistant WhatsApp intelligent",
           description:
-            "Répondez automatiquement aux questions fréquentes de vos clients, 24h/24, sur WhatsApp.",
+            "Répondez automatiquement aux questions fréquentes de vos clients, 24h/24, sur WhatsApp — le canal que vos clients utilisent déjà le plus.",
           priceType: "QUOTE" as const,
           features: [
-            "Réponses automatiques",
-            "Escalade vers un humain",
-            "Intégré à votre numéro existant",
+            "Réponses automatiques aux questions fréquentes",
+            "Escalade vers un humain dès que la demande sort du cadre prévu",
+            "Intégré à votre numéro WhatsApp existant",
+          ],
+        },
+        {
+          slug: "agent-ia-emails",
+          name: "Agent IA pour vos emails",
+          description:
+            "Trie et priorise votre boîte mail, prépare des brouillons de réponse pour les demandes récurrentes — vous gardez toujours le dernier mot avant l'envoi.",
+          priceType: "QUOTE" as const,
+          features: [
+            "Tri automatique par urgence et par sujet",
+            "Brouillons de réponse prêts à valider, jamais envoyés sans vous",
+            "Relances automatiques de devis ou de prospects sans réponse",
+          ],
+        },
+        {
+          slug: "agent-ia-seo-contenu",
+          name: "Agent IA pour le SEO et le contenu",
+          description:
+            "Rédige et optimise vos textes (pages du site, articles, fiches produits) pour mieux ressortir sur Google, en gardant le ton de votre marque.",
+          priceType: "QUOTE" as const,
+          features: [
+            "Recherche des mots-clés que vos clients tapent réellement",
+            "Rédaction optimisée pour le référencement, relue par vous avant publication",
+            "Suivi mensuel de votre position sur Google",
+          ],
+        },
+        {
+          slug: "agent-ia-reseaux-sociaux",
+          name: "Agent IA pour les réseaux sociaux",
+          description:
+            "Propose et planifie des publications adaptées à votre activité pour Facebook, Instagram et WhatsApp Status, sans que vous y passiez vos journées.",
+          priceType: "QUOTE" as const,
+          features: [
+            "Calendrier de publication automatisé",
+            "Suggestions de contenu adaptées à votre secteur d'activité",
+            "Chaque publication reste soumise à votre validation",
           ],
         },
       ],
