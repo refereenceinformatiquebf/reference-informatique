@@ -8,6 +8,7 @@
  * Référence Informatique), pas des données de démonstration génériques —
  * voir PLAYBOOK-CONSTRUCTION.md, Étape 2.
  */
+import "dotenv/config";
 import { createClient } from "@supabase/supabase-js";
 import { prisma } from "../lib/prisma/client";
 
