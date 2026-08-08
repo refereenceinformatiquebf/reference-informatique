@@ -20,6 +20,7 @@ export function QuoteStatusSelect({
       <input type="hidden" name="quoteId" value={quoteId} />
       <Select
         name="status"
+        aria-label="Changer le statut de cette demande de devis"
         defaultValue={status}
         onChange={() => formRef.current?.requestSubmit()}
         className="w-auto text-xs"

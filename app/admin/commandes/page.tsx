@@ -47,6 +47,7 @@ export default async function AdminCommandesPage({
                   ? "/admin/commandes"
                   : `/admin/commandes?statut=${filter.value}`
               }
+              aria-current={statusFilter === filter.value ? "true" : undefined}
               className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
                 statusFilter === filter.value
                   ? "bg-brand text-white"
