@@ -1,26 +1,130 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * Système de tokens — Référence Informatique V2.
+ * Voir PLAYBOOK-CONSTRUCTION.md, section 5, pour la justification de chaque
+ * choix. Ne jamais coder une couleur ou une taille de police en dur dans une
+ * page ou un composant : tout doit passer par ces variables.
+ *
+ * Trois états de thème gérés, comme documenté dans la charte du projet :
+ *  - :root                              -> palette claire par défaut
+ *  - prefers-color-scheme: dark         -> thème système sombre (aucun choix explicite)
+ *  - [data-theme="dark"|"light"]        -> bascule manuelle (composant à venir),
+ *                                          gagne toujours sur la préférence système
+ */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  /* Encre / texte */
+  --ink: #161b22;
+  --ink-soft: #4b5563;
+  --ink-faint: #8a94a3;
+
+  /* Fonds */
+  --paper: #ffffff;
+  --paper-raised: #f7f8fa;
+
+  /* Marque */
+  --brand: #1e3a5f;
+  --brand-accent: #9c6b28;
+
+  /* Sémantique (états, jamais utilisée comme accent de marque) */
+  --success: #3e7a54;
+  --warning: #8a6d1f;
+  --danger: #a8432c;
+
+  /* Lignes */
+  --line: rgba(22, 27, 34, 0.12);
+  --line-strong: rgba(22, 27, 34, 0.22);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --ink: #e7e9ed;
+    --ink-soft: #a7adb8;
+    --ink-faint: #6b7280;
+
+    --paper: #12151b;
+    --paper-raised: #1a1f28;
+
+    --brand: #8fa8cf;
+    --brand-accent: #d3a75c;
+
+    --success: #6fb98a;
+    --warning: #d4b656;
+    --danger: #e0806a;
+
+    --line: rgba(255, 255, 255, 0.14);
+    --line-strong: rgba(255, 255, 255, 0.24);
   }
 }
 
+:root[data-theme="dark"] {
+  --ink: #e7e9ed;
+  --ink-soft: #a7adb8;
+  --ink-faint: #6b7280;
+
+  --paper: #12151b;
+  --paper-raised: #1a1f28;
+
+  --brand: #8fa8cf;
+  --brand-accent: #d3a75c;
+
+  --success: #6fb98a;
+  --warning: #d4b656;
+  --danger: #e0806a;
+
+  --line: rgba(255, 255, 255, 0.14);
+  --line-strong: rgba(255, 255, 255, 0.24);
+}
+
+@theme inline {
+  /* Couleurs -> génère bg-ink, text-brand, border-line, etc. */
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-brand: var(--brand);
+  --color-brand-accent: var(--brand-accent);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  /* Typographie -> génère font-display / font-body / font-data */
+  --font-display:
+    "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia,
+    serif;
+  --font-body: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-data: "SF Mono", "Cascadia Mono", Consolas, Menlo, monospace;
+
+  /* Échelle typographique fixe -> génère text-2xs ... text-5xl */
+  --text-2xs: 0.75rem; /* 12px */
+  --text-xs: 0.875rem; /* 14px */
+  --text-sm: 1rem; /* 16px */
+  --text-md: 1.1875rem; /* 19px */
+  --text-lg: 1.5rem; /* 24px */
+  --text-xl: 2rem; /* 32px */
+  --text-2xl: 2.625rem; /* 42px */
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  text-wrap: balance;
+}
+
+/* Chiffres alignés en colonne (prix, dates, statistiques) */
+.tabular {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
 }
