@@ -12,6 +12,12 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  // Prisma 7 (générateur `prisma-client`) interdit `url`/`directUrl` ici —
+  // validé par `prisma validate` (P1012, "no longer supported in schema
+  // files"). Les URLs de connexion vivent exclusivement dans
+  // prisma.config.ts (CLI : migrate, studio, ...) et dans l'adaptateur
+  // construit à la main pour le runtime (voir lib/prisma/client.ts). Voir
+  // PLAYBOOK-CONSTRUCTION.md, Étape 2.
 }
 
 enum Role {

@@ -3,10 +3,11 @@ import { PrismaClient } from "@/lib/generated/prisma/client";
 
 /**
  * Client Prisma singleton. Prisma 7 (générateur `prisma-client`) exige un
- * adaptateur de connexion explicite — ici `@prisma/adapter-pg`, qui pilote
- * la même chaîne de connexion (`DATABASE_URL`) que le reste du projet.
- * Voir prisma.config.ts pour la convention direct/poolée selon
- * l'environnement.
+ * adaptateur de connexion explicite — ici `@prisma/adapter-pg`, qui utilise
+ * DATABASE_URL (pooler Supabase en mode transaction, port 6543) — la même
+ * valeur partout, développement comme production. Ce module ne passe
+ * jamais par prisma.config.ts : DIRECT_URL (configuré là-bas, pour la CLI
+ * `prisma migrate`) n'entre jamais en jeu ici.
  *
  * En développement, le rechargement à chaud de Next.js réévalue ce module à
  * chaque changement de fichier — sans cette précaution, chaque rechargement

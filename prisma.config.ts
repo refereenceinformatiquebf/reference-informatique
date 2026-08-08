@@ -4,14 +4,19 @@ import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
 // Décision d'architecture (voir PLAYBOOK-CONSTRUCTION.md, Étape 2) :
-// Prisma 7 n'a plus de champ `directUrl` séparé — une seule URL est utilisée
-// à la fois pour le runtime et pour les migrations. Convention retenue :
-//   - En local (.env)         -> connexion DIRECTE Supabase (port 5432),
-//                                 nécessaire pour `prisma migrate dev`.
-//   - Sur Vercel (production) -> connexion POOLÉE Supabase/PgBouncer
-//                                 (port 6543), adaptée au runtime serverless.
-// Les migrations ne s'exécutent jamais automatiquement en production ;
-// seule la valeur locale a donc besoin d'être la connexion directe.
+// le type Datasource de prisma.config.ts n'expose qu'un seul champ `url`
+// (confirmé dans node_modules/@prisma/config — pas d'équivalent
+// `directUrl`), et schema.prisma interdit désormais tout champ url/
+// directUrl (P1012 sous le générateur `prisma-client`). Il n'y a donc plus
+// qu'UNE URL par contexte, pas deux à la fois :
+//   - Ici (CLI : `prisma migrate`, `prisma studio`, ...) -> DIRECT_URL,
+//     le pooler Supabase en mode session (port 5432). Le mode transaction
+//     (pgbouncer, port 6543) ne supporte pas les verrous consultatifs et
+//     prepared statements dont `migrate` a besoin.
+//   - À l'exécution (requêtes de l'application) -> DATABASE_URL, le
+//     pooler en mode transaction (port 6543), utilisé directement par
+//     l'adaptateur dans lib/prisma/client.ts — qui ne passe jamais par ce
+//     fichier de config.
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
@@ -19,6 +24,6 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: process.env["DIRECT_URL"],
   },
 });
