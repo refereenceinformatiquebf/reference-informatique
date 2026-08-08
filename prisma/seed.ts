@@ -155,36 +155,147 @@ async function seedProducts() {
       name: "Clé de Formations Complètes",
       shortDescription:
         "La clé USB 64 Go qui contient l'essentiel de ce dont vous avez besoin.",
+      longDescription:
+        "Classée meilleure clé de formations complètes au Burkina Faso. Fonctionne sans internet — apprenez partout, même sans connexion. Accès plateforme en ligne 24h/24 inclus en plus de la clé USB.",
       price: 12000,
       compareAtPrice: 25000,
       displayOrder: 1,
+      faq: [
+        {
+          question: "Combien de temps ai-je accès au contenu ?",
+          answer:
+            "Vous avez un accès à vie ! La clé USB est à vous pour toujours et l'accès plateforme est inclus sans limite.",
+        },
+        {
+          question: "Comment se passe la livraison ?",
+          answer:
+            "Livraison gratuite partout au Burkina Faso sous 24 à 48h après confirmation du paiement.",
+        },
+        {
+          question: "Quels modes de paiement sont acceptés ?",
+          answer:
+            "Carte bancaire et Mobile Money (Orange Money, Moov Money, Wave) en ligne, ou commande directe via WhatsApp.",
+        },
+        {
+          question: "La clé fonctionne-t-elle sur tous les ordinateurs ?",
+          answer:
+            "Oui, sur tous les PC Windows et Mac, sans installation particulière.",
+        },
+        {
+          question: "Les formations sont-elles adaptées aux débutants ?",
+          answer:
+            "Oui, chaque module commence de zéro et progresse jusqu'au niveau avancé.",
+        },
+      ],
+      whyChooseUs:
+        "Elle contient des modules complets couvrant tout ce dont vous avez besoin pour maîtriser l'informatique professionnelle. Fonctionne sans internet — apprenez partout, même sans connexion. Accès plateforme en ligne 24h/24 inclus en plus de la clé USB. Livraison gratuite partout au Burkina Faso.",
+      targetAudience: [
+        "Étudiants et lycéens qui veulent maîtriser les outils bureautiques",
+        "Employés et fonctionnaires qui veulent progresser dans leur carrière",
+        "Entrepreneurs qui veulent utiliser l'IA et le marketing digital",
+        "Enseignants qui veulent créer des présentations professionnelles",
+      ],
+      contents: [
+        "Excel Simple (Débutant à Intermédiaire)",
+        "Excel Avancé (Formules, Tableaux croisés, Macros, Analyses...)",
+        "Word de A à Z (Mise en page, Bien rédigé, Styles...)",
+        "PowerPoint de A à Z (Présentations professionnelles et impressionnantes)",
+        "Intelligence Artificielle — Comprendre et utiliser l'IA, ChatGPT, prompts et automatisation",
+        "Marketing Digital et Business en ligne",
+        "Anglais Débutant, Intermédiaire, Avancé",
+        "100 Meilleurs Livres PDF pour Entreprendre",
+        "Infographie et Design avec Canva",
+        "Montage Vidéo professionnel avec Cap Cut",
+      ],
     },
     {
       slug: "cle-formations-smart",
       name: "Clé de formations SMART",
       shortDescription:
         "La clé intelligente pour maîtriser votre ordinateur et booster votre productivité.",
+      longDescription:
+        "Idéale pour les professionnels qui veulent être plus productifs au bureau. 150 logiciels Excel prêts à l'emploi et 5500 diapositives PowerPoint professionnelles.",
       price: 14000,
       compareAtPrice: 20000,
       displayOrder: 2,
+      whyChooseUs:
+        "150 logiciels Excel prêts à l'emploi — plus besoin de créer depuis zéro. 5500 diapositives PowerPoint professionnelles pour toutes vos présentations. Maîtrisez la prise de parole et devenez éloquent et convaincant.",
+      targetAudience: [
+        "Employés et fonctionnaires qui veulent être plus efficaces au bureau",
+        "Managers et chefs de projet qui font beaucoup de présentations",
+        "Comptables et gestionnaires qui travaillent avec Excel",
+        "Étudiants en fin d'études qui préparent leurs soutenances",
+      ],
+      contents: [
+        "Maîtrise complète de l'ordinateur (Windows, clavier, fichiers)",
+        "Prise de parole en public — Vidéos + Livres PDF + Livres Audio",
+        "Dominez la peur de parler en public et devenez éloquent",
+        "150 Logiciels Excel (Facturation, Vente, Comptabilité)",
+        "150 Logiciels Excel (Gestion de Stock, Budget, Paie, RH)",
+        "5500 Diapositives PowerPoint professionnelles prêtes à l'emploi",
+        "Modèles pour bilans, réunions, soutenances et présentations",
+      ],
     },
     {
       slug: "cle-enfants",
       name: "Clé pour Enfants — Informatique et Anglais",
       shortDescription:
         "Clé USB 32 Go spécialement conçue pour préparer les enfants à réussir demain.",
+      longDescription:
+        "Contenu 100% adapté aux enfants — méthode ludique et progressive, dès 6 ans.",
       price: 10000,
       compareAtPrice: 15000,
       displayOrder: 3,
+      whyChooseUs:
+        "Contenu 100% adapté aux enfants — méthode ludique et progressive. Apprendre l'anglais dès le jeune âge — un avantage pour toute la vie. Les dessins animés éducatifs rendent l'apprentissage amusant.",
+      targetAudience: [
+        "Enfants qui veulent apprendre l'informatique",
+        "Enfants qui veulent apprendre l'anglais de façon amusante",
+        "Parents qui veulent préparer leurs enfants pour l'école et l'avenir",
+        "Écoles et centres de formation pour enfants",
+      ],
+      contents: [
+        "Informatique pour enfants — Utilisation de l'ordinateur dès le début",
+        "Anglais pour enfants Débutant — Vocabulaire et bases",
+        "Anglais pour enfants Intermédiaire — Phrases et conversation",
+        "Dessins animés éducatifs pour apprendre en s'amusant",
+        "Exercices interactifs adaptés à l'âge de l'enfant",
+        "Méthode ludique et progressive pour rester motivé",
+      ],
     },
     {
       slug: "cle-tout-en-un",
       name: "CLE COMPLETE Tout-en-Un (64 Go)",
       shortDescription:
         "L'offre la plus complète : la Clé de Formations Complètes et la Clé SMART réunies.",
+      longDescription:
+        "Une seule clé USB 64 Go qui combine la Clé de Formations Complètes et la Clé SMART. Vous économisez par rapport à l'achat séparé des deux clés.",
       price: 16000,
       compareAtPrice: 39000,
       displayOrder: 4,
+      whyChooseUs:
+        "La clé la plus complète — treize modules dans une seule clé 64 Go. Tout ce dont vous avez besoin pour devenir un expert informatique. Accès plateforme en ligne 24h/24 inclus sans limite de durée.",
+      targetAudience: [
+        "Toute personne qui veut tout apprendre en une seule fois",
+        "Professionnels qui veulent maximiser leur productivité",
+        "Entrepreneurs qui veulent maîtriser tous les outils numériques",
+        "Étudiants qui veulent se démarquer sur le marché du travail",
+      ],
+      contents: [
+        "Excel Simple et Avancé — De débutant à expert",
+        "Word de A à Z — Mise en page et publipostage",
+        "PowerPoint de A à Z — Présentations professionnelles",
+        "Intelligence Artificielle et ChatGPT — Automatisation",
+        "Marketing Digital et Business en ligne",
+        "Anglais Débutant, Intermédiaire et Avancé",
+        "100 Meilleurs Livres PDF pour Entreprendre",
+        "Maîtrise complète de l'ordinateur",
+        "Prise de parole en public — Vidéos + Livres PDF + Audio",
+        "150 Logiciels Excel (Facturation, Stock, Comptabilité, Budget)",
+        "5500 Diapositives PowerPoint professionnelles prêtes à l'emploi",
+        "Infographie et Design avec Canva",
+        "Montage Vidéo professionnel avec Cap Cut",
+      ],
     },
   ];
 

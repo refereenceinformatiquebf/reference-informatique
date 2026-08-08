@@ -44,9 +44,10 @@ model Product {
   compareAtPrice   Int?     @map("compare_at_price")
   coverImageUrl    String?  @map("cover_image_url")
   galleryUrls      String[] @map("gallery_urls")
+  contents         String[] // liste "ce que contient cette formation"
   faq              Json? // [{ "question": "...", "answer": "..." }]
   whyChooseUs      String?  @map("why_choose_us") @db.Text
-  targetAudience   String?  @map("target_audience") @db.Text
+  targetAudience   String[] @map("target_audience")
   active           Boolean  @default(true)
   displayOrder     Int      @default(0) @map("display_order")
   createdAt        DateTime @default(now()) @map("created_at")
