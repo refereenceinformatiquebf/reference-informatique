@@ -3,17 +3,17 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { requestPasswordReset, type AuthFormState } from "@/lib/actions/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { FieldError } from "@/components/ui/field-error";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="bg-brand w-full rounded-md px-4 py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
-    >
+    <Button type="submit" disabled={pending} className="w-full">
       {pending ? "Envoi…" : "Envoyer le lien de réinitialisation"}
-    </button>
+    </Button>
   );
 }
 
@@ -34,20 +34,15 @@ export function MotDePasseOublieForm() {
   return (
     <form action={action} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-ink text-sm font-medium">
-          Email
-        </label>
-        <input
+        <Label htmlFor="email">Email</Label>
+        <Input
           id="email"
           name="email"
           type="email"
           autoComplete="email"
           required
-          className="border-line focus:border-brand rounded-md border px-3 py-2 text-sm outline-none"
         />
-        {state?.errors?.email ? (
-          <p className="text-danger text-xs">{state.errors.email[0]}</p>
-        ) : null}
+        <FieldError message={state?.errors?.email?.[0]} />
       </div>
 
       <SubmitButton />
