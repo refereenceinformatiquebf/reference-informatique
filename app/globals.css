@@ -128,3 +128,34 @@ h4 {
   font-family: var(--font-data);
   font-variant-numeric: tabular-nums;
 }
+
+/* Utilisé par components/ui/accordion.tsx (FAQ des Services/Boutique) */
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+/* Respect global de prefers-reduced-motion — couvre l'accordéon ci-dessus
+   et toute transition/animation ajoutée par la suite, sans avoir à cibler
+   chaque classe une par une. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
