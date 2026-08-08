@@ -310,6 +310,89 @@ async function seedProducts() {
   console.log(`✔ ${products.length} produits Boutique créés.`);
 }
 
+/**
+ * Structure de modules/leçons pour la Clé de Formations Complètes, reprise
+ * de l'organisation réelle de l'ancien catalogue (chapitres identifiés lors
+ * de l'audit). `storagePath` est un chemin provisoire dans le bucket
+ * Supabase Storage "formations" — les fichiers réels doivent y être
+ * déposés (dashboard Supabase ou upload admin, à construire) avant que le
+ * lecteur de l'Étape 15 puisse réellement diffuser un contenu.
+ */
+async function seedModulesAndLessons() {
+  const product = await prisma.product.findUnique({
+    where: { slug: "cle-formations-completes" },
+  });
+  if (!product) return;
+
+  const modules = [
+    {
+      title: "Formation Excel",
+      lessons: [
+        {
+          title: "Manuel de formations complètes Excel",
+          type: "PDF" as const,
+          storagePath: `${product.id}/formation-excel/manuel-excel.pdf`,
+        },
+      ],
+    },
+    {
+      title: "Formation complète Word",
+      lessons: [
+        {
+          title: "Livre de Formation complète Word",
+          type: "PDF" as const,
+          storagePath: `${product.id}/formation-word/manuel-word.pdf`,
+        },
+      ],
+    },
+    {
+      title: "Formation en Intelligence Artificielle",
+      lessons: [
+        {
+          title: "Manuel de formation en Intelligence Artificielle",
+          type: "PDF" as const,
+          storagePath: `${product.id}/formation-ia/manuel-ia.pdf`,
+        },
+      ],
+    },
+  ];
+
+  for (const [moduleIndex, moduleData] of modules.entries()) {
+    const existingModule = await prisma.module.findFirst({
+      where: { productId: product.id, title: moduleData.title },
+    });
+
+    const createdModule =
+      existingModule ??
+      (await prisma.module.create({
+        data: {
+          productId: product.id,
+          title: moduleData.title,
+          displayOrder: moduleIndex,
+        },
+      }));
+
+    for (const [lessonIndex, lesson] of moduleData.lessons.entries()) {
+      const existingLesson = await prisma.lesson.findFirst({
+        where: { moduleId: createdModule.id, title: lesson.title },
+      });
+      if (existingLesson) continue;
+
+      await prisma.lesson.create({
+        data: {
+          moduleId: createdModule.id,
+          title: lesson.title,
+          type: lesson.type,
+          storagePath: lesson.storagePath,
+          displayOrder: lessonIndex,
+        },
+      });
+    }
+  }
+
+  console.log(`✔ Modules et leçons créés pour "${product.name}".`);
+}
+
 async function seedAdminAccount() {
   const email = process.env.SEED_ADMIN_EMAIL;
   const password = process.env.SEED_ADMIN_PASSWORD;
@@ -349,6 +432,7 @@ async function seedAdminAccount() {
 async function main() {
   await seedServiceCategories();
   await seedProducts();
+  await seedModulesAndLessons();
   await seedAdminAccount();
 }
 
