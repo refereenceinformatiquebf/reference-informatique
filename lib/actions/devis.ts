@@ -41,14 +41,23 @@ export async function requestDevis(
 
   // Rattache la demande au compte connecté si l'utilisateur est authentifié
   // — n'affecte pas le mode de rendu de la page appelante (une Server
-  // Action n'est exécutée qu'à la soumission, jamais au rendu).
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Action n'est exécutée qu'à la soumission, jamais au rendu). Ce
+  // rattachement est un bonus, pas une condition : si la vérification de
+  // session échoue (Supabase indisponible), la demande de devis doit tout
+  // de même être enregistrée, simplement sans compte associé.
+  let userId: string | undefined;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    userId = user?.id;
+  } catch (error) {
+    console.error("[requestDevis] Vérification de session impossible :", error);
+  }
 
   const quoteRequest = await prisma.quoteRequest.create({
-    data: { ...validated.data, profileId: user?.id },
+    data: { ...validated.data, profileId: userId },
     include: { service: true },
   });
 

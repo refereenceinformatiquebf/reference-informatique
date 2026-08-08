@@ -8,8 +8,26 @@
  * Référence Informatique), pas des données de démonstration génériques —
  * voir PLAYBOOK-CONSTRUCTION.md, Étape 2.
  */
+import { createClient } from "@supabase/supabase-js";
 import { prisma } from "../lib/prisma/client";
-import { createAdminClient } from "../lib/supabase/admin";
+
+/**
+ * Construit son propre client admin plutôt que d'importer
+ * lib/supabase/admin.ts : ce fichier applicatif charge le paquet
+ * "server-only", qui lève volontairement une erreur dès qu'il est importé
+ * en dehors du pipeline de build Next.js (protection contre une fuite de
+ * la clé service_role vers un Client Component). Un script de seed
+ * s'exécute via `tsx`, hors de ce pipeline — l'import échoue donc toujours,
+ * même si l'usage est légitime. On reconstruit ici le même client, sans le
+ * garde qui n'a pas de sens dans ce contexte.
+ */
+function createSeedAdminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } },
+  );
+}
 
 async function seedServiceCategories() {
   const categories = [
@@ -404,7 +422,7 @@ async function seedAdminAccount() {
     return;
   }
 
-  const supabase = createAdminClient();
+  const supabase = createSeedAdminClient();
   const { data, error } = await supabase.auth.admin.createUser({
     email,
     password,

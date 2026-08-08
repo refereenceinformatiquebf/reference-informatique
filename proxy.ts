@@ -11,61 +11,82 @@ const CLIENT_PREFIXES = ["/espace-client", "/commande"];
 const ADMIN_PREFIX = "/admin";
 
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request });
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
-          response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
-          );
-        },
-      },
-    },
-  );
-
-  // Vérification optimiste uniquement (lecture du cookie de session) : la
-  // vérification réelle a lieu dans le DAL (lib/auth/dal.ts), au plus près
-  // de chaque donnée. Ce proxy sert à rafraîchir la session et à rediriger
-  // vite, pas à faire office de seule ligne de défense.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   const path = request.nextUrl.pathname;
   const isProtected =
     CLIENT_PREFIXES.some((prefix) => path.startsWith(prefix)) ||
     path.startsWith(ADMIN_PREFIX);
 
-  if (isProtected && !user) {
+  // Trouvé en testant réellement le projet (pas seulement en le compilant) :
+  // interroger Supabase pour CHAQUE page, y compris les pages publiques,
+  // rendait tout le site indisponible dès que Supabase était injoignable ou
+  // mal configuré — une panne d'un service tiers ne doit jamais faire
+  // tomber les pages qui n'en ont pas besoin. On ne touche donc à Supabase
+  // que pour les routes qui en ont réellement besoin.
+  if (!isProtected) {
+    return NextResponse.next();
+  }
+
+  let response = NextResponse.next({ request });
+
+  try {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) =>
+              request.cookies.set(name, value),
+            );
+            response = NextResponse.next({ request });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options),
+            );
+          },
+        },
+      },
+    );
+
+    // Vérification optimiste uniquement (lecture du cookie de session) : la
+    // vérification réelle a lieu dans le DAL (lib/auth/dal.ts), au plus
+    // près de chaque donnée. Ce proxy sert à rafraîchir la session et à
+    // rediriger vite, pas à faire office de seule ligne de défense.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      const url = new URL("/connexion", request.url);
+      url.searchParams.set("next", path);
+      return NextResponse.redirect(url);
+    }
+
+    if (path.startsWith(ADMIN_PREFIX)) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if (profile?.role !== "ADMIN") {
+        return NextResponse.redirect(new URL("/espace-client", request.url));
+      }
+    }
+
+    return response;
+  } catch (error) {
+    // Supabase injoignable, variables d'environnement absentes, etc. : on
+    // refuse par défaut plutôt que de planter — une route protégée dont on
+    // ne peut pas vérifier la session redirige vers la connexion, elle ne
+    // renvoie jamais une erreur 500 à l'utilisateur.
+    console.error("[proxy] Vérification de session impossible :", error);
     const url = new URL("/connexion", request.url);
     url.searchParams.set("next", path);
     return NextResponse.redirect(url);
   }
-
-  if (path.startsWith(ADMIN_PREFIX) && user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (profile?.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/espace-client", request.url));
-    }
-  }
-
-  return response;
 }
 
 export const config = {

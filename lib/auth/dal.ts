@@ -15,10 +15,23 @@ import { prisma } from "@/lib/prisma/client";
  * Next.js sur l'authentification.
  */
 export const getCurrentProfile = cache(async () => {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Trouvé en testant réellement le projet : sans ce garde, une panne ou
+  // une mauvaise configuration de Supabase fait planter (erreur 500) TOUTE
+  // page qui vérifie la session — y compris des pages qui devraient
+  // simplement traiter le visiteur comme non connecté. Un échec de
+  // vérification de session n'est jamais une raison de crasher la page ;
+  // au pire, on affiche l'état "non connecté".
+  let user;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+    user = authUser;
+  } catch (error) {
+    console.error("[getCurrentProfile] Session Supabase indisponible :", error);
+    return null;
+  }
 
   if (!user) {
     return null;
