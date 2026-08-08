@@ -172,12 +172,17 @@ model Payment {
   orderId     String          @map("order_id") @db.Uuid
   order       Order           @relation(fields: [orderId], references: [id])
   provider    PaymentProvider
-  providerRef String?         @map("provider_ref") // id de transaction FedaPay, ou "confirmation-manuelle" pour WhatsApp
+  providerRef String          @map("provider_ref") // id de transaction FedaPay, ou l'id de l'Order pour une confirmation WhatsApp
   amount      Int
   status      String // reflète le statut brut renvoyé par le fournisseur, pour audit
   rawPayload  Json?           @map("raw_payload") // corps complet du webhook, pour investigation
   createdAt   DateTime        @default(now()) @map("created_at")
 
+  // Garantit qu'un même événement (webhook FedaPay rejoué, double clic sur
+  // "confirmer" côté admin) ne peut jamais créer deux Payment - la
+  // protection contre les doublons vit dans la base, pas seulement dans le
+  // code applicatif.
+  @@unique([provider, providerRef])
   @@index([orderId])
   @@map("payments")
 }

@@ -7,7 +7,7 @@ import { createServerClient } from "@supabase/ssr";
 // ("Proxy") mais le rôle est identique. Un `middleware.ts` n'aurait
 // simplement jamais été exécuté.
 
-const CLIENT_PREFIX = "/espace-client";
+const CLIENT_PREFIXES = ["/espace-client", "/commande"];
 const ADMIN_PREFIX = "/admin";
 
 export async function proxy(request: NextRequest) {
@@ -44,7 +44,8 @@ export async function proxy(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isProtected =
-    path.startsWith(CLIENT_PREFIX) || path.startsWith(ADMIN_PREFIX);
+    CLIENT_PREFIXES.some((prefix) => path.startsWith(prefix)) ||
+    path.startsWith(ADMIN_PREFIX);
 
   if (isProtected && !user) {
     const url = new URL("/connexion", request.url);
