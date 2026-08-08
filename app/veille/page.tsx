@@ -55,6 +55,7 @@ export default async function VeillePage() {
                         src={article.coverImageUrl}
                         alt={article.title}
                         fill
+                        sizes="192px"
                         className="object-cover"
                       />
                     </div>

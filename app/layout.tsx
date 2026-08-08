@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import { Shell } from "@/components/shell";
 import { JsonLd } from "@/components/json-ld";
 import "./globals.css";
@@ -40,6 +42,10 @@ export default function RootLayout({
       <body className="h-full antialiased">
         <JsonLd data={organizationJsonLd} />
         <Shell>{children}</Shell>
+        {/* Mesure réelle des Core Web Vitals une fois déployé sur Vercel
+            (Étape 16) — n'a aucun effet en dehors de cette plateforme. */}
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

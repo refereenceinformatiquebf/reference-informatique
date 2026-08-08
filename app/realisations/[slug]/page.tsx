@@ -41,6 +41,7 @@ export default async function CaseStudyPage({
             src={item.coverImageUrl}
             alt={item.title}
             fill
+            sizes="(min-width: 768px) 768px, 100vw"
             className="object-cover"
           />
         </div>
@@ -66,7 +67,13 @@ export default async function CaseStudyPage({
               key={url}
               className="bg-paper-raised relative aspect-video w-full overflow-hidden rounded-md"
             >
-              <Image src={url} alt="" fill className="object-cover" />
+              <Image
+                src={url}
+                alt=""
+                fill
+                sizes="(min-width: 640px) 50vw, 100vw"
+                className="object-cover"
+              />
             </div>
           ))}
         </div>

@@ -36,6 +36,7 @@ export default async function CommandePage({
               src={product.coverImageUrl}
               alt={product.name}
               fill
+              sizes="64px"
               className="object-cover"
             />
           ) : (
