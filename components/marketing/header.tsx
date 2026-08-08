@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { NAV_LINKS } from "./nav-links";
 import { IconUtilisateur, IconFleche } from "@/components/icons";
 import { useCurrentProfile } from "./use-current-profile";
+import { Logo, Wordmark } from "./logo";
 
 export function Header() {
   const pathname = usePathname();
@@ -17,14 +18,8 @@ export function Header() {
     <header className="border-line bg-paper sticky top-0 z-50 border-b">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="bg-brand flex h-8 w-8 items-center justify-center rounded-md text-sm font-bold text-white">
-            RI
-          </span>
-          <span className="text-ink text-sm leading-tight font-bold">
-            Référence
-            <br />
-            Informatique
-          </span>
+          <Logo size={34} />
+          <Wordmark />
         </Link>
 
         <nav

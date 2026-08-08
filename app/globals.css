@@ -14,18 +14,32 @@
  */
 
 :root {
-  /* Encre / texte */
-  --ink: #161b22;
-  --ink-soft: #4b5563;
-  --ink-faint: #8a94a3;
+  /* Encre / texte — teinte légèrement bleutée (jamais un gris pur) pour
+     rester cohérente avec la marque. */
+  --ink: #16233a;
+  --ink-soft: #4c5a72;
+  --ink-faint: #8791a5;
 
-  /* Fonds */
-  --paper: #ffffff;
-  --paper-raised: #f7f8fa;
+  /* Fonds — blanc légèrement chaud, jamais un blanc clinique. */
+  --paper: #fffdf9;
+  --paper-raised: #f6f2e9;
 
-  /* Marque */
-  --brand: #1e3a5f;
-  --brand-accent: #9c6b28;
+  /* Marque — bleu marine, du plus profond au plus clair, pour les
+     dégradés (hero, bandeaux) autant que pour le texte/boutons plats. */
+  --brand-900: #0a1e3d;
+  --brand-700: #123a6b;
+  --brand-500: #1f5ba8;
+  --brand-100: #e8f0fb;
+  --brand: var(--brand-700);
+
+  /* Accent — or vif (valeur, prix, CTA) et corail (chaleur, énergie),
+     tous deux repris de l'identité existante du site actuel, mais
+     intensifiés : voir PLAYBOOK-CONSTRUCTION.md, Étape 4bis. */
+  --gold-600: #e8a316;
+  --gold-100: #fdf1d9;
+  --brand-accent: var(--gold-600);
+  --coral-600: #c44a24;
+  --coral-100: #fbe4da;
 
   /* Sémantique (états, jamais utilisée comme accent de marque) */
   --success: #3e7a54;
@@ -33,48 +47,66 @@
   --danger: #a8432c;
 
   /* Lignes */
-  --line: rgba(22, 27, 34, 0.12);
-  --line-strong: rgba(22, 27, 34, 0.22);
+  --line: rgba(22, 35, 58, 0.12);
+  --line-strong: rgba(22, 35, 58, 0.22);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ink: #e7e9ed;
-    --ink-soft: #a7adb8;
-    --ink-faint: #6b7280;
+    --ink: #e9ecf3;
+    --ink-soft: #adb6c8;
+    --ink-faint: #6f7a90;
 
-    --paper: #12151b;
-    --paper-raised: #1a1f28;
+    --paper: #0e1420;
+    --paper-raised: #171f2f;
 
-    --brand: #8fa8cf;
-    --brand-accent: #d3a75c;
+    --brand-900: #0a1e3d;
+    --brand-700: #7fa3d9;
+    --brand-500: #a9c4e8;
+    --brand-100: #1a2e4d;
+    --brand: var(--brand-700);
+
+    --gold-600: #f0b73f;
+    --gold-100: #3a2e10;
+    --brand-accent: var(--gold-600);
+    --coral-600: #e8794f;
+    --coral-100: #3d2115;
 
     --success: #6fb98a;
     --warning: #d4b656;
     --danger: #e0806a;
 
-    --line: rgba(255, 255, 255, 0.14);
-    --line-strong: rgba(255, 255, 255, 0.24);
+    --line: rgba(233, 236, 243, 0.14);
+    --line-strong: rgba(233, 236, 243, 0.24);
   }
 }
 
 :root[data-theme="dark"] {
-  --ink: #e7e9ed;
-  --ink-soft: #a7adb8;
-  --ink-faint: #6b7280;
+  --ink: #e9ecf3;
+  --ink-soft: #adb6c8;
+  --ink-faint: #6f7a90;
 
-  --paper: #12151b;
-  --paper-raised: #1a1f28;
+  --paper: #0e1420;
+  --paper-raised: #171f2f;
 
-  --brand: #8fa8cf;
-  --brand-accent: #d3a75c;
+  --brand-900: #0a1e3d;
+  --brand-700: #7fa3d9;
+  --brand-500: #a9c4e8;
+  --brand-100: #1a2e4d;
+  --brand: var(--brand-700);
+
+  --gold-600: #f0b73f;
+  --gold-100: #3a2e10;
+  --brand-accent: var(--gold-600);
+  --coral-600: #e8794f;
+  --coral-100: #3d2115;
 
   --success: #6fb98a;
   --warning: #d4b656;
   --danger: #e0806a;
 
-  --line: rgba(255, 255, 255, 0.14);
-  --line-strong: rgba(255, 255, 255, 0.24);
+  --line: rgba(233, 236, 243, 0.14);
+  --line-strong: rgba(233, 236, 243, 0.24);
 }
 
 @theme inline {
@@ -85,18 +117,27 @@
   --color-paper: var(--paper);
   --color-paper-raised: var(--paper-raised);
   --color-brand: var(--brand);
+  --color-brand-900: var(--brand-900);
+  --color-brand-700: var(--brand-700);
+  --color-brand-500: var(--brand-500);
+  --color-brand-100: var(--brand-100);
   --color-brand-accent: var(--brand-accent);
+  --color-gold-600: var(--gold-600);
+  --color-gold-100: var(--gold-100);
+  --color-coral-600: var(--coral-600);
+  --color-coral-100: var(--coral-100);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
 
-  /* Typographie -> génère font-display / font-body / font-data */
-  --font-display:
-    "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia,
-    serif;
-  --font-body: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* Typographie -> génère font-display / font-body / font-data.
+     Fraunces (serif chaleureuse, à fort caractère) et Plus Jakarta Sans
+     (humaniste, très lisible) sont chargées via next/font/google dans
+     app/layout.tsx, qui expose --font-fraunces / --font-jakarta. */
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-body: var(--font-jakarta), -apple-system, "Segoe UI", sans-serif;
   --font-data: "SF Mono", "Cascadia Mono", Consolas, Menlo, monospace;
 
   /* Échelle typographique fixe -> génère text-2xs ... text-5xl */
