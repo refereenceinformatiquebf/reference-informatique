@@ -12,6 +12,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
+import { JsonLd } from "@/components/json-ld";
 
 export const dynamic = "force-dynamic";
 
@@ -54,8 +55,23 @@ export default async function ProductPage({
 
   const faq = Array.isArray(product.faq) ? product.faq.filter(isFaqEntry) : [];
 
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.shortDescription,
+    image: product.coverImageUrl ?? undefined,
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "XOF",
+      price: product.price,
+      availability: "https://schema.org/InStock",
+    },
+  };
+
   return (
     <div className="flex flex-col">
+      <JsonLd data={productJsonLd} />
       <section className="border-line border-b px-4 py-14">
         <div className="mx-auto grid max-w-5xl grid-cols-1 gap-10 lg:grid-cols-2">
           <div className="bg-paper-raised relative aspect-[4/3] w-full overflow-hidden rounded-lg">

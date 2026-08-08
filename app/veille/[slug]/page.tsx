@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ReactMarkdown from "react-markdown";
 import { prisma } from "@/lib/prisma/client";
+import { JsonLd } from "@/components/json-ld";
 
 export const dynamic = "force-dynamic";
 
@@ -35,8 +36,19 @@ export default async function ArticlePage({
     notFound();
   }
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.excerpt,
+    image: article.coverImageUrl ?? undefined,
+    datePublished: article.publishedAt.toISOString(),
+    author: { "@type": "Organization", name: "Référence Informatique" },
+  };
+
   return (
     <article className="mx-auto max-w-2xl px-4 py-16">
+      <JsonLd data={articleJsonLd} />
       {article.tags.length > 0 ? (
         <div className="mb-3 flex flex-wrap gap-2">
           {article.tags.map((tag) => (
