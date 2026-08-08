@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -204,28 +205,45 @@ export default async function HomePage() {
                   <Link
                     key={product.id}
                     href={`/boutique/${product.slug}`}
-                    className="border-line bg-paper hover:border-brand relative flex flex-col gap-3 rounded-lg border p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                    className="border-line bg-paper hover:border-brand relative flex flex-col overflow-hidden rounded-lg border transition-all hover:-translate-y-0.5 hover:shadow-lg"
                   >
-                    {discount ? (
-                      <span className="bg-coral-600 absolute -top-2.5 right-4 rounded-full px-2.5 py-1 text-[0.6875rem] font-bold text-white">
-                        -{discount}%
-                      </span>
-                    ) : null}
-                    <h3 className="font-display text-ink text-sm font-semibold">
-                      {product.name}
-                    </h3>
-                    <p className="text-ink-soft line-clamp-2 text-xs leading-relaxed">
-                      {product.shortDescription}
-                    </p>
-                    <div className="mt-auto flex items-baseline gap-2">
-                      {product.compareAtPrice ? (
-                        <span className="text-ink-faint tabular text-xs line-through">
-                          {product.compareAtPrice.toLocaleString("fr-FR")} F
+                    <div className="bg-paper-raised relative aspect-[4/3] w-full">
+                      {product.coverImageUrl ? (
+                        <Image
+                          src={product.coverImageUrl}
+                          alt={product.name}
+                          fill
+                          sizes="(min-width: 640px) 25vw, 50vw"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="text-ink-faint flex h-full w-full items-center justify-center">
+                          <IconFormation size={32} />
+                        </div>
+                      )}
+                      {discount ? (
+                        <span className="bg-coral-600 absolute top-2.5 right-2.5 rounded-full px-2.5 py-1 text-[0.6875rem] font-bold text-white">
+                          -{discount}%
                         </span>
                       ) : null}
-                      <span className="text-brand-700 tabular text-base font-bold">
-                        {product.price.toLocaleString("fr-FR")} F
-                      </span>
+                    </div>
+                    <div className="flex flex-1 flex-col gap-3 p-5">
+                      <h3 className="font-display text-ink text-sm font-semibold">
+                        {product.name}
+                      </h3>
+                      <p className="text-ink-soft line-clamp-2 text-xs leading-relaxed">
+                        {product.shortDescription}
+                      </p>
+                      <div className="mt-auto flex items-baseline gap-2">
+                        {product.compareAtPrice ? (
+                          <span className="text-ink-faint tabular text-xs line-through">
+                            {product.compareAtPrice.toLocaleString("fr-FR")} F
+                          </span>
+                        ) : null}
+                        <span className="text-brand-700 tabular text-base font-bold">
+                          {product.price.toLocaleString("fr-FR")} F
+                        </span>
+                      </div>
                     </div>
                   </Link>
                 );

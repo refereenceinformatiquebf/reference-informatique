@@ -30,6 +30,11 @@ function createSeedAdminClient() {
   );
 }
 
+// Vraies photos produit (clés USB HP réelles), recadrées à partir des
+// visuels promotionnels de l'ancien site et déposées dans le bucket public
+// "medias" — voir supabase/migrations/0002_storage_buckets.sql.
+const MEDIA_BASE = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/medias/produits`;
+
 async function seedServiceCategories() {
   const categories = [
     {
@@ -172,6 +177,7 @@ async function seedProducts() {
     {
       slug: "cle-formations-completes",
       name: "Clé de Formations Complètes",
+      coverImageUrl: `${MEDIA_BASE}/cle-formations-completes.jpg`,
       shortDescription:
         "La clé USB 64 Go qui contient l'essentiel de ce dont vous avez besoin.",
       longDescription:
@@ -230,6 +236,7 @@ async function seedProducts() {
     {
       slug: "cle-formations-smart",
       name: "Clé de formations SMART",
+      coverImageUrl: `${MEDIA_BASE}/cle-formations-smart.jpg`,
       shortDescription:
         "La clé intelligente pour maîtriser votre ordinateur et booster votre productivité.",
       longDescription:
@@ -258,6 +265,7 @@ async function seedProducts() {
     {
       slug: "cle-enfants",
       name: "Clé pour Enfants — Informatique et Anglais",
+      coverImageUrl: `${MEDIA_BASE}/cle-enfants.jpg`,
       shortDescription:
         "Clé USB 32 Go spécialement conçue pour préparer les enfants à réussir demain.",
       longDescription:
@@ -285,6 +293,7 @@ async function seedProducts() {
     {
       slug: "cle-tout-en-un",
       name: "CLE COMPLETE Tout-en-Un (64 Go)",
+      coverImageUrl: `${MEDIA_BASE}/cle-tout-en-un.jpg`,
       shortDescription:
         "L'offre la plus complète : la Clé de Formations Complètes et la Clé SMART réunies.",
       longDescription:
@@ -412,6 +421,70 @@ async function seedModulesAndLessons() {
   console.log(`✔ Modules et leçons créés pour "${product.name}".`);
 }
 
+/**
+ * Vrais témoignages clients, repris tels quels de la base de l'ancien site
+ * (table `produits`, colonnes `temoignage`/`temoignage_auteur`) — jamais de
+ * témoignage inventé. "Bobo" est fidèle à la donnée d'origine : le client
+ * n'avait renseigné qu'un seul mot (probablement Bobo-Dioulasso, la ville,
+ * mais rien ne permet de l'affirmer), donc on ne le scinde pas en
+ * nom/ville comme les trois autres.
+ */
+async function seedTestimonials() {
+  const testimonials = [
+    {
+      productSlug: "cle-formations-completes",
+      authorName: "Isaac",
+      authorCity: "Ouaga",
+      quote: "C'est tout simplement excellent.",
+    },
+    {
+      productSlug: "cle-formations-smart",
+      authorName: "Bobo",
+      authorCity: null,
+      quote: "Merci pour votre promptitude, j'ai beaucoup aimé merci.",
+    },
+    {
+      productSlug: "cle-enfants",
+      authorName: "Christine Oued.",
+      authorCity: "Ouaga",
+      quote:
+        "Avant, ma fille passait tout son temps sur le téléphone à faire défiler TikTok sans réel intérêt. Mais depuis que nous avons découvert votre clé éducative, tout a changé ! Aujourd'hui, elle est concentrée, motivée et prend du plaisir à apprendre. Je suis vraiment impressionné par cette transformation. Merci infiniment !",
+    },
+    {
+      productSlug: "cle-tout-en-un",
+      authorName: "Aristide Traoré",
+      authorCity: "Koudougou",
+      quote:
+        "Franchement j'étais sceptique au début, mais après avoir reçu la clé j'ai été bluffé par la quantité et la qualité de contenu. Je suis très satisfait, je vous recommande !",
+    },
+  ];
+
+  for (const { productSlug, authorName, authorCity, quote } of testimonials) {
+    const product = await prisma.product.findUnique({
+      where: { slug: productSlug },
+    });
+    if (!product) continue;
+
+    const existing = await prisma.testimonial.findFirst({
+      where: { productId: product.id, authorName },
+    });
+    if (existing) continue;
+
+    await prisma.testimonial.create({
+      data: {
+        productId: product.id,
+        authorName,
+        authorCity,
+        quote,
+        rating: 5,
+        published: true,
+      },
+    });
+  }
+
+  console.log(`✔ ${testimonials.length} témoignages clients créés.`);
+}
+
 async function seedAdminAccount() {
   const email = process.env.SEED_ADMIN_EMAIL;
   const password = process.env.SEED_ADMIN_PASSWORD;
@@ -452,6 +525,7 @@ async function main() {
   await seedServiceCategories();
   await seedProducts();
   await seedModulesAndLessons();
+  await seedTestimonials();
   await seedAdminAccount();
 }
 
