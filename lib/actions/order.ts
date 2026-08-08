@@ -8,6 +8,10 @@ import {
   createFedapayTransaction,
   generateFedapayPaymentUrl,
 } from "@/lib/payments/fedapay";
+import {
+  sendOrderConfirmation,
+  sendNewOrderAdminNotification,
+} from "@/lib/email/send";
 
 const WHATSAPP_NUMBER =
   process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "22675789737";
@@ -34,7 +38,7 @@ async function getOrCreatePendingOrder(productId: string) {
   });
 
   if (existing) {
-    return { profile, product, order: existing };
+    return { profile, product, order: existing, isNew: false };
   }
 
   const order = await prisma.order.create({
@@ -48,12 +52,34 @@ async function getOrCreatePendingOrder(productId: string) {
     },
   });
 
-  return { profile, product, order };
+  return { profile, product, order, isNew: true };
+}
+
+async function notifyNewOrder(params: {
+  clientEmail: string;
+  clientName: string;
+  clientPhone: string;
+  productName: string;
+  amount: number;
+  channel: "BOUTIQUE" | "WHATSAPP";
+}) {
+  // Les échecs d'envoi d'email ne doivent jamais bloquer une commande déjà
+  // enregistrée en base — on les journalise sans interrompre le tunnel.
+  await Promise.all([
+    sendOrderConfirmation({
+      to: params.clientEmail,
+      clientName: params.clientName,
+      productName: params.productName,
+      amount: params.amount,
+    }),
+    sendNewOrderAdminNotification(params),
+  ]).catch((error) => console.error("[notifyNewOrder]", error));
 }
 
 export async function startFedapayCheckout(formData: FormData) {
   const productId = String(formData.get("productId") ?? "");
-  const { profile, product, order } = await getOrCreatePendingOrder(productId);
+  const { profile, product, order, isNew } =
+    await getOrCreatePendingOrder(productId);
 
   if (order.status === "PAYE") {
     redirect("/espace-client");
@@ -70,6 +96,17 @@ export async function startFedapayCheckout(formData: FormData) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (isNew && user?.email) {
+    await notifyNewOrder({
+      clientEmail: user.email,
+      clientName: profile.name,
+      clientPhone: profile.phone ?? "",
+      productName: product.name,
+      amount: order.amount,
+      channel: "BOUTIQUE",
+    });
+  }
 
   const [firstname, ...rest] = profile.name.split(" ");
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -95,7 +132,8 @@ export async function startFedapayCheckout(formData: FormData) {
 
 export async function startWhatsappOrder(formData: FormData) {
   const productId = String(formData.get("productId") ?? "");
-  const { product, order } = await getOrCreatePendingOrder(productId);
+  const { profile, product, order, isNew } =
+    await getOrCreatePendingOrder(productId);
 
   if (order.status === "PAYE") {
     redirect("/espace-client");
@@ -109,6 +147,23 @@ export async function startWhatsappOrder(formData: FormData) {
       where: { id: order.id },
       data: { paymentProvider: "WHATSAPP_MANUAL", channel: "WHATSAPP" },
     });
+  }
+
+  if (isNew) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user?.email) {
+      await notifyNewOrder({
+        clientEmail: user.email,
+        clientName: profile.name,
+        clientPhone: profile.phone ?? "",
+        productName: product.name,
+        amount: order.amount,
+        channel: "WHATSAPP",
+      });
+    }
   }
 
   const message = [

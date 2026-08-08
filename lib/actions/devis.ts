@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma/client";
 import { createClient } from "@/lib/supabase/server";
 import { devisSchema } from "@/lib/validations/devis";
+import { sendDevisReceived } from "@/lib/email/send";
 
 export type DevisFormState =
   | {
@@ -38,11 +39,19 @@ export async function requestDevis(
     data: { user },
   } = await supabase.auth.getUser();
 
-  await prisma.quoteRequest.create({
+  const quoteRequest = await prisma.quoteRequest.create({
     data: { ...validated.data, profileId: user?.id },
+    include: { service: true },
   });
 
-  // Les emails de confirmation (client + admin) sont branchés à l'Étape 12.
+  await sendDevisReceived({
+    clientEmail: quoteRequest.email,
+    clientName: quoteRequest.name,
+    clientPhone: quoteRequest.phone,
+    serviceName: quoteRequest.service.name,
+    message: quoteRequest.message,
+    budget: quoteRequest.budget ?? undefined,
+  }).catch((error) => console.error("[requestDevis] email", error));
 
   return {
     success: true,

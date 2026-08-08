@@ -2,6 +2,8 @@ import "server-only";
 import { Prisma } from "@/lib/generated/prisma/client";
 import type { PaymentProvider } from "@/lib/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { sendPaymentConfirmation, sendAccessGranted } from "@/lib/email/send";
 
 type MarkOrderPaidParams = {
   orderId: string;
@@ -27,6 +29,7 @@ type MarkOrderPaidParams = {
 export async function markOrderPaid(params: MarkOrderPaidParams) {
   const order = await prisma.order.findUnique({
     where: { id: params.orderId },
+    include: { product: true, profile: true },
   });
 
   if (!order) {
@@ -78,12 +81,36 @@ export async function markOrderPaid(params: MarkOrderPaidParams) {
     });
   }
 
-  // L'email de confirmation (client) et l'activation de formation sont
-  // déclenchés ici une fois l'Étape 12 (Brevo) branchée.
+  await notifyPaymentConfirmed(order).catch((error) =>
+    console.error("[markOrderPaid] notification email", error),
+  );
 
   return {
     ok: true as const,
     alreadyProcessed: false as const,
     order: updatedOrder,
   };
+}
+
+async function notifyPaymentConfirmed(
+  order: Prisma.OrderGetPayload<{ include: { product: true; profile: true } }>,
+) {
+  const supabaseAdmin = createAdminClient();
+  const { data } = await supabaseAdmin.auth.admin.getUserById(order.profileId);
+  const email = data.user?.email;
+  if (!email || !order.product) return;
+
+  await Promise.all([
+    sendPaymentConfirmation({
+      to: email,
+      clientName: order.profile.name,
+      productName: order.product.name,
+      amount: order.amount,
+    }),
+    sendAccessGranted({
+      to: email,
+      clientName: order.profile.name,
+      productName: order.product.name,
+    }),
+  ]);
 }
