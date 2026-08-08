@@ -1,0 +1,295 @@
+// Schéma de référence — Référence Informatique V2.
+// Voir PLAYBOOK-CONSTRUCTION.md, section 4, pour la justification de chaque
+// modèle. `Profile` est le miroir métier de `auth.users` (géré par Supabase
+// Auth, hors périmètre Prisma) : la contrainte de clé étrangère et le
+// trigger de création automatique vivent dans une migration SQL manuelle,
+// voir supabase/migrations/0001_profiles_auth_link.sql.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CLIENT
+  ADMIN
+}
+
+model Profile {
+  id        String   @id @db.Uuid // == auth.users.id
+  name      String
+  phone     String?
+  role      Role     @default(CLIENT)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  orders        Order[]
+  quoteRequests QuoteRequest[]
+  access        Access[]
+  progress      Progress[]
+
+  @@map("profiles")
+}
+
+model Product {
+  id               String   @id @default(uuid()) @db.Uuid
+  slug             String   @unique
+  name             String
+  shortDescription String   @map("short_description")
+  longDescription  String?  @map("long_description") @db.Text
+  price            Int // F CFA, entier — jamais de décimales sur cette devise
+  compareAtPrice   Int?     @map("compare_at_price")
+  coverImageUrl    String?  @map("cover_image_url")
+  galleryUrls      String[] @map("gallery_urls")
+  faq              Json? // [{ "question": "...", "answer": "..." }]
+  whyChooseUs      String?  @map("why_choose_us") @db.Text
+  targetAudience   String?  @map("target_audience") @db.Text
+  active           Boolean  @default(true)
+  displayOrder     Int      @default(0) @map("display_order")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  modules      Module[]
+  orders       Order[]
+  access       Access[]
+  testimonials Testimonial[]
+
+  @@map("products")
+}
+
+model ServiceCategory {
+  id           String   @id @default(uuid()) @db.Uuid
+  slug         String   @unique // conception-web | agents-ia | logiciels-automatisation | maintenance
+  name         String
+  description  String   @db.Text
+  iconKey      String   @map("icon_key") // clé vers le set d'icônes de l'Étape 4
+  displayOrder Int      @default(0) @map("display_order")
+
+  services Service[]
+
+  @@map("service_categories")
+}
+
+enum PriceType {
+  FIXED // prix affiché tel quel
+  FROM // "à partir de X F"
+  QUOTE // uniquement sur devis
+}
+
+model Service {
+  id           String          @id @default(uuid()) @db.Uuid
+  categoryId   String          @map("category_id") @db.Uuid
+  category     ServiceCategory @relation(fields: [categoryId], references: [id])
+  slug         String          @unique
+  name         String
+  description  String          @db.Text
+  priceType    PriceType       @map("price_type")
+  priceFrom    Int?            @map("price_from") // F CFA, si priceType = FIXED ou FROM
+  features     String[]
+  active       Boolean         @default(true)
+  displayOrder Int             @default(0) @map("display_order")
+
+  orders        Order[]
+  quoteRequests QuoteRequest[]
+
+  @@map("services")
+}
+
+enum QuoteStatus {
+  NOUVEAU
+  EN_DISCUSSION
+  DEVIS_ENVOYE
+  ACCEPTE
+  REFUSE
+}
+
+model QuoteRequest {
+  id           String      @id @default(uuid()) @db.Uuid
+  serviceId    String      @map("service_id") @db.Uuid
+  service      Service     @relation(fields: [serviceId], references: [id])
+  profileId    String?     @map("profile_id") @db.Uuid
+  profile      Profile?    @relation(fields: [profileId], references: [id])
+  name         String
+  email        String
+  phone        String
+  company      String?
+  message      String      @db.Text
+  budget       String?
+  status       QuoteStatus @default(NOUVEAU)
+  internalNote String?     @map("internal_note") @db.Text
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  @@map("quote_requests")
+}
+
+enum OrderChannel {
+  BOUTIQUE
+  WHATSAPP
+}
+
+enum PaymentProvider {
+  FEDAPAY
+  WHATSAPP_MANUAL
+}
+
+enum OrderStatus {
+  EN_ATTENTE
+  PAYE
+  ECHOUE
+  ANNULE
+  REMBOURSE
+}
+
+model Order {
+  id              String          @id @default(uuid()) @db.Uuid
+  profileId       String          @map("profile_id") @db.Uuid
+  profile         Profile         @relation(fields: [profileId], references: [id])
+  productId       String?         @map("product_id") @db.Uuid
+  product         Product?        @relation(fields: [productId], references: [id])
+  serviceId       String?         @map("service_id") @db.Uuid
+  service         Service?        @relation(fields: [serviceId], references: [id])
+  amount          Int // F CFA
+  channel         OrderChannel
+  paymentProvider PaymentProvider @map("payment_provider")
+  status          OrderStatus     @default(EN_ATTENTE)
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  payments Payment[]
+
+  // Contrainte applicative (vérifiée en code, pas en DB) : productId XOR
+  // serviceId, jamais les deux ni aucun des deux.
+  @@map("orders")
+}
+
+model Payment {
+  id          String          @id @default(uuid()) @db.Uuid
+  orderId     String          @map("order_id") @db.Uuid
+  order       Order           @relation(fields: [orderId], references: [id])
+  provider    PaymentProvider
+  providerRef String?         @map("provider_ref") // id de transaction FedaPay, ou "confirmation-manuelle" pour WhatsApp
+  amount      Int
+  status      String // reflète le statut brut renvoyé par le fournisseur, pour audit
+  rawPayload  Json?           @map("raw_payload") // corps complet du webhook, pour investigation
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  @@index([orderId])
+  @@map("payments")
+}
+
+model Access {
+  id        String   @id @default(uuid()) @db.Uuid
+  profileId String   @map("profile_id") @db.Uuid
+  profile   Profile  @relation(fields: [profileId], references: [id])
+  productId String   @map("product_id") @db.Uuid
+  product   Product  @relation(fields: [productId], references: [id])
+  grantedAt DateTime @default(now()) @map("granted_at")
+
+  @@unique([profileId, productId])
+  @@map("access")
+}
+
+model Module {
+  id           String  @id @default(uuid()) @db.Uuid
+  productId    String  @map("product_id") @db.Uuid
+  product      Product @relation(fields: [productId], references: [id])
+  title        String
+  displayOrder Int     @default(0) @map("display_order")
+
+  lessons Lesson[]
+
+  @@map("modules")
+}
+
+enum LessonType {
+  VIDEO
+  PDF
+}
+
+model Lesson {
+  id           String     @id @default(uuid()) @db.Uuid
+  moduleId     String     @map("module_id") @db.Uuid
+  module       Module     @relation(fields: [moduleId], references: [id])
+  title        String
+  type         LessonType
+  storagePath  String     @map("storage_path") // chemin dans le bucket Supabase "formations", jamais une URL publique
+  durationSecs Int?       @map("duration_secs")
+  displayOrder Int        @default(0) @map("display_order")
+
+  progress Progress[]
+
+  @@map("lessons")
+}
+
+model Progress {
+  id          String   @id @default(uuid()) @db.Uuid
+  profileId   String   @map("profile_id") @db.Uuid
+  profile     Profile  @relation(fields: [profileId], references: [id])
+  lessonId    String   @map("lesson_id") @db.Uuid
+  lesson      Lesson   @relation(fields: [lessonId], references: [id])
+  completedAt DateTime @default(now()) @map("completed_at")
+
+  @@unique([profileId, lessonId])
+  @@map("progress")
+}
+
+model Testimonial {
+  id         String   @id @default(uuid()) @db.Uuid
+  productId  String?  @map("product_id") @db.Uuid
+  product    Product? @relation(fields: [productId], references: [id])
+  authorName String   @map("author_name")
+  authorCity String?  @map("author_city")
+  quote      String   @db.Text
+  rating     Int      @default(5)
+  published  Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("testimonials")
+}
+
+model Article {
+  id             String    @id @default(uuid()) @db.Uuid
+  slug           String    @unique
+  title          String
+  excerpt        String    @db.Text
+  body           String    @db.Text // markdown
+  coverImageUrl  String?   @map("cover_image_url")
+  tags           String[]
+  seoTitle       String?   @map("seo_title")
+  seoDescription String?   @map("seo_description")
+  publishedAt    DateTime? @map("published_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  @@map("articles")
+}
+
+model CaseStudy {
+  id            String    @id @default(uuid()) @db.Uuid
+  slug          String    @unique
+  title         String
+  clientName    String    @map("client_name")
+  categorySlug  String    @map("category_slug") // référence libre vers ServiceCategory.slug
+  summary       String    @db.Text
+  results       String?   @db.Text
+  coverImageUrl String?   @map("cover_image_url")
+  galleryUrls   String[]  @map("gallery_urls")
+  publishedAt   DateTime? @map("published_at")
+
+  @@map("case_studies")
+}
+
+model ContactMessage {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  email     String
+  phone     String?
+  message   String   @db.Text
+  handled   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("contact_messages")
+}
