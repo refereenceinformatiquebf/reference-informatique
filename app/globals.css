@@ -32,14 +32,16 @@
   --brand-100: #e8f0fb;
   --brand: var(--brand-700);
 
-  /* Accent — or vif (valeur, prix, CTA) et corail (chaleur, énergie),
-     tous deux repris de l'identité existante du site actuel, mais
-     intensifiés : voir PLAYBOOK-CONSTRUCTION.md, Étape 4bis. */
-  --gold-600: #e8a316;
-  --gold-100: #fdf1d9;
-  --brand-accent: var(--gold-600);
+  /* Accent — corail (chaleur, énergie, CTA principal) et vert (repris de
+     l'identité WhatsApp déjà très présente sur le site actuel, où le vert
+     dominait déjà les éléments de contact). Pas de jaune/or : écarté sur
+     retour explicite. Voir PLAYBOOK-CONSTRUCTION.md, Étape 4bis. */
   --coral-600: #c44a24;
   --coral-100: #fbe4da;
+  --brand-accent: var(--coral-600);
+  --green-700: #15803d;
+  --green-600: #16a34a;
+  --green-100: #dcfce7;
 
   /* Sémantique (états, jamais utilisée comme accent de marque) */
   --success: #3e7a54;
@@ -66,11 +68,12 @@
     --brand-100: #1a2e4d;
     --brand: var(--brand-700);
 
-    --gold-600: #f0b73f;
-    --gold-100: #3a2e10;
-    --brand-accent: var(--gold-600);
     --coral-600: #e8794f;
     --coral-100: #3d2115;
+    --brand-accent: var(--coral-600);
+    --green-700: #16a34a;
+    --green-600: #22c55e;
+    --green-100: #123822;
 
     --success: #6fb98a;
     --warning: #d4b656;
@@ -95,11 +98,12 @@
   --brand-100: #1a2e4d;
   --brand: var(--brand-700);
 
-  --gold-600: #f0b73f;
-  --gold-100: #3a2e10;
-  --brand-accent: var(--gold-600);
   --coral-600: #e8794f;
   --coral-100: #3d2115;
+  --brand-accent: var(--coral-600);
+  --green-700: #16a34a;
+  --green-600: #22c55e;
+  --green-100: #123822;
 
   --success: #6fb98a;
   --warning: #d4b656;
@@ -122,10 +126,11 @@
   --color-brand-500: var(--brand-500);
   --color-brand-100: var(--brand-100);
   --color-brand-accent: var(--brand-accent);
-  --color-gold-600: var(--gold-600);
-  --color-gold-100: var(--gold-100);
   --color-coral-600: var(--coral-600);
   --color-coral-100: var(--coral-100);
+  --color-green-700: var(--green-700);
+  --color-green-600: var(--green-600);
+  --color-green-100: var(--green-100);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);

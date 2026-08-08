@@ -1,27 +1,22 @@
+import Image from "next/image";
+
 /**
- * Marque Référence Informatique — un chevron (progression, code) surmonté
- * d'une étincelle or (l'IA, l'insight), sur un carré dégradé marine. Remplace
- * l'ancien badge "RI" texte seul, jugé trop générique.
+ * Marque réelle de Référence Informatique (ordinateur, engrenages,
+ * flèche de progression) — le vrai logo de l'entreprise, pas une
+ * réinvention. Fond blanc d'origine géré par le cadre arrondi ci-dessous,
+ * qui reste lisible tant que le logo est posé sur un fond clair (header,
+ * footer) ; voir Étape 4bis.
  */
 export function Logo({ size = 32 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden>
-      <defs>
-        <linearGradient id="logo-mark-grad" x1="0" y1="0" x2="32" y2="32">
-          <stop offset="0" stopColor="var(--brand-900)" />
-          <stop offset="1" stopColor="var(--brand-500)" />
-        </linearGradient>
-      </defs>
-      <rect width="32" height="32" rx="9" fill="url(#logo-mark-grad)" />
-      <path
-        d="M12 10l6 6-6 6"
-        stroke="white"
-        strokeWidth="2.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="24" cy="8" r="3.25" fill="var(--gold-600)" />
-    </svg>
+    <Image
+      src="/images/logo.jpeg"
+      alt="Référence Informatique"
+      width={size}
+      height={size}
+      className="rounded-md object-cover"
+      priority
+    />
   );
 }
 

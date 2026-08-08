@@ -32,7 +32,7 @@ const METIERS = [
     title: "Conception de sites web",
     description:
       "Sites vitrines, boutiques en ligne et plateformes sur mesure, pensés pour convertir.",
-    accent: "gold" as const,
+    accent: "green" as const,
   },
   {
     href: "/services/agents-ia",
@@ -53,17 +53,18 @@ const METIERS = [
 ] as const;
 
 // Fonds pleins + texte contrasté (jamais un fond pâle avec un texte de la
-// même teinte : l'or et le corail n'ont pas assez d'écart de luminance avec
-// leur propre nuance pâle pour rester lisibles — voir Étape 18, WCAG AA).
+// même teinte : le vert et le corail n'ont pas assez d'écart de luminance
+// avec leur propre nuance pâle pour rester lisibles — voir Étape 18, WCAG
+// AA). green-700 (pas green-600) pour rester au-dessus de 4.5:1 en texte.
 const ACCENT_STYLES = {
   brand: "bg-brand-700 text-white",
-  gold: "bg-gold-600 text-brand-900",
+  green: "bg-green-700 text-white",
   coral: "bg-coral-600 text-white",
 } as const;
 
 const AVATAR_STYLES = [
   "bg-brand-700 text-white",
-  "bg-gold-600 text-brand-900",
+  "bg-green-700 text-white",
   "bg-coral-600 text-white",
 ] as const;
 
@@ -97,7 +98,7 @@ export default async function HomePage() {
         />
         <div
           aria-hidden
-          className="bg-gold-600 absolute -top-24 -right-24 h-96 w-96 rounded-full opacity-20 blur-3xl"
+          className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-green-600 opacity-20 blur-3xl"
         />
         <div
           aria-hidden
@@ -105,7 +106,7 @@ export default async function HomePage() {
         />
 
         <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
-          <span className="bg-gold-600 text-brand-900 rounded-full px-4 py-1.5 text-xs font-bold tracking-wide uppercase">
+          <span className="rounded-full bg-green-700 px-4 py-1.5 text-xs font-bold tracking-wide text-white uppercase">
             Burkina Faso · Depuis Ouagadougou
           </span>
           <h1 className="font-display text-3xl leading-tight font-semibold text-white sm:text-5xl">
