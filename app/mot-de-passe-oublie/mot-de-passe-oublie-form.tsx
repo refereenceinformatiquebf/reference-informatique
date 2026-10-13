@@ -25,7 +25,7 @@ export function MotDePasseOublieForm() {
 
   if (state?.success) {
     return (
-      <p className="bg-success/10 text-success rounded-md px-4 py-3 text-sm">
+      <p className="bg-success-bg text-success-text rounded-lg px-4 py-3 text-sm leading-relaxed">
         {state.message}
       </p>
     );

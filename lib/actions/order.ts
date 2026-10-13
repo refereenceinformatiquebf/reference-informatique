@@ -4,55 +4,158 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma/client";
 import { requireProfile } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
+import { findProduct, isProductAvailable } from "@/lib/catalog";
+import { ensureProductRow } from "@/lib/catalog/db-sync";
+import { getVisitorCountry, isHomeCountry } from "@/lib/geo";
+import { shippingSchema, type ShippingInput } from "@/lib/validations/order";
+import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
+import { SITE, whatsappLink } from "@/lib/site";
+import { formatPrice } from "@/lib/format";
 import {
-  createFedapayTransaction,
-  generateFedapayPaymentUrl,
-} from "@/lib/payments/fedapay";
+  cancelSaspaySession,
+  createSaspayCheckoutSession,
+} from "@/lib/payments/saspay";
+import { syncSaspayOrder } from "@/lib/payments/saspay-sync";
 import {
   sendOrderConfirmation,
   sendNewOrderAdminNotification,
 } from "@/lib/email/send";
 
-const WHATSAPP_NUMBER =
-  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "22675789737";
+export type OrderFormState =
+  | {
+      error?: string;
+      fieldErrors?: Partial<Record<keyof ShippingInput, string[]>>;
+    }
+  | undefined;
+
+type OrderContext = {
+  profile: Awaited<ReturnType<typeof requireProfile>>;
+  catalogProduct: NonNullable<ReturnType<typeof findProduct>>;
+  productRow: NonNullable<Awaited<ReturnType<typeof ensureProductRow>>>;
+  shipping: ShippingInput | null;
+  visitorCountry: Awaited<ReturnType<typeof getVisitorCountry>>;
+};
+
+class OrderError extends Error {}
 
 /**
- * Récupère (ou crée) la commande en attente pour ce produit. Empêche
- * explicitement la double commande sur le même produit — voir
- * PLAYBOOK-CONSTRUCTION.md, Étape 9, "cas limites".
+ * Prépare une commande : vérifie le produit, le pays du visiteur, la
+ * livraison. Toute la logique de refus est ici, pour que le paiement en
+ * ligne et la commande WhatsApp appliquent EXACTEMENT les mêmes règles.
+ *
+ * Règle d'accès par pays : un produit réservé à un pays (les clés de
+ * formations) ne peut pas être commandé depuis un autre pays, même en
+ * forgeant la requête — le contrôle est refait ici, côté serveur, et ne
+ * dépend pas de ce que la page a affiché.
  */
-async function getOrCreatePendingOrder(productId: string) {
-  const profile = await requireProfile();
+async function prepareOrder(
+  formData: FormData,
+): Promise<
+  | { ok: true; context: OrderContext }
+  | { ok: false; state: NonNullable<OrderFormState> }
+> {
+  const slug = String(formData.get("productSlug") ?? "");
+  const catalogProduct = findProduct(slug);
+  const visitorCountry = await getVisitorCountry();
 
-  const product = await prisma.product.findUnique({ where: { id: productId } });
-  if (!product || !product.active) {
-    throw new Error("Ce produit n'est plus disponible.");
+  // Même message pour « inconnu » et « réservé à un autre pays » : on ne
+  // révèle pas l'existence d'un produit invisible pour ce visiteur.
+  if (!catalogProduct || !isProductAvailable(catalogProduct, visitorCountry)) {
+    return {
+      ok: false,
+      state: {
+        error:
+          "Ce produit n'est pas disponible. Retournez à la boutique pour en choisir un autre.",
+      },
+    };
   }
+
+  let shipping: ShippingInput | null = null;
+  if (catalogProduct.delivery === "cle-physique") {
+    const parsed = shippingSchema.safeParse({
+      city: formData.get("city"),
+      address: formData.get("address"),
+      phone: formData.get("phone"),
+    });
+    if (!parsed.success) {
+      return {
+        ok: false,
+        state: { fieldErrors: parsed.error.flatten().fieldErrors },
+      };
+    }
+    shipping = parsed.data;
+  }
+
+  const profile = await requireProfile();
+  const productRow = await ensureProductRow(catalogProduct.slug);
+  if (!productRow) {
+    return { ok: false, state: { error: "Ce produit n'est plus disponible." } };
+  }
+
+  return {
+    ok: true,
+    context: { profile, catalogProduct, productRow, shipping, visitorCountry },
+  };
+}
+
+/**
+ * Récupère (ou crée) la commande en attente pour ce produit. Empêche la
+ * double commande sur un même produit, et remet la commande en attente au
+ * prix ACTUEL du catalogue (un prix modifié ne laisse jamais une ancienne
+ * commande à l'ancien tarif).
+ */
+async function getOrCreatePendingOrder(
+  context: OrderContext,
+  channel: "BOUTIQUE" | "WHATSAPP",
+) {
+  const { profile, catalogProduct, productRow, shipping } = context;
+
+  const shippingData = shipping
+    ? {
+        shippingCity: shipping.city,
+        shippingAddress: shipping.address,
+        shippingPhone: shipping.phone,
+      }
+    : {};
 
   const existing = await prisma.order.findFirst({
     where: {
       profileId: profile.id,
-      productId,
+      productId: productRow.id,
       status: { in: ["EN_ATTENTE", "PAYE"] },
     },
   });
 
   if (existing) {
-    return { profile, product, order: existing, isNew: false };
+    if (existing.status === "EN_ATTENTE") {
+      const updated = await prisma.order.update({
+        where: { id: existing.id },
+        data: {
+          amount: catalogProduct.price,
+          channel,
+          paymentProvider:
+            channel === "BOUTIQUE" ? "SASPAY" : "WHATSAPP_MANUAL",
+          ...shippingData,
+        },
+      });
+      return { order: updated, isNew: false };
+    }
+    return { order: existing, isNew: false };
   }
 
   const order = await prisma.order.create({
     data: {
       profileId: profile.id,
-      productId,
-      amount: product.price,
-      channel: "BOUTIQUE",
-      paymentProvider: "FEDAPAY",
+      productId: productRow.id,
+      amount: catalogProduct.price,
+      channel,
+      paymentProvider: channel === "BOUTIQUE" ? "SASPAY" : "WHATSAPP_MANUAL",
       status: "EN_ATTENTE",
+      ...shippingData,
     },
   });
 
-  return { profile, product, order, isNew: true };
+  return { order, isNew: true };
 }
 
 async function notifyNewOrder(params: {
@@ -76,20 +179,64 @@ async function notifyNewOrder(params: {
   ]).catch((error) => console.error("[notifyNewOrder]", error));
 }
 
-export async function startFedapayCheckout(formData: FormData) {
-  const productId = String(formData.get("productId") ?? "");
-  const { profile, product, order, isNew } =
-    await getOrCreatePendingOrder(productId);
-
-  if (order.status === "PAYE") {
-    redirect("/espace-client");
+/**
+ * Point d'entrée du formulaire de commande. Le bouton cliqué envoie
+ * `intent` = « online » (paiement en ligne) ou « whatsapp ».
+ */
+export async function submitOrder(
+  _state: OrderFormState,
+  formData: FormData,
+): Promise<OrderFormState> {
+  try {
+    await enforceRateLimit("order", 12, 60);
+  } catch (error) {
+    if (error instanceof RateLimitError) return { error: error.message };
+    throw error;
   }
 
-  if (order.paymentProvider !== "FEDAPAY" || order.channel !== "BOUTIQUE") {
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { paymentProvider: "FEDAPAY", channel: "BOUTIQUE" },
+  const prepared = await prepareOrder(formData);
+  if (!prepared.ok) return prepared.state;
+
+  const intent = formData.get("intent") === "whatsapp" ? "whatsapp" : "online";
+
+  // Variable LOCALE à la requête : jamais d'état partagé entre deux clients.
+  let target: string;
+  try {
+    target =
+      intent === "whatsapp"
+        ? await startWhatsappOrder(prepared.context)
+        : await startSaspayCheckout(prepared.context);
+  } catch (error) {
+    if (error instanceof OrderError) return { error: error.message };
+    console.error("[submitOrder]", error);
+    return {
+      error:
+        "Nous n'avons pas pu lancer le paiement. Réessayez dans un instant, ou commandez par WhatsApp : nous vous aiderons tout de suite.",
+    };
+  }
+
+  // La redirection est faite HORS du try/catch : une redirection Next.js est
+  // une exception qu'il ne faut jamais avaler.
+  redirect(target);
+}
+
+/** Paiement en ligne : ouvre une session SasPay et renvoie son adresse. */
+async function startSaspayCheckout(context: OrderContext): Promise<string> {
+  const { profile, catalogProduct, visitorCountry } = context;
+
+  const { order, isNew } = await getOrCreatePendingOrder(context, "BOUTIQUE");
+
+  if (order.status === "PAYE") return "/espace-client";
+
+  // Le client relance un paiement : si sa session précédente a en réalité
+  // été payée (webhook en retard), on le constate ici plutôt que de lui
+  // ouvrir une seconde page de paiement et de risquer un double débit.
+  if (order.providerSessionId) {
+    const alreadyPaid = await syncSaspayOrder(order).catch((error) => {
+      console.error("[startSaspayCheckout] revérification impossible", error);
+      return false;
     });
+    if (alreadyPaid) return "/espace-client";
   }
 
   const supabase = await createClient();
@@ -97,57 +244,61 @@ export async function startFedapayCheckout(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (isNew && user?.email) {
+  if (!user?.email) {
+    throw new OrderError(
+      "Votre compte n'a pas d'adresse email : impossible de lancer le paiement en ligne. Commandez par WhatsApp, nous vous aiderons.",
+    );
+  }
+
+  if (isNew) {
     await notifyNewOrder({
       clientEmail: user.email,
       clientName: profile.name,
       clientPhone: profile.phone ?? "",
-      productName: product.name,
+      productName: catalogProduct.name,
       amount: order.amount,
       channel: "BOUTIQUE",
     });
   }
 
-  const [firstname, ...rest] = profile.name.split(" ");
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-
-  const transaction = await createFedapayTransaction({
-    description: `${product.name} — Référence Informatique`,
+  const session = await createSaspayCheckoutSession({
+    description: `${catalogProduct.name} — ${SITE.name}`,
     amount: order.amount,
-    callbackUrl: `${siteUrl}/commande/retour?order=${order.id}`,
     orderId: order.id,
+    returnUrl: `${SITE.url}/commande/retour?order=${order.id}`,
+    // Burkina Faso : présélectionné sur la page de paiement. Ailleurs, on
+    // laisse le client choisir son pays plutôt que d'en deviner un.
+    country: isHomeCountry(visitorCountry) ? "BF" : undefined,
     customer: {
-      email: user?.email ?? "",
-      firstname: firstname || profile.name,
-      lastname: rest.join(" ") || "-",
-      phoneNumber: profile.phone
-        ? { number: profile.phone, country: "bj" }
-        : undefined,
+      email: user.email,
+      name: profile.name,
+      phone: order.shippingPhone ?? profile.phone ?? undefined,
     },
   });
 
-  const paymentUrl = await generateFedapayPaymentUrl(transaction.id);
-  redirect(paymentUrl);
+  // La session est enregistrée AVANT la redirection : c'est elle qui permet
+  // de relier le paiement à cette commande quand SasPay nous notifie.
+  const previousSessionId = order.providerSessionId;
+  await prisma.order.update({
+    where: { id: order.id },
+    data: { providerSessionId: session.id },
+  });
+
+  // L'ancienne page de paiement ne doit plus rester utilisable.
+  if (previousSessionId) {
+    await cancelSaspaySession(previousSessionId);
+  }
+
+  return session.checkoutUrl;
 }
 
-export async function startWhatsappOrder(formData: FormData) {
-  const productId = String(formData.get("productId") ?? "");
-  const { profile, product, order, isNew } =
-    await getOrCreatePendingOrder(productId);
+/** Commande par WhatsApp : enregistre la commande puis ouvre la conversation. */
+async function startWhatsappOrder(context: OrderContext): Promise<string> {
+  const { profile, catalogProduct, shipping } = context;
 
-  if (order.status === "PAYE") {
-    redirect("/espace-client");
-  }
+  const { order, isNew } = await getOrCreatePendingOrder(context, "WHATSAPP");
 
-  if (
-    order.paymentProvider !== "WHATSAPP_MANUAL" ||
-    order.channel !== "WHATSAPP"
-  ) {
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { paymentProvider: "WHATSAPP_MANUAL", channel: "WHATSAPP" },
-    });
-  }
+  if (order.status === "PAYE") return "/espace-client";
 
   if (isNew) {
     const supabase = await createClient();
@@ -159,20 +310,24 @@ export async function startWhatsappOrder(formData: FormData) {
         clientEmail: user.email,
         clientName: profile.name,
         clientPhone: profile.phone ?? "",
-        productName: product.name,
+        productName: catalogProduct.name,
         amount: order.amount,
         channel: "WHATSAPP",
       });
     }
   }
 
-  const message = [
+  const lines = [
     "Bonjour, je souhaite commander :",
-    `${product.name} — ${order.amount.toLocaleString("fr-FR")} F CFA`,
+    `${catalogProduct.name} — ${formatPrice(order.amount)}`,
     `Référence de commande : ${order.id}`,
-  ].join("\n");
+  ];
+  if (shipping) {
+    lines.push(
+      `Livraison : ${shipping.city}, ${shipping.address}`,
+      `Téléphone : ${shipping.phone}`,
+    );
+  }
 
-  redirect(
-    `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
-  );
+  return whatsappLink(lines.join("\n"));
 }

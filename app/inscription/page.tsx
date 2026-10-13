@@ -1,32 +1,31 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { InscriptionForm } from "./inscription-form";
 
 export const metadata: Metadata = {
   title: "Créer un compte",
+  robots: { index: false, follow: true },
 };
 
 export default function InscriptionPage() {
   return (
-    <div className="mx-auto flex max-w-sm flex-col gap-6 px-4 py-24">
-      <div>
-        <h1 className="text-ink text-lg font-bold">Créer un compte</h1>
-        <p className="text-ink-soft mt-1 text-sm">
-          Accédez à vos formations et suivez vos commandes.
-        </p>
-      </div>
-
+    <AuthShell
+      title="Créer un compte"
+      lead="Gratuit, en une minute. Votre compte vous donne accès à vos achats, à vos commandes et à vos demandes de devis."
+      footer={
+        <>
+          Déjà un compte ?{" "}
+          <Link
+            href="/connexion"
+            className="text-brand-text font-medium underline underline-offset-4"
+          >
+            Se connecter
+          </Link>
+        </>
+      }
+    >
       <InscriptionForm />
-
-      <p className="text-ink-soft text-center text-sm">
-        Déjà un compte ?{" "}
-        <Link
-          href="/connexion"
-          className="text-brand font-medium hover:underline"
-        >
-          Se connecter
-        </Link>
-      </p>
-    </div>
+    </AuthShell>
   );
 }

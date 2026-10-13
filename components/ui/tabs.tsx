@@ -25,7 +25,7 @@ export const TabsTrigger = forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "text-ink-soft data-[state=active]:border-brand data-[state=active]:text-brand shrink-0 border-b-2 border-transparent px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition-colors",
+      "text-ink-soft hover:text-ink data-[state=active]:border-brand data-[state=active]:text-brand-text shrink-0 border-b-2 border-transparent px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors",
       className,
     )}
     {...props}

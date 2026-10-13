@@ -1,49 +1,66 @@
-import type { Metadata } from "next";
-import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { DM_Sans, DM_Serif_Display } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { Shell } from "@/components/shell";
 import { JsonLd } from "@/components/json-ld";
+import { SITE } from "@/lib/site";
 import "./globals.css";
 
-const fraunces = Fraunces({
+// Typographie de la charte Boulga AI : DM Serif Display pour les titres,
+// DM Sans pour tout le reste.
+const dmSerif = DM_Serif_Display({
   subsets: ["latin"],
-  variable: "--font-fraunces",
-  axes: ["opsz", "SOFT", "WONK"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-dm-serif",
   display: "swap",
 });
 
-const jakarta = Plus_Jakarta_Sans({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-jakarta",
+  variable: "--font-dm-sans",
+  axes: ["opsz"],
   display: "swap",
 });
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
+  metadataBase: new URL(SITE.url),
   title: {
-    default: "Référence Informatique",
-    template: "%s — Référence Informatique",
+    default: `${SITE.name} — Services informatiques et formations au Burkina Faso`,
+    template: `%s — ${SITE.name}`,
   },
-  description:
-    "Formations, conception de sites web, agents IA et maintenance informatique au Burkina Faso.",
+  description: SITE.description,
+  applicationName: SITE.name,
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    siteName: "Référence Informatique",
+    siteName: SITE.name,
+    description: SITE.description,
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b1f3a" },
+  ],
 };
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "Référence Informatique",
-  url: SITE_URL,
+  name: SITE.name,
+  url: SITE.url,
+  logo: `${SITE.url}/brand/logo-icon.png`,
   areaServed: "BF",
-  description:
-    "Formations, conception de sites web, agents IA et maintenance informatique au Burkina Faso.",
+  description: SITE.description,
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "customer support",
+    telephone: SITE.phoneInternational,
+    availableLanguage: "fr",
+  },
 };
 
 export default function RootLayout({
@@ -52,15 +69,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="fr"
-      className={`h-full ${fraunces.variable} ${jakarta.variable}`}
-    >
-      <body className="h-full antialiased">
+    <html lang="fr" className={`h-full ${dmSerif.variable} ${dmSans.variable}`}>
+      <body className="min-h-full antialiased">
         <JsonLd data={organizationJsonLd} />
         <Shell>{children}</Shell>
         {/* Mesure réelle des Core Web Vitals une fois déployé sur Vercel
-            (Étape 16) — n'a aucun effet en dehors de cette plateforme. */}
+            — n'a aucun effet en dehors de cette plateforme. */}
         <SpeedInsights />
         <Analytics />
       </body>

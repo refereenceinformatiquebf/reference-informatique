@@ -68,12 +68,12 @@ model Product {
 }
 
 model ServiceCategory {
-  id           String   @id @default(uuid()) @db.Uuid
-  slug         String   @unique // conception-web | agents-ia | logiciels-automatisation | maintenance
+  id           String @id @default(uuid()) @db.Uuid
+  slug         String @unique // conception-web | agents-ia | logiciels-automatisation | maintenance
   name         String
-  description  String   @db.Text
-  iconKey      String   @map("icon_key") // clé vers le set d'icônes de l'Étape 4
-  displayOrder Int      @default(0) @map("display_order")
+  description  String @db.Text
+  iconKey      String @map("icon_key") // clé vers le set d'icônes de l'Étape 4
+  displayOrder Int    @default(0) @map("display_order")
 
   services Service[]
 
@@ -139,7 +139,7 @@ enum OrderChannel {
 }
 
 enum PaymentProvider {
-  FEDAPAY
+  SASPAY
   WHATSAPP_MANUAL
 }
 
@@ -152,22 +152,33 @@ enum OrderStatus {
 }
 
 model Order {
-  id              String          @id @default(uuid()) @db.Uuid
-  profileId       String          @map("profile_id") @db.Uuid
-  profile         Profile         @relation(fields: [profileId], references: [id])
-  productId       String?         @map("product_id") @db.Uuid
-  product         Product?        @relation(fields: [productId], references: [id])
-  serviceId       String?         @map("service_id") @db.Uuid
-  service         Service?        @relation(fields: [serviceId], references: [id])
-  amount          Int // F CFA
-  channel         OrderChannel
-  paymentProvider PaymentProvider @map("payment_provider")
-  status          OrderStatus     @default(EN_ATTENTE)
-  createdAt       DateTime        @default(now()) @map("created_at")
-  updatedAt       DateTime        @updatedAt @map("updated_at")
+  id                String          @id @default(uuid()) @db.Uuid
+  profileId         String          @map("profile_id") @db.Uuid
+  profile           Profile         @relation(fields: [profileId], references: [id])
+  productId         String?         @map("product_id") @db.Uuid
+  product           Product?        @relation(fields: [productId], references: [id])
+  serviceId         String?         @map("service_id") @db.Uuid
+  service           Service?        @relation(fields: [serviceId], references: [id])
+  amount            Int // F CFA
+  channel           OrderChannel
+  paymentProvider   PaymentProvider @map("payment_provider")
+  // Dernière session de checkout SasPay ouverte pour cette commande. Le
+  // webhook SasPay ne renvoie ni notre orderId ni l'id de session : c'est ce
+  // champ qui permet de relier un paiement à sa commande (voir
+  // lib/payments/saspay-sync.ts).
+  providerSessionId String?         @map("provider_session_id")
+  // Livraison d'une clé USB (produits à livraison physique, Burkina Faso).
+  // Null pour les produits numériques.
+  shippingCity      String?         @map("shipping_city")
+  shippingAddress   String?         @map("shipping_address") @db.Text
+  shippingPhone     String?         @map("shipping_phone")
+  status            OrderStatus     @default(EN_ATTENTE)
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
 
   payments Payment[]
 
+  @@index([providerSessionId])
   // Contrainte applicative (vérifiée en code, pas en DB) : productId XOR
   // serviceId, jamais les deux ni aucun des deux.
   @@map("orders")
@@ -178,13 +189,13 @@ model Payment {
   orderId     String          @map("order_id") @db.Uuid
   order       Order           @relation(fields: [orderId], references: [id])
   provider    PaymentProvider
-  providerRef String          @map("provider_ref") // id de transaction FedaPay, ou l'id de l'Order pour une confirmation WhatsApp
+  providerRef String          @map("provider_ref") // id de transaction SasPay, ou l'id de l'Order pour une confirmation WhatsApp
   amount      Int
   status      String // reflète le statut brut renvoyé par le fournisseur, pour audit
   rawPayload  Json?           @map("raw_payload") // corps complet du webhook, pour investigation
   createdAt   DateTime        @default(now()) @map("created_at")
 
-  // Garantit qu'un même événement (webhook FedaPay rejoué, double clic sur
+  // Garantit qu'un même événement (webhook SasPay rejoué, double clic sur
   // "confirmer" côté admin) ne peut jamais créer deux Payment - la
   // protection contre les doublons vit dans la base, pas seulement dans le
   // code applicatif.

@@ -28,7 +28,7 @@ export function NewOrderAdminEmail({
       </Text>
       <Text style={emailTextStyle}>
         Canal :{" "}
-        {channel === "BOUTIQUE" ? "Paiement en ligne (FedaPay)" : "WhatsApp"}
+        {channel === "BOUTIQUE" ? "Paiement en ligne (SasPay)" : "WhatsApp"}
       </Text>
     </EmailLayout>
   );

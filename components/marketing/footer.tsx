@@ -1,99 +1,115 @@
 import Link from "next/link";
-import { IconWhatsapp } from "@/components/icons";
-import { NAV_LINKS } from "./nav-links";
-import { Logo } from "./logo";
+import { IconWhatsapp, IconTelephone } from "@/components/icons";
+import { ALL_SERVICE_FAMILIES } from "@/lib/catalog";
+import { SITE, whatsappLink } from "@/lib/site";
+import { Brand } from "./logo";
 
-const WHATSAPP_NUMBER =
-  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "22675789737";
-
+/**
+ * Pied de page marine (charte Boulga AI). Statique : il ne lit ni cookies ni
+ * en-têtes, donc il ne rend aucune page dynamique. Il ne cite aucune offre
+ * réservée à un pays — les clés de formations n'y apparaissent pas.
+ */
 export function Footer() {
   return (
-    <footer className="border-line bg-paper-raised border-t">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-2.5">
-            <Logo size={28} />
-            <span className="font-display text-ink text-sm font-semibold">
-              Référence Informatique
-            </span>
-          </div>
-          <p className="text-ink-soft text-sm leading-relaxed">
-            Formations, conception de sites web, agents IA et maintenance
-            informatique — Burkina Faso.
+    <footer className="on-navy bg-brand-900 text-white">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+        <div className="flex flex-col gap-4">
+          <Brand tone="light" size={44} />
+          <p className="max-w-xs text-[0.9375rem] leading-relaxed text-white/70">
+            Sites web, agents IA, automatisation et maintenance. Formations et
+            ressources numériques. Au Burkina Faso, et à distance.
           </p>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <span className="text-ink-faint text-xs font-bold tracking-wide uppercase">
-            Navigation
-          </span>
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-ink-soft hover:text-ink text-sm"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <span className="text-ink-faint text-xs font-bold tracking-wide uppercase">
-            Compte
-          </span>
-          <Link
-            href="/connexion"
-            className="text-ink-soft hover:text-ink text-sm"
-          >
-            Se connecter
-          </Link>
-          <Link
-            href="/inscription"
-            className="text-ink-soft hover:text-ink text-sm"
-          >
-            Créer un compte
-          </Link>
-          <Link
-            href="/politique-de-confidentialite"
-            className="text-ink-soft hover:text-ink text-sm"
-          >
-            Confidentialité
-          </Link>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <span className="text-ink-faint text-xs font-bold tracking-wide uppercase">
-            Contact
-          </span>
           <a
-            href={`https://wa.me/${WHATSAPP_NUMBER}`}
+            href={whatsappLink()}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-success flex items-center gap-2 text-sm font-semibold"
+            className="mt-1 inline-flex w-fit items-center gap-2 rounded-md bg-green-600 px-4 py-2.5 text-sm font-medium text-white transition-[filter] hover:brightness-110"
           >
             <IconWhatsapp size={18} />
-            WhatsApp — réponse rapide
-          </a>
-          <a
-            href={`tel:+${WHATSAPP_NUMBER}`}
-            className="text-ink-soft hover:text-ink text-sm"
-          >
-            +
-            {WHATSAPP_NUMBER.replace(
-              /(\d{3})(\d{2})(\d{2})(\d{2})(\d{2})/,
-              "$1 $2 $3 $4 $5",
-            )}
+            Nous écrire sur WhatsApp
           </a>
         </div>
+
+        <FooterColumn title="Services">
+          {ALL_SERVICE_FAMILIES.map((family) => (
+            <FooterLink key={family.slug} href={`/services/${family.slug}`}>
+              {family.name}
+            </FooterLink>
+          ))}
+          <FooterLink href="/services">Tous nos services</FooterLink>
+        </FooterColumn>
+
+        <FooterColumn title="Boutique">
+          <FooterLink href="/boutique">Toute la boutique</FooterLink>
+          <FooterLink href="/boutique?famille=formation">Formations</FooterLink>
+          <FooterLink href="/boutique?famille=ebook">
+            Livres numériques
+          </FooterLink>
+          <FooterLink href="/boutique?famille=modele">Modèles</FooterLink>
+          <FooterLink href="/boutique?famille=pack">
+            Packs d&rsquo;outils
+          </FooterLink>
+        </FooterColumn>
+
+        <FooterColumn title="Entreprise">
+          <FooterLink href="/a-propos">À propos</FooterLink>
+          <FooterLink href="/faq">Questions fréquentes</FooterLink>
+          <FooterLink href="/contact">Contact</FooterLink>
+          <FooterLink href="/conditions-generales">
+            Conditions générales
+          </FooterLink>
+          <FooterLink href="/politique-de-confidentialite">
+            Confidentialité
+          </FooterLink>
+          <a
+            href={`tel:${SITE.phoneInternational}`}
+            className="mt-1 inline-flex items-center gap-2 text-[0.9375rem] text-white/70 transition-colors hover:text-white"
+          >
+            <IconTelephone size={16} />
+            {SITE.phoneDisplay}
+          </a>
+        </FooterColumn>
       </div>
 
-      <div className="border-line border-t px-4 py-5">
-        <p className="text-ink-faint mx-auto max-w-6xl text-center text-xs">
-          © {new Date().getFullYear()} Référence Informatique. Tous droits
-          réservés.
+      <div className="border-t border-white/10 px-4 py-5">
+        <p className="mx-auto max-w-6xl text-center text-xs text-white/55">
+          © {new Date().getFullYear()} {SITE.name}. Tous droits réservés.
         </p>
       </div>
     </footer>
+  );
+}
+
+function FooterColumn({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <nav aria-label={title} className="flex flex-col gap-2.5">
+      <span className="text-[0.6875rem] font-medium tracking-[0.12em] text-white/50 uppercase">
+        {title}
+      </span>
+      {children}
+    </nav>
+  );
+}
+
+function FooterLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className="text-[0.9375rem] text-white/70 transition-colors hover:text-white"
+    >
+      {children}
+    </Link>
   );
 }

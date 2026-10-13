@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { IconVideo, IconPdf } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { markLessonViewed } from "@/lib/actions/progress";
 
 export function LessonItem({
@@ -18,10 +19,10 @@ export function LessonItem({
   const src = `/api/formations/${productSlug}/lecons/${lesson.id}`;
 
   return (
-    <li className="border-line rounded-lg border p-4">
+    <li className="border-line bg-paper rounded-lg border p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="bg-brand/10 text-brand flex h-9 w-9 shrink-0 items-center justify-center rounded-md">
+          <span className="bg-brand-50 text-brand-text flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px]">
             {lesson.type === "VIDEO" ? (
               <IconVideo size={18} />
             ) : (
@@ -31,9 +32,7 @@ export function LessonItem({
           <span className="text-ink text-sm font-medium">{lesson.title}</span>
         </div>
         <div className="flex items-center gap-3">
-          {isViewed ? (
-            <span className="text-success text-xs font-semibold">Vu ✓</span>
-          ) : null}
+          {isViewed ? <Badge variant="success">Vu</Badge> : null}
           <Button
             size="sm"
             variant="outline"

@@ -1,5 +1,6 @@
 import { forwardRef, type SelectHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
+import { fieldClasses } from "./input";
 
 /**
  * <select> natif stylé, pas un composant Radix : pour une liste déroulante
@@ -13,10 +14,7 @@ export const Select = forwardRef<
   return (
     <select
       ref={ref}
-      className={cn(
-        "border-line focus:border-brand bg-paper w-full rounded-md border px-3 py-2 text-sm outline-none",
-        className,
-      )}
+      className={cn(fieldClasses, "pr-9", className)}
       {...props}
     >
       {children}

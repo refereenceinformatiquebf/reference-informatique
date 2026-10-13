@@ -1,7 +1,11 @@
 import { z } from "zod";
 
 export const devisSchema = z.object({
-  serviceId: z.uuid({ error: "Service invalide." }),
+  /** Slug de la prestation dans le catalogue (lib/catalog/services.ts). */
+  serviceSlug: z
+    .string()
+    .trim()
+    .min(1, { error: "Choisissez la prestation qui vous intéresse." }),
   name: z.string().trim().min(2, { error: "Votre nom est obligatoire." }),
   email: z.email({ error: "Adresse email invalide." }),
   phone: z.string().trim().min(8, { error: "Numéro de téléphone invalide." }),

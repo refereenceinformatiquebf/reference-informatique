@@ -8,7 +8,7 @@ import { sendPaymentConfirmation, sendAccessGranted } from "@/lib/email/send";
 type MarkOrderPaidParams = {
   orderId: string;
   provider: PaymentProvider;
-  /** Identifiant unique de la transaction chez le fournisseur (id FedaPay),
+  /** Identifiant unique de la transaction chez le fournisseur (id SasPay),
    * ou l'id de l'Order lui-même pour une confirmation WhatsApp manuelle. */
   providerRef: string;
   amount: number;
@@ -18,7 +18,7 @@ type MarkOrderPaidParams = {
 
 /**
  * Point d'entrée UNIQUE pour marquer une commande payée — appelé à la fois
- * par le webhook FedaPay (Étape 10) et par l'action de confirmation
+ * par la synchronisation SasPay (Étape 10) et par l'action de confirmation
  * WhatsApp de l'admin (Étape 11), pour que les deux chemins déclenchent
  * rigoureusement les mêmes effets (voir PLAYBOOK-CONSTRUCTION.md).
  *

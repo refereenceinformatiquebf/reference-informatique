@@ -3,23 +3,34 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
+/**
+ * Boutons de la charte Boulga AI : rayon 8 px, DM Sans medium, survol
+ * scale(1.02) + légère hausse de luminosité (200 ms standard).
+ *  - primary   : bleu Boulga plein — l'action principale d'une vue
+ *  - outline   : contour bleu — action secondaire
+ *  - ghost     : contour neutre — action tertiaire (Annuler…)
+ *  - danger    : rouge — action destructive
+ *  - whatsapp  : vert WhatsApp — réservé aux actions WhatsApp
+ *  - inverse   : blanc plein — sur fond marine/bleu (héros, bandeaux)
+ */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-md text-sm font-semibold transition-all disabled:pointer-events-none disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
+  "inline-flex items-center justify-center gap-2 rounded-md font-medium whitespace-nowrap transition-[transform,filter,background-color,border-color,color,box-shadow] duration-200 ease-[var(--ease-standard)] hover:scale-[1.02] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-55 focus-visible:shadow-[var(--focus-halo)] focus-visible:outline-none",
   {
     variants: {
       variant: {
-        primary:
-          "from-brand-700 to-brand-500 shadow-brand-900/20 bg-gradient-to-br text-white shadow-md hover:shadow-lg hover:brightness-110",
-        accent:
-          "bg-coral-600 text-white shadow-md shadow-black/10 hover:brightness-105",
+        primary: "bg-brand text-brand-contrast hover:brightness-110",
         outline:
-          "border border-line text-ink hover:border-brand hover:text-brand",
-        ghost: "text-ink hover:bg-paper-raised",
+          "border-brand text-brand-text hover:bg-brand-50 border bg-transparent",
+        ghost:
+          "border-line text-ink-soft hover:text-ink hover:bg-paper border bg-transparent",
+        danger: "bg-danger text-white hover:brightness-110",
+        whatsapp: "bg-green-600 text-white hover:brightness-110",
+        inverse: "text-brand-900 bg-white hover:bg-brand-50",
       },
       size: {
-        sm: "h-8 px-3",
-        md: "h-10 px-4",
-        lg: "h-12 px-6 text-base",
+        sm: "h-9 px-3.5 text-[0.8125rem]",
+        md: "h-11 px-5 text-sm",
+        lg: "h-12 px-6 text-[0.9375rem]",
       },
     },
     defaultVariants: {
@@ -49,3 +60,5 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   },
 );
 Button.displayName = "Button";
+
+export { buttonVariants };

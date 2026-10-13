@@ -1,116 +1,159 @@
 @import "tailwindcss";
 
 /*
- * Système de tokens — Référence Informatique V2.
- * Voir PLAYBOOK-CONSTRUCTION.md, section 5, pour la justification de chaque
- * choix. Ne jamais coder une couleur ou une taille de police en dur dans une
- * page ou un composant : tout doit passer par ces variables.
+ * Système de tokens — Référence Informatique, charte graphique de Boulga AI
+ * (C:\Boulga AI\boulga_ai_charte_graphique.html, v1.0) appliquée telle quelle :
+ * marine #0B1F3A + bleu #1565C0, DM Serif Display (titres) + DM Sans (texte),
+ * rayons 8 / 12 / 16 / pilule, mouvement 100-200-350-500 ms.
  *
- * Trois états de thème gérés, comme documenté dans la charte du projet :
- *  - :root                              -> palette claire par défaut
- *  - prefers-color-scheme: dark         -> thème système sombre (aucun choix explicite)
- *  - [data-theme="dark"|"light"]        -> bascule manuelle (composant à venir),
- *                                          gagne toujours sur la préférence système
+ * Ne jamais coder une couleur, un rayon ou une durée en dur dans une page ou
+ * un composant : tout passe par ces variables.
+ *
+ * Trois états de thème : :root (clair), prefers-color-scheme: dark (système),
+ * [data-theme="dark"|"light"] (bascule manuelle, gagne sur le système).
  */
 
 :root {
-  /* Encre / texte — teinte légèrement bleutée (jamais un gris pur) pour
-     rester cohérente avec la marque. */
-  --ink: #16233a;
-  --ink-soft: #4c5a72;
-  --ink-faint: #8791a5;
+  /* Encre — marine profond pour les titres, bleu-gris pour le texte courant. */
+  --ink: #0b1f3a;
+  --ink-soft: #46576f;
+  --ink-faint: #65748b;
 
-  /* Fonds — blanc légèrement chaud, jamais un blanc clinique. */
-  --paper: #fffdf9;
-  --paper-raised: #f6f2e9;
+  /* Fonds — « Fond neutre » #F5F7FA pour l'interface, « Blanc pur » pour les
+     surfaces (cartes, champs, en-tête). */
+  --paper: #ffffff;
+  --paper-raised: #f5f7fa;
 
-  /* Marque — bleu marine, du plus profond au plus clair, pour les
-     dégradés (hero, bandeaux) autant que pour le texte/boutons plats. */
-  --brand-900: #0a1e3d;
-  --brand-700: #123a6b;
-  --brand-500: #1f5ba8;
-  --brand-100: #e8f0fb;
-  --brand: var(--brand-700);
+  /* Échelle du bleu Boulga (50 → 900, ★ 500 = couleur d'action). */
+  --brand-50: #e3f0ff;
+  --brand-100: #b3cffe;
+  --brand-200: #81adfc;
+  --brand-300: #4d8ff8;
+  --brand-500: #1565c0;
+  --brand-600: #0d4fa0;
+  --brand-700: #063a80;
+  --brand-800: #032660;
+  --brand-900: #0b1f3a;
+  --brand: var(--brand-500);
+  --brand-contrast: #ffffff;
+  /* Texte de lien / d'accent sur fond clair (bleu 600 = contraste AAA sur blanc). */
+  --brand-text: var(--brand-600);
 
-  /* Accent — corail (chaleur, énergie, CTA principal) et vert (repris de
-     l'identité WhatsApp déjà très présente sur le site actuel, où le vert
-     dominait déjà les éléments de contact). Pas de jaune/or : écarté sur
-     retour explicite. Voir PLAYBOOK-CONSTRUCTION.md, Étape 4bis. */
-  --coral-600: #c44a24;
-  --coral-100: #fbe4da;
-  --brand-accent: var(--coral-600);
-  --green-700: #15803d;
-  --green-600: #16a34a;
-  --green-100: #dcfce7;
+  /* WhatsApp : seul vert de la marque, réservé aux actions WhatsApp. */
+  --green-700: #1b5e20;
+  --green-600: #2e7d32;
+  --green-100: #e6f4ea;
 
-  /* Sémantique (états, jamais utilisée comme accent de marque) */
-  --success: #3e7a54;
-  --warning: #8a6d1f;
-  --danger: #a8432c;
+  /* Fonctionnelles de la charte (statuts, jamais une couleur d'accent). */
+  --success: #2e7d32;
+  --success-bg: #e6f4ea;
+  --success-text: #1b5e20;
+  --warning: #f57c00;
+  --warning-bg: #fff8e1;
+  --warning-text: #6d4c00;
+  --danger: #c62828;
+  --danger-bg: #fdecea;
+  --danger-text: #b71c1c;
 
   /* Lignes */
-  --line: rgba(22, 35, 58, 0.12);
-  --line-strong: rgba(22, 35, 58, 0.22);
+  --line: #e0e4ec;
+  --line-strong: #c3cad8;
+
+  /* Rayons de la charte : 8 boutons/champs · 12 cartes · 16 panneaux · pilule */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Ombres — très douces (bordure fine d'abord, ombre ensuite). */
+  --shadow-card:
+    0 1px 2px rgba(11, 31, 58, 0.04), 0 4px 16px rgba(11, 31, 58, 0.05);
+  --shadow-lift:
+    0 2px 4px rgba(11, 31, 58, 0.05), 0 12px 32px rgba(11, 31, 58, 0.1);
+  --focus-halo: 0 0 0 3px rgba(21, 101, 192, 0.18);
+
+  /* Mouvement de la charte */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-expressive: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 100ms;
+  --dur-standard: 200ms;
+  --dur-expressive: 350ms;
+  --dur-page: 500ms;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ink: #e9ecf3;
-    --ink-soft: #adb6c8;
-    --ink-faint: #6f7a90;
+    --ink: #eaf0fa;
+    --ink-soft: #b4c0d4;
+    --ink-faint: #8795ad;
 
-    --paper: #0e1420;
-    --paper-raised: #171f2f;
+    --paper: #10284a;
+    --paper-raised: #0b1f3a;
 
-    --brand-900: #0a1e3d;
-    --brand-700: #7fa3d9;
-    --brand-500: #a9c4e8;
-    --brand-100: #1a2e4d;
-    --brand: var(--brand-700);
+    --brand: #4d8ff8;
+    --brand-contrast: #06193a;
+    --brand-text: #81adfc;
+    --brand-50: #123560;
+    --brand-100: #1b4a85;
 
-    --coral-600: #e8794f;
-    --coral-100: #3d2115;
-    --brand-accent: var(--coral-600);
-    --green-700: #16a34a;
-    --green-600: #22c55e;
-    --green-100: #123822;
+    --green-700: #a5d6a7;
+    --green-600: #66bb6a;
+    --green-100: #14361c;
 
-    --success: #6fb98a;
-    --warning: #d4b656;
-    --danger: #e0806a;
+    --success: #66bb6a;
+    --success-bg: #14361c;
+    --success-text: #a5d6a7;
+    --warning: #ffb74d;
+    --warning-bg: #3a2a08;
+    --warning-text: #ffd180;
+    --danger: #ef5350;
+    --danger-bg: #3d1414;
+    --danger-text: #ff8a80;
 
-    --line: rgba(233, 236, 243, 0.14);
-    --line-strong: rgba(233, 236, 243, 0.24);
+    --line: #1f3a63;
+    --line-strong: #2f5189;
+
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
+    --shadow-lift:
+      0 2px 4px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.4);
+    --focus-halo: 0 0 0 3px rgba(77, 143, 248, 0.35);
   }
 }
 
 :root[data-theme="dark"] {
-  --ink: #e9ecf3;
-  --ink-soft: #adb6c8;
-  --ink-faint: #6f7a90;
+  --ink: #eaf0fa;
+  --ink-soft: #b4c0d4;
+  --ink-faint: #8795ad;
 
-  --paper: #0e1420;
-  --paper-raised: #171f2f;
+  --paper: #10284a;
+  --paper-raised: #0b1f3a;
 
-  --brand-900: #0a1e3d;
-  --brand-700: #7fa3d9;
-  --brand-500: #a9c4e8;
-  --brand-100: #1a2e4d;
-  --brand: var(--brand-700);
+  --brand: #4d8ff8;
+  --brand-contrast: #06193a;
+  --brand-text: #81adfc;
+  --brand-50: #123560;
+  --brand-100: #1b4a85;
 
-  --coral-600: #e8794f;
-  --coral-100: #3d2115;
-  --brand-accent: var(--coral-600);
-  --green-700: #16a34a;
-  --green-600: #22c55e;
-  --green-100: #123822;
+  --green-700: #a5d6a7;
+  --green-600: #66bb6a;
+  --green-100: #14361c;
 
-  --success: #6fb98a;
-  --warning: #d4b656;
-  --danger: #e0806a;
+  --success: #66bb6a;
+  --success-bg: #14361c;
+  --success-text: #a5d6a7;
+  --warning: #ffb74d;
+  --warning-bg: #3a2a08;
+  --warning-text: #ffd180;
+  --danger: #ef5350;
+  --danger-bg: #3d1414;
+  --danger-text: #ff8a80;
 
-  --line: rgba(233, 236, 243, 0.14);
-  --line-strong: rgba(233, 236, 243, 0.24);
+  --line: #1f3a63;
+  --line-strong: #2f5189;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
+  --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.4);
+  --focus-halo: 0 0 0 3px rgba(77, 143, 248, 0.35);
 }
 
 @theme inline {
@@ -121,61 +164,166 @@
   --color-paper: var(--paper);
   --color-paper-raised: var(--paper-raised);
   --color-brand: var(--brand);
-  --color-brand-900: var(--brand-900);
-  --color-brand-700: var(--brand-700);
-  --color-brand-500: var(--brand-500);
+  --color-brand-contrast: var(--brand-contrast);
+  --color-brand-text: var(--brand-text);
+  --color-brand-50: var(--brand-50);
   --color-brand-100: var(--brand-100);
-  --color-brand-accent: var(--brand-accent);
-  --color-coral-600: var(--coral-600);
-  --color-coral-100: var(--coral-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
   --color-green-700: var(--green-700);
   --color-green-600: var(--green-600);
   --color-green-100: var(--green-100);
   --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-success-text: var(--success-text);
   --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-text: var(--warning-text);
   --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-text: var(--danger-text);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
 
-  /* Typographie -> génère font-display / font-body / font-data.
-     Fraunces (serif chaleureuse, à fort caractère) et Plus Jakarta Sans
-     (humaniste, très lisible) sont chargées via next/font/google dans
-     app/layout.tsx, qui expose --font-fraunces / --font-jakarta. */
-  --font-display: var(--font-fraunces), Georgia, serif;
-  --font-body: var(--font-jakarta), -apple-system, "Segoe UI", sans-serif;
-  --font-data: "SF Mono", "Cascadia Mono", Consolas, Menlo, monospace;
+  /* Rayons -> rounded-sm / md / lg / xl */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 
-  /* Échelle typographique fixe -> génère text-2xs ... text-5xl */
-  --text-2xs: 0.75rem; /* 12px */
-  --text-xs: 0.875rem; /* 14px */
-  --text-sm: 1rem; /* 16px */
-  --text-md: 1.1875rem; /* 19px */
-  --text-lg: 1.5rem; /* 24px */
-  --text-xl: 2rem; /* 32px */
-  --text-2xl: 2.625rem; /* 42px */
+  --shadow-card: var(--shadow-card);
+  --shadow-lift: var(--shadow-lift);
+
+  /* Typographie -> font-display / font-body / font-data.
+     DM Serif Display (titres, prix) et DM Sans (texte, interface) sont
+     chargées par next/font dans app/layout.tsx. */
+  --font-display: var(--font-dm-serif), Georgia, serif;
+  --font-body: var(--font-dm-sans), -apple-system, "Segoe UI", sans-serif;
+  --font-data: var(--font-dm-sans), -apple-system, "Segoe UI", sans-serif;
+
+  /* Échelle typographique de la charte (display 36 / h1 26 / h2 18 / corps 15) */
+  --text-2xs: 0.75rem; /* 12 — légendes */
+  --text-xs: 0.875rem; /* 14 */
+  --text-sm: 0.9375rem; /* 15 — corps */
+  --text-md: 1.125rem; /* 18 — H2 */
+  --text-lg: 1.625rem; /* 26 — H1 */
+  --text-xl: 2.25rem; /* 36 — Display */
+  --text-2xl: 3rem; /* 48 — héros */
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--paper);
+  background: var(--paper-raised);
   color: var(--ink);
   font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: 1.65;
+  text-rendering: optimizeLegibility;
 }
 
+/* Titres : DM Serif Display 400, jamais en gras (le gras faux dégrade la
+   forme du caractère). Letter-spacing de la charte : -0.02em en display. */
 h1,
 h2,
 h3,
 h4 {
   font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
   text-wrap: balance;
+}
+
+/* Titres explicitement mis en gras (écrans applicatifs : espace client,
+   administration) : on passe à DM Sans, comme le « H2 » de la charte.
+   DM Serif Display n'existe qu'en graisse 400 — un gras serait synthétisé
+   par le navigateur et dégrade le dessin des lettres. */
+:is(h1, h2, h3, h4)[class*="font-bold"],
+:is(h1, h2, h3, h4)[class*="font-semibold"] {
+  font-family: var(--font-body);
+  letter-spacing: -0.01em;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 /* Chiffres alignés en colonne (prix, dates, statistiques) */
 .tabular {
-  font-family: var(--font-data);
   font-variant-numeric: tabular-nums;
 }
 
-/* Utilisé par components/ui/accordion.tsx (FAQ des Services/Boutique) */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--brand-100);
+  color: var(--brand-900);
+}
+
+/* ---------- Mouvement de la charte ---------- */
+
+/* Apparition de carte : opacity 0 -> 1 + translateY 8px -> 0 ; page load
+   500 ms, décalage de 60 ms entre éléments (--i). */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.rise-in {
+  animation: rise-in var(--dur-page) var(--ease-standard) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+/* Skeleton : shimmer gauche -> droite, 1.4 s en boucle */
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--line) 0%,
+    var(--paper-raised) 50%,
+    var(--line) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: var(--radius-md);
+}
+
+/* « Zone d'illustration » de la charte : dégradé marine -> bleu uni, sans
+   motif — le fond des héros et des bandeaux d'appel à l'action. */
+.illus-zone {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(135deg, #0b1f3a 0%, #1565c0 100%);
+  color: #fff;
+  /* Point d'accent des icônes : bleu clair sur fond marine (voir icons.tsx). */
+  --icon-accent: #81adfc;
+}
+
+/* Utilisé par components/ui/accordion.tsx (FAQ) */
 @keyframes accordion-down {
   from {
     height: 0;
@@ -192,9 +340,22 @@ h4 {
     height: 0;
   }
 }
-/* Respect global de prefers-reduced-motion — couvre l'accordéon ci-dessus
-   et toute transition/animation ajoutée par la suite, sans avoir à cibler
-   chaque classe une par une. */
+
+/* Surfaces marine pleines (pied de page, bandeaux) : accent d'icône clair. */
+.on-navy {
+  --icon-accent: #81adfc;
+}
+
+/* Défilement horizontal sans barre visible (rails de produits sur mobile) */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Respect global de prefers-reduced-motion — couvre toute transition ou
+   animation, sans avoir à cibler chaque classe une par une. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -102,7 +102,7 @@ export default async function AdminCommandesPage({
                       {formatPrice(order.amount)}
                     </td>
                     <td className="text-ink-soft px-4 py-3 text-xs">
-                      {order.channel === "BOUTIQUE" ? "FedaPay" : "WhatsApp"}
+                      {order.channel === "BOUTIQUE" ? "SasPay" : "WhatsApp"}
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant={status.variant}>{status.label}</Badge>

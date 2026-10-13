@@ -1,22 +1,28 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { MotDePasseOublieForm } from "./mot-de-passe-oublie-form";
 
 export const metadata: Metadata = {
   title: "Mot de passe oublié",
+  robots: { index: false, follow: true },
 };
 
 export default function MotDePasseOubliePage() {
   return (
-    <div className="mx-auto flex max-w-sm flex-col gap-6 px-4 py-24">
-      <div>
-        <h1 className="text-ink text-lg font-bold">Mot de passe oublié</h1>
-        <p className="text-ink-soft mt-1 text-sm">
-          Indiquez votre email, nous vous envoyons un lien pour le
-          réinitialiser.
-        </p>
-      </div>
-
+    <AuthShell
+      title="Mot de passe oublié"
+      lead="Indiquez votre email : nous vous envoyons un lien pour choisir un nouveau mot de passe."
+      footer={
+        <Link
+          href="/connexion"
+          className="text-brand-text font-medium underline underline-offset-4"
+        >
+          Retour à la connexion
+        </Link>
+      }
+    >
       <MotDePasseOublieForm />
-    </div>
+    </AuthShell>
   );
 }

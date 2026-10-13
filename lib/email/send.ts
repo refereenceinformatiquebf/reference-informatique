@@ -1,6 +1,7 @@
 import "server-only";
 import { render } from "@react-email/render";
 import type { ReactElement } from "react";
+import { SITE } from "@/lib/site";
 import { getBrevoClient } from "./client";
 import { OrderConfirmationEmail } from "./templates/order-confirmation";
 import { PaymentConfirmationEmail } from "./templates/payment-confirmation";
@@ -12,14 +13,14 @@ import {
 } from "./templates/devis-received";
 
 const SENDER = {
-  name: "Référence Informatique",
+  name: SITE.name,
   email: process.env.BREVO_SENDER_EMAIL ?? "hello@reference-informatique.com",
 };
 
 const ADMIN_EMAIL =
   process.env.ADMIN_NOTIFICATION_EMAIL ?? "nosservicesinformatiques@gmail.com";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const SITE_URL = SITE.url;
 
 /**
  * Point d'envoi unique. En développement (pas de clé Brevo), affiche
@@ -81,7 +82,7 @@ export async function sendAccessGranted(params: {
 }) {
   await sendEmail({
     to: { email: params.to, name: params.clientName },
-    subject: `Votre formation est prête — ${params.productName}`,
+    subject: `Votre accès est prêt — ${params.productName}`,
     react: AccessGrantedEmail({ ...params, siteUrl: SITE_URL }),
   });
 }

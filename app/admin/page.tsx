@@ -52,7 +52,7 @@ export default async function AdminDashboardPage() {
         <StatCard
           label="CA ce mois"
           value={formatPrice(totalRevenue)}
-          sub={`FedaPay ${formatPrice(revenueByChannel.BOUTIQUE)} · WhatsApp ${formatPrice(revenueByChannel.WHATSAPP)}`}
+          sub={`SasPay ${formatPrice(revenueByChannel.BOUTIQUE)} · WhatsApp ${formatPrice(revenueByChannel.WHATSAPP)}`}
         />
         <StatCard
           label="Devis en attente"

@@ -16,8 +16,9 @@ export function DevisReceivedClientEmail({
       <Text style={emailTextStyle}>Bonjour {clientName},</Text>
       <Text style={emailTextStyle}>
         Nous avons bien reçu votre demande concernant{" "}
-        <strong>{serviceName}</strong>. Notre équipe revient vers vous sous 24h
-        ouvrées avec un devis détaillé.
+        <strong>{serviceName}</strong>. Notre équipe revient vers vous sous 24 h
+        ouvrées avec une proposition claire : ce qui est livré, le prix et le
+        délai.
       </Text>
     </EmailLayout>
   );

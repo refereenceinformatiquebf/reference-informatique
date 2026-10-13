@@ -3,7 +3,7 @@
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
-import { IconFleche } from "@/components/icons";
+import { IconChevronBas } from "@/components/icons";
 
 export const Accordion = AccordionPrimitive.Root;
 
@@ -13,7 +13,7 @@ export const AccordionItem = forwardRef<
 >(({ className, ...props }, ref) => (
   <AccordionPrimitive.Item
     ref={ref}
-    className={cn("border-line border-b", className)}
+    className={cn("border-line border-b last:border-b-0", className)}
     {...props}
   />
 ));
@@ -23,17 +23,20 @@ export const AccordionTrigger = forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => (
-  <AccordionPrimitive.Header className="flex">
+  <AccordionPrimitive.Header className="font-body flex">
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        "text-ink flex flex-1 items-center justify-between gap-4 py-4 text-left text-sm font-semibold [&[data-state=open]>svg]:rotate-90",
+        "text-ink hover:text-brand-text flex flex-1 items-center justify-between gap-4 py-4 text-left text-[0.9375rem] font-medium transition-colors [&[data-state=open]>svg]:rotate-180",
         className,
       )}
       {...props}
     >
       {children}
-      <IconFleche size={16} className="shrink-0 transition-transform" />
+      <IconChevronBas
+        size={18}
+        className="text-ink-faint shrink-0 transition-transform duration-200"
+      />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ));
@@ -45,10 +48,10 @@ export const AccordionContent = forwardRef<
 >(({ className, children, ...props }, ref) => (
   <AccordionPrimitive.Content
     ref={ref}
-    className="text-ink-soft overflow-hidden text-sm data-[state=closed]:animate-[accordion-up_0.2s_ease-out] data-[state=open]:animate-[accordion-down_0.2s_ease-out]"
+    className="text-ink-soft overflow-hidden text-[0.9375rem] leading-relaxed data-[state=closed]:animate-[accordion-up_0.2s_ease-out] data-[state=open]:animate-[accordion-down_0.2s_ease-out]"
     {...props}
   >
-    <div className={cn("pb-4", className)}>{children}</div>
+    <div className={cn("pb-5", className)}>{children}</div>
   </AccordionPrimitive.Content>
 ));
 AccordionContent.displayName = "AccordionContent";

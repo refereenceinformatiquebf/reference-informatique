@@ -4,8 +4,10 @@ import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { IconFormation, IconWhatsapp } from "@/components/icons";
+import { IconChip } from "@/components/ui/section";
+import { IconWhatsapp } from "@/components/icons";
 import { formatPrice } from "@/lib/format";
+import { whatsappLink } from "@/lib/site";
 import { ORDER_STATUS_LABELS, QUOTE_STATUS_LABELS } from "@/lib/status-labels";
 import { signOut } from "@/lib/actions/auth";
 import type {
@@ -24,10 +26,16 @@ type Props = {
   quotes: (QuoteRequest & { service: Service })[];
 };
 
+const dateFormat: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+};
+
 export function EspaceClientTabs({ profile, access, orders, quotes }: Props) {
   return (
     <Tabs defaultValue="formations" className="mt-8">
-      <TabsList>
+      <TabsList aria-label="Sections de votre espace">
         <TabsTrigger value="formations">
           Mes formations ({access.length})
         </TabsTrigger>
@@ -35,37 +43,36 @@ export function EspaceClientTabs({ profile, access, orders, quotes }: Props) {
           Mes commandes ({orders.length})
         </TabsTrigger>
         <TabsTrigger value="devis">Mes devis ({quotes.length})</TabsTrigger>
-        <TabsTrigger value="profil">Profil</TabsTrigger>
+        <TabsTrigger value="profil">Mon profil</TabsTrigger>
       </TabsList>
 
       <TabsContent value="formations">
         {access.length === 0 ? (
           <EmptyState
-            message="Aucune formation active pour le moment."
+            icon="formation"
+            title="Aucune formation pour le moment"
+            message="Vos achats apparaissent ici dès que le paiement est confirmé."
             ctaHref="/boutique"
-            ctaLabel="Voir la boutique"
+            ctaLabel="Découvrir la boutique"
           />
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {access.map((item) => (
-              <div key={item.id} className="border-line rounded-lg border p-5">
-                <div className="bg-brand/10 text-brand flex h-10 w-10 items-center justify-center rounded-md">
-                  <IconFormation size={20} />
-                </div>
-                <h3 className="text-ink mt-3 text-sm font-semibold">
+              <div
+                key={item.id}
+                className="border-line bg-paper flex flex-col rounded-lg border p-5"
+              >
+                <IconChip name="formation" size={44} />
+                <h3 className="font-display text-ink mt-4 text-[1.25rem] leading-tight">
                   {item.product.name}
                 </h3>
-                <p className="text-ink-faint mt-1 text-xs">
+                <p className="text-ink-faint mt-1.5 text-xs">
                   Activé le{" "}
-                  {item.grantedAt.toLocaleDateString("fr-FR", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
+                  {item.grantedAt.toLocaleDateString("fr-FR", dateFormat)}
                 </p>
-                <Button asChild size="sm" className="mt-4 w-full">
+                <Button asChild className="mt-5 w-full">
                   <Link href={`/espace-client/formations/${item.product.slug}`}>
-                    Accéder
+                    Accéder à mon contenu
                   </Link>
                 </Button>
               </div>
@@ -77,28 +84,43 @@ export function EspaceClientTabs({ profile, access, orders, quotes }: Props) {
       <TabsContent value="commandes">
         {orders.length === 0 ? (
           <EmptyState
-            message="Aucune commande pour le moment."
+            icon="panier"
+            title="Aucune commande pour le moment"
+            message="Vos commandes et leur état s'affichent ici."
             ctaHref="/boutique"
-            ctaLabel="Voir la boutique"
+            ctaLabel="Découvrir la boutique"
           />
         ) : (
           <div className="flex flex-col gap-3">
             {orders.map((order) => {
               const status = ORDER_STATUS_LABELS[order.status];
               const label = order.product?.name ?? order.service?.name ?? "—";
+              const canResume =
+                order.status === "EN_ATTENTE" && order.product !== null;
               return (
                 <div
                   key={order.id}
-                  className="border-line flex items-center justify-between gap-4 rounded-lg border p-4"
+                  className="border-line bg-paper flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div>
-                    <p className="text-ink text-sm font-semibold">{label}</p>
-                    <p className="text-ink-faint mt-0.5 text-xs">
+                  <div className="min-w-0">
+                    <p className="text-ink text-[0.9375rem] font-medium">
+                      {label}
+                    </p>
+                    <p className="text-ink-faint tabular mt-0.5 text-xs">
                       {order.createdAt.toLocaleDateString("fr-FR")} ·{" "}
                       {formatPrice(order.amount)}
                     </p>
                   </div>
-                  <Badge variant={status.variant}>{status.label}</Badge>
+                  <div className="flex items-center gap-3">
+                    {canResume ? (
+                      <Button asChild size="sm" variant="outline">
+                        <Link href={`/commande/${order.product!.slug}`}>
+                          Reprendre la commande
+                        </Link>
+                      </Button>
+                    ) : null}
+                    <Badge variant={status.variant}>{status.label}</Badge>
+                  </div>
                 </div>
               );
             })}
@@ -109,7 +131,9 @@ export function EspaceClientTabs({ profile, access, orders, quotes }: Props) {
       <TabsContent value="devis">
         {quotes.length === 0 ? (
           <EmptyState
-            message="Aucune demande de devis pour le moment."
+            icon="devis"
+            title="Aucune demande de devis"
+            message="Les devis que vous demandez apparaissent ici avec leur avancement."
             ctaHref="/services"
             ctaLabel="Voir nos services"
           />
@@ -120,14 +144,14 @@ export function EspaceClientTabs({ profile, access, orders, quotes }: Props) {
               return (
                 <div
                   key={quote.id}
-                  className="border-line flex items-center justify-between gap-4 rounded-lg border p-4"
+                  className="border-line bg-paper flex items-center justify-between gap-4 rounded-lg border p-4"
                 >
                   <div>
-                    <p className="text-ink text-sm font-semibold">
+                    <p className="text-ink text-[0.9375rem] font-medium">
                       {quote.service.name}
                     </p>
                     <p className="text-ink-faint mt-0.5 text-xs">
-                      {quote.createdAt.toLocaleDateString("fr-FR")}
+                      Demandé le {quote.createdAt.toLocaleDateString("fr-FR")}
                     </p>
                   </div>
                   <Badge variant={status.variant}>{status.label}</Badge>
@@ -139,12 +163,16 @@ export function EspaceClientTabs({ profile, access, orders, quotes }: Props) {
       </TabsContent>
 
       <TabsContent value="profil">
-        <div className="border-line max-w-sm rounded-lg border p-5">
-          <div className="bg-brand flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-white">
+        <div className="border-line bg-paper max-w-md rounded-lg border p-6">
+          <div className="bg-brand text-brand-contrast font-display flex h-14 w-14 items-center justify-center rounded-full text-2xl">
             {profile.name.charAt(0).toUpperCase()}
           </div>
-          <p className="text-ink mt-3 text-sm font-semibold">{profile.name}</p>
-          <p className="text-ink-soft text-xs">{profile.phone}</p>
+          <p className="font-display text-ink mt-4 text-[1.375rem] leading-tight">
+            {profile.name}
+          </p>
+          {profile.phone ? (
+            <p className="text-ink-soft mt-1 text-sm">{profile.phone}</p>
+          ) : null}
           <p className="text-ink-faint mt-1 text-xs">
             Membre depuis{" "}
             {profile.createdAt.toLocaleDateString("fr-FR", {
@@ -153,21 +181,25 @@ export function EspaceClientTabs({ profile, access, orders, quotes }: Props) {
             })}
           </p>
 
-          <a
-            href="https://wa.me/22675789737"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-success mt-4 flex items-center gap-2 text-sm font-semibold"
-          >
-            <IconWhatsapp size={16} />
-            Contacter le support
-          </a>
-
-          <form action={signOut} className="mt-4">
-            <Button variant="outline" size="sm" type="submit">
-              Se déconnecter
+          <div className="mt-6 flex flex-col gap-3">
+            <Button asChild variant="whatsapp">
+              <a
+                href={whatsappLink(
+                  "Bonjour, j'ai besoin d'aide avec mon espace.",
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <IconWhatsapp size={18} />
+                Contacter le support
+              </a>
             </Button>
-          </form>
+            <form action={signOut}>
+              <Button variant="ghost" type="submit" className="w-full">
+                Se déconnecter
+              </Button>
+            </form>
+          </div>
         </div>
       </TabsContent>
     </Tabs>
@@ -175,17 +207,27 @@ export function EspaceClientTabs({ profile, access, orders, quotes }: Props) {
 }
 
 function EmptyState({
+  icon,
+  title,
   message,
   ctaHref,
   ctaLabel,
 }: {
+  icon: "formation" | "panier" | "devis";
+  title: string;
   message: string;
   ctaHref: string;
   ctaLabel: string;
 }) {
   return (
-    <div className="border-line flex flex-col items-center gap-3 rounded-lg border border-dashed p-10 text-center">
-      <p className="text-ink-soft text-sm">{message}</p>
+    <div className="border-line bg-paper flex flex-col items-center gap-4 rounded-lg border border-dashed p-10 text-center">
+      <IconChip name={icon} size={52} />
+      <div>
+        <p className="font-display text-ink text-[1.25rem] leading-tight">
+          {title}
+        </p>
+        <p className="text-ink-soft mt-1.5 text-sm">{message}</p>
+      </div>
       <Button asChild variant="outline" size="sm">
         <Link href={ctaHref}>{ctaLabel}</Link>
       </Button>

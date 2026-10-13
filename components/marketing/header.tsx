@@ -5,21 +5,29 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { NAV_LINKS } from "./nav-links";
-import { IconUtilisateur, IconFleche } from "@/components/icons";
+import { IconCroix, IconMenu, IconUtilisateur } from "@/components/icons";
+import { Button } from "@/components/ui/button";
 import { useCurrentProfile } from "./use-current-profile";
-import { Logo, Wordmark } from "./logo";
+import { Brand } from "./logo";
 
 export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { profile, loading } = useCurrentProfile();
 
+  const accountHref = profile?.role === "ADMIN" ? "/admin" : "/espace-client";
+  const accountLabel =
+    profile?.role === "ADMIN" ? "Administration" : "Mon espace";
+
   return (
-    <header className="border-line bg-paper sticky top-0 z-50 border-b">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2.5">
-          <Logo size={34} />
-          <Wordmark />
+    <header className="border-line bg-paper/95 supports-[backdrop-filter]:bg-paper/85 sticky top-0 z-50 border-b backdrop-blur">
+      <div className="mx-auto flex h-[4.25rem] max-w-6xl items-center justify-between gap-4 px-4">
+        <Link
+          href="/"
+          aria-label="Référence Informatique — accueil"
+          className="rounded-md focus-visible:shadow-[var(--focus-halo)]"
+        >
+          <Brand size={40} />
         </Link>
 
         <nav
@@ -37,10 +45,10 @@ export function Header() {
                 href={link.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  "rounded-md px-3.5 py-2 text-sm font-medium transition-colors duration-200",
                   active
-                    ? "text-brand bg-brand/10"
-                    : "text-ink-soft hover:text-ink hover:bg-paper-raised",
+                    ? "bg-brand-50 text-brand-700"
+                    : "text-ink-soft hover:bg-paper-raised hover:text-ink",
                 )}
               >
                 {link.label}
@@ -51,45 +59,35 @@ export function Header() {
 
         <div className="hidden items-center gap-2 lg:flex">
           {loading ? (
-            <div className="h-9 w-40" aria-hidden />
+            <div className="h-9 w-44" aria-hidden />
           ) : profile ? (
-            <Link
-              href={profile.role === "ADMIN" ? "/admin" : "/espace-client"}
-              className="border-line hover:border-brand hover:text-brand flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold transition-colors"
-            >
-              <IconUtilisateur size={16} />
-              {profile.role === "ADMIN" ? "Administration" : "Mon espace"}
-            </Link>
+            <Button asChild variant="outline" size="sm">
+              <Link href={accountHref}>
+                <IconUtilisateur size={16} />
+                {accountLabel}
+              </Link>
+            </Button>
           ) : (
             <>
-              <Link
-                href="/connexion"
-                className="border-line hover:border-brand hover:text-brand rounded-md border px-3 py-2 text-sm font-semibold transition-colors"
-              >
-                Connexion
-              </Link>
-              <Link
-                href="/inscription"
-                className="bg-brand rounded-md px-3 py-2 text-sm font-semibold text-white hover:opacity-90"
-              >
-                S&apos;inscrire
-              </Link>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/connexion">Connexion</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link href="/inscription">Créer un compte</Link>
+              </Button>
             </>
           )}
         </div>
 
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
           aria-controls="mobile-menu"
-          aria-label="Ouvrir le menu"
-          className="border-line rounded-md border p-2 lg:hidden"
+          aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+          className="border-line text-ink hover:bg-paper-raised flex h-11 w-11 items-center justify-center rounded-md border transition-colors lg:hidden"
         >
-          <IconFleche
-            size={18}
-            className={cn("transition-transform", open && "rotate-90")}
-          />
+          {open ? <IconCroix size={20} /> : <IconMenu size={20} />}
         </button>
       </div>
 
@@ -97,40 +95,53 @@ export function Header() {
         <nav
           id="mobile-menu"
           aria-label="Navigation mobile"
-          className="border-line flex flex-col gap-1 border-t px-4 py-3 lg:hidden"
+          className="border-line bg-paper border-t px-4 pt-3 pb-5 lg:hidden"
         >
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setOpen(false)}
-              className="text-ink-soft hover:bg-paper-raised rounded-md px-3 py-2.5 text-sm font-medium"
-            >
-              {link.label}
-            </Link>
-          ))}
-          <div className="border-line mt-2 flex flex-col gap-2 border-t pt-3">
+          <ul className="flex flex-col gap-1">
+            {NAV_LINKS.map((link) => {
+              const active =
+                link.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(link.href);
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    onClick={() => setOpen(false)}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "block rounded-md px-3.5 py-3 text-[0.9375rem] font-medium",
+                      active
+                        ? "bg-brand-50 text-brand-700"
+                        : "text-ink-soft hover:bg-paper-raised",
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="border-line mt-4 flex flex-col gap-2 border-t pt-4">
             {profile ? (
-              <Link
-                href={profile.role === "ADMIN" ? "/admin" : "/espace-client"}
-                className="border-line rounded-md border px-3 py-2.5 text-center text-sm font-semibold"
-              >
-                {profile.role === "ADMIN" ? "Administration" : "Mon espace"}
-              </Link>
+              <Button asChild variant="outline">
+                <Link href={accountHref} onClick={() => setOpen(false)}>
+                  <IconUtilisateur size={16} />
+                  {accountLabel}
+                </Link>
+              </Button>
             ) : (
               <>
-                <Link
-                  href="/connexion"
-                  className="border-line rounded-md border px-3 py-2.5 text-center text-sm font-semibold"
-                >
-                  Connexion
-                </Link>
-                <Link
-                  href="/inscription"
-                  className="bg-brand rounded-md px-3 py-2.5 text-center text-sm font-semibold text-white"
-                >
-                  S&apos;inscrire
-                </Link>
+                <Button asChild variant="outline">
+                  <Link href="/connexion" onClick={() => setOpen(false)}>
+                    Connexion
+                  </Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/inscription" onClick={() => setOpen(false)}>
+                    Créer un compte
+                  </Link>
+                </Button>
               </>
             )}
           </div>

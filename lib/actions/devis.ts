@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma/client";
+import { ensureServiceRow } from "@/lib/catalog/db-sync";
 import { createClient } from "@/lib/supabase/server";
 import { devisSchema } from "@/lib/validations/devis";
 import { sendDevisReceived } from "@/lib/email/send";
@@ -26,7 +27,7 @@ export async function requestDevis(
   }
 
   const validated = devisSchema.safeParse({
-    serviceId: formData.get("serviceId"),
+    serviceSlug: formData.get("serviceSlug"),
     name: formData.get("name"),
     email: formData.get("email"),
     phone: formData.get("phone"),
@@ -38,6 +39,19 @@ export async function requestDevis(
   if (!validated.success) {
     return { errors: validated.error.flatten().fieldErrors };
   }
+
+  // La prestation vient du catalogue : on crée sa ligne de base si besoin
+  // pour pouvoir y rattacher la demande.
+  const service = await ensureServiceRow(validated.data.serviceSlug);
+  if (!service) {
+    return {
+      errors: {
+        serviceSlug: ["Cette prestation n'existe pas ou n'est plus proposée."],
+      },
+    };
+  }
+  const { serviceSlug: _serviceSlug, ...contact } = validated.data;
+  void _serviceSlug;
 
   // Rattache la demande au compte connecté si l'utilisateur est authentifié
   // — n'affecte pas le mode de rendu de la page appelante (une Server
@@ -57,7 +71,7 @@ export async function requestDevis(
   }
 
   const quoteRequest = await prisma.quoteRequest.create({
-    data: { ...validated.data, profileId: userId },
+    data: { ...contact, serviceId: service.id, profileId: userId },
     include: { service: true },
   });
 
@@ -73,6 +87,6 @@ export async function requestDevis(
   return {
     success: true,
     message:
-      "Votre demande a bien été reçue. Nous revenons vers vous sous 24h ouvrées.",
+      "Merci, votre demande est bien reçue. Nous revenons vers vous avec une proposition sous 24 h ouvrées. Vous pouvez aussi nous écrire sur WhatsApp pour aller plus vite.",
   };
 }

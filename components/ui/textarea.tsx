@@ -1,5 +1,6 @@
 import { forwardRef, type TextareaHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
+import { fieldClasses } from "./input";
 
 export const Textarea = forwardRef<
   HTMLTextAreaElement,
@@ -9,7 +10,8 @@ export const Textarea = forwardRef<
     <textarea
       ref={ref}
       className={cn(
-        "border-line focus:border-brand w-full rounded-md border px-3 py-2 text-sm outline-none",
+        fieldClasses,
+        "min-h-28 resize-y leading-relaxed",
         className,
       )}
       {...props}

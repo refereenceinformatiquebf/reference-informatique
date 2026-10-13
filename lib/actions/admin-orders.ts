@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma/client";
 
 /**
  * Confirme manuellement un paiement WhatsApp — déclenche EXACTEMENT les
- * mêmes effets qu'un paiement FedaPay réussi (voir lib/orders.ts,
+ * mêmes effets qu'un paiement SasPay réussi (voir lib/orders.ts,
  * markOrderPaid), pour que l'expérience client soit identique quel que
  * soit le canal choisi (PLAYBOOK-CONSTRUCTION.md, Étape 11).
  */
