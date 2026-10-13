@@ -16,12 +16,12 @@ import { JsonLd } from "@/components/json-ld";
 import { DevisForm } from "@/components/services/devis-form";
 import { ServiceCard } from "@/components/services/service-card";
 import { IconFleche, IconHorloge, IconWhatsapp } from "@/components/icons";
+import { ALL_SERVICES, findFamily } from "@/lib/catalog";
 import {
-  ALL_SERVICES,
-  findFamily,
-  findService,
-  servicesOfFamily,
-} from "@/lib/catalog";
+  getAllServices,
+  getService,
+  getServicesOfFamily,
+} from "@/lib/catalog/live";
 import { formatServicePrice } from "@/lib/format";
 import { SITE, whatsappLink } from "@/lib/site";
 import { fr } from "@/lib/typography";
@@ -37,7 +37,7 @@ export async function generateMetadata({
   params,
 }: PageProps<"/services/[categorie]/[service]">): Promise<Metadata> {
   const { categorie, service: slug } = await params;
-  const service = findService(slug);
+  const service = await getService(slug);
   if (!service || service.family !== categorie) {
     return { title: "Page introuvable", robots: { index: false } };
   }
@@ -52,14 +52,17 @@ export default async function ServicePage({
   params,
 }: PageProps<"/services/[categorie]/[service]">) {
   const { categorie, service: slug } = await params;
-  const service = findService(slug);
+  const service = await getService(slug);
   const family = findFamily(categorie);
   if (!service || !family || service.family !== family.slug) notFound();
 
-  const siblings = servicesOfFamily(family.slug).filter(
+  const siblings = (await getServicesOfFamily(family.slug)).filter(
     (item) => item.slug !== service.slug,
   );
-  const quoteOptions = ALL_SERVICES.map(({ slug, name }) => ({ slug, name }));
+  const quoteOptions = (await getAllServices()).map(({ slug, name }) => ({
+    slug,
+    name,
+  }));
 
   const serviceJsonLd = {
     "@context": "https://schema.org",

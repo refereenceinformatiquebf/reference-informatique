@@ -12,11 +12,8 @@ import {
 } from "@/components/ui/section";
 import { ServiceCard } from "@/components/services/service-card";
 import { IconFleche, IconWhatsapp } from "@/components/icons";
-import {
-  ALL_SERVICE_FAMILIES,
-  findFamily,
-  servicesOfFamily,
-} from "@/lib/catalog";
+import { ALL_SERVICE_FAMILIES, findFamily } from "@/lib/catalog";
+import { getServicesOfFamily } from "@/lib/catalog/live";
 import { SERVICE_FAQ, WORK_STEPS } from "@/lib/content";
 import { whatsappLink } from "@/lib/site";
 import { fr } from "@/lib/typography";
@@ -45,7 +42,7 @@ export default async function ServiceFamilyPage({
   const family = findFamily(categorie);
   if (!family) notFound();
 
-  const services = servicesOfFamily(family.slug);
+  const services = await getServicesOfFamily(family.slug);
 
   return (
     <div className="flex flex-col">

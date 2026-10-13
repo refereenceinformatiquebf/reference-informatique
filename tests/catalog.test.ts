@@ -8,6 +8,7 @@
  *  - le plan du site ne révèle pas les offres réservées ;
  *  - le catalogue est cohérent (slugs uniques, prix, remises, textes).
  */
+import "./setup";
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
@@ -84,8 +85,8 @@ describe("accès par pays", () => {
     }
   });
 
-  it("le plan du site ne mentionne aucune clé", () => {
-    const urls = sitemap().map((entry) => entry.url);
+  it("le plan du site ne mentionne aucune clé", async () => {
+    const urls = (await sitemap()).map((entry) => entry.url);
     for (const key of KEYS) {
       assert.equal(
         urls.some((url) => url.includes(key.slug)),

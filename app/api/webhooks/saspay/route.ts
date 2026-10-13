@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma/client";
 import {
   constructSaspayEvent,
   SaspayWebhookSignatureError,
@@ -6,10 +7,31 @@ import {
 } from "@/lib/payments/saspay";
 import { syncPendingSaspayOrders } from "@/lib/payments/saspay-sync";
 
+/** Trace une réception de webhook (tableau de bord, diagnostic). Ne lève jamais. */
+async function logWebhook(
+  eventType: string,
+  status: "VERIFIED" | "REJECTED" | "ERROR",
+  detail?: string,
+) {
+  try {
+    await prisma.webhookEvent.create({
+      data: {
+        provider: "SASPAY",
+        eventType,
+        status,
+        detail: detail?.slice(0, 300),
+      },
+    });
+  } catch (error) {
+    console.error("[saspay-webhook] journalisation impossible :", error);
+  }
+}
+
 export async function POST(request: Request) {
   const signature = request.headers.get("x-webhook-signature");
   const timestamp = request.headers.get("x-webhook-timestamp");
   if (!signature || !timestamp) {
+    await logWebhook("?", "REJECTED", "Signature ou horodatage manquant.");
     return NextResponse.json({ error: "Signature manquante" }, { status: 401 });
   }
 
@@ -23,8 +45,10 @@ export async function POST(request: Request) {
     event = constructSaspayEvent(rawBody, signature, timestamp);
   } catch (error) {
     if (error instanceof SaspayWebhookSignatureError) {
+      await logWebhook("?", "REJECTED", error.message);
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
+    await logWebhook("?", "ERROR", String(error));
     throw error;
   }
 
@@ -38,6 +62,11 @@ export async function POST(request: Request) {
       // Vérification impossible (API SasPay indisponible…) : on répond 500
       // pour que SasPay retente (5 essais étalés sur 2 h). Sans risque —
       // le traitement est idempotent.
+      await logWebhook(
+        event.event,
+        "ERROR",
+        `${failed} vérification(s) en échec sur ${checked}.`,
+      );
       return NextResponse.json(
         { error: "Vérification différée" },
         { status: 500 },
@@ -49,6 +78,13 @@ export async function POST(request: Request) {
         `[saspay-webhook] transaction.success ${event.data.id ?? "?"} : aucune commande en attente rapprochée (${checked} vérifiée(s)).`,
       );
     }
+    await logWebhook(
+      event.event,
+      "VERIFIED",
+      `${paid} commande(s) passée(s) à payé sur ${checked} vérifiée(s).`,
+    );
+  } else {
+    await logWebhook(event.event, "VERIFIED");
   }
 
   if (

@@ -11,13 +11,12 @@ import { Card } from "@/components/ui/card";
 import { FaqList } from "@/components/ui/faq-list";
 import { ProductCard } from "@/components/shop/product-card";
 import { IconFleche, IconWhatsapp } from "@/components/icons";
+import { ALL_SERVICE_FAMILIES, type Product } from "@/lib/catalog";
 import {
-  ALL_SERVICE_FAMILIES,
-  ALL_SERVICES,
-  findProduct,
-  visibleProducts,
-  type Product,
-} from "@/lib/catalog";
+  getAllServices,
+  getProduct,
+  getVisibleProducts,
+} from "@/lib/catalog/live";
 import { getVisitorCountry, isHomeCountry } from "@/lib/geo";
 import { formatServicePrice } from "@/lib/format";
 import { SITE, whatsappLink } from "@/lib/site";
@@ -107,7 +106,9 @@ const FAQ = [
 ];
 
 /** Produits mis en avant : choisis par slug, filtrés par pays. */
-function featuredFor(country: ReturnType<typeof isHomeCountry>): Product[] {
+async function featuredFor(
+  country: ReturnType<typeof isHomeCountry>,
+): Promise<Product[]> {
   const slugs = country
     ? [
         "cle-tout-en-un",
@@ -121,22 +122,23 @@ function featuredFor(country: ReturnType<typeof isHomeCountry>): Product[] {
         "le-chercheur-augmente",
         "pack-5500-diapositives-powerpoint",
       ];
-  return slugs
-    .map((slug) => findProduct(slug))
-    .filter((p): p is Product => Boolean(p));
+  const products = await Promise.all(slugs.map((slug) => getProduct(slug)));
+  return products.filter((p): p is Product => Boolean(p));
 }
 
 export default async function HomePage() {
   const country = await getVisitorCountry();
   const atHome = isHomeCountry(country);
-  const featured = featuredFor(atHome).filter((product) =>
-    visibleProducts(country).some((p) => p.slug === product.slug),
+  const visible = await getVisibleProducts(country);
+  const allServices = await getAllServices();
+  const featured = (await featuredFor(atHome)).filter((product) =>
+    visible.some((p) => p.slug === product.slug),
   );
 
   // Témoignages réels des clients (clés de formations) : réservés aux
   // visiteurs du Burkina Faso, comme les offres dont ils parlent.
   const testimonials = atHome
-    ? visibleProducts(country).flatMap((product) =>
+    ? visible.flatMap((product) =>
         product.testimonial
           ? [{ ...product.testimonial, product: product.name }]
           : [],
@@ -290,7 +292,7 @@ export default async function HomePage() {
           />
           <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2">
             {ALL_SERVICE_FAMILIES.map((family, index) => {
-              const services = ALL_SERVICES.filter(
+              const services = allServices.filter(
                 (s) => s.family === family.slug,
               );
               const cheapest = services

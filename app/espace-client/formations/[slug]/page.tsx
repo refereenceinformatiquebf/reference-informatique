@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma/client";
 import { requireProfile } from "@/lib/auth/dal";
-import { findProduct } from "@/lib/catalog";
+import { getProduct } from "@/lib/catalog/live";
 import { Button } from "@/components/ui/button";
 import { Container, IconChip } from "@/components/ui/section";
 import { IconWhatsapp } from "@/components/icons";
@@ -74,7 +74,7 @@ export default async function FormationPlayerPage({
     totalLessons > 0 ? Math.round((viewedCount / totalLessons) * 100) : 0;
 
   // Message d'attente adapté à la façon dont ce produit est remis.
-  const delivery = findProduct(product.slug)?.delivery;
+  const delivery = (await getProduct(product.slug))?.delivery;
   const emptyMessage =
     delivery === "manuel"
       ? "Notre équipe vous contacte sur WhatsApp pour vous remettre votre accès. Si vous n'avez pas été contacté, écrivez-nous."

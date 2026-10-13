@@ -1,21 +1,30 @@
 import { prisma } from "@/lib/prisma/client";
-import { findFamily, findProduct, findService } from "@/lib/catalog";
+import { findFamily } from "@/lib/catalog";
+import { getProduct, getService } from "@/lib/catalog/live";
 
 /**
- * Le catalogue vit dans le code (source de vérité des textes ET des prix) ;
- * la base n'a besoin des produits et des services que pour les relations
- * (commande, accès, demande de devis). Ces fonctions créent ou mettent à
- * jour la ligne de base correspondante AU MOMENT où elle devient nécessaire.
+ * La base n'a besoin des produits et des services que pour les relations
+ * (commande, accès, demande de devis). Ces fonctions créent la ligne de base
+ * correspondante AU MOMENT où elle devient nécessaire.
  *
- * Conséquence importante : un prix modifié dans le code est pris en compte
- * à la prochaine commande, sans attendre qu'on relance un seed — une
- * commande ne peut donc jamais être facturée à un ancien prix.
+ * Elles ne modifient JAMAIS ce que l'équipe a réglé depuis l'administration :
+ *  - ligne absente : créée à partir du catalogue (code ou administration) ;
+ *  - ligne présente et jamais modifiée par l'équipe : ses champs miroirs sont
+ *    rafraîchis depuis le code, pour qu'une correction du code s'applique ;
+ *  - ligne modifiée par l'équipe : intouchée (la base fait foi).
+ * Le prix facturé vient toujours du catalogue vivant (lib/catalog/live.ts),
+ * pas de cette ligne.
  */
 
-/** Ligne `products` à jour pour ce slug, ou null si le slug est inconnu. */
+/** Ligne `products` pour ce slug (créée si besoin), ou null si le slug est inconnu. */
 export async function ensureProductRow(slug: string) {
-  const product = findProduct(slug);
+  const product = await getProduct(slug);
   if (!product) return null;
+
+  const existing = await prisma.product.findUnique({ where: { slug } });
+  if (existing && (existing.adminEditedAt || existing.source === "ADMIN")) {
+    return existing;
+  }
 
   const data = {
     name: product.name,
@@ -40,9 +49,9 @@ export async function ensureProductRow(slug: string) {
   });
 }
 
-/** Ligne `services` (et sa famille) à jour pour ce slug, ou null. */
+/** Ligne `services` (et sa famille) pour ce slug, ou null. */
 export async function ensureServiceRow(slug: string) {
-  const service = findService(slug);
+  const service = await getService(slug);
   if (!service) return null;
   const family = findFamily(service.family);
   if (!family) return null;
@@ -63,6 +72,9 @@ export async function ensureServiceRow(slug: string) {
       displayOrder: family.order,
     },
   });
+
+  const existing = await prisma.service.findUnique({ where: { slug } });
+  if (existing?.adminEditedAt) return existing;
 
   const data = {
     categoryId: category.id,

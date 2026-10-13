@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { requestDevis, type DevisFormState } from "@/lib/actions/devis";
+import { Honeypot } from "@/components/ui/honeypot";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -57,7 +58,8 @@ export function DevisForm({
   }
 
   return (
-    <form action={action} className="flex flex-col gap-5">
+    <form action={action} className="relative flex flex-col gap-5">
+      <Honeypot />
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="serviceSlug">Prestation concernée</Label>
         <Select

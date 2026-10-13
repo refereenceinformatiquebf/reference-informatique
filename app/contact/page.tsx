@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Container, SectionHeading } from "@/components/ui/section";
 import { IconTelephone, IconWhatsapp } from "@/components/icons";
-import { ALL_SERVICES, findService } from "@/lib/catalog";
+import { getAllServices, getService } from "@/lib/catalog/live";
 import { SITE, whatsappLink } from "@/lib/site";
 import { fr } from "@/lib/typography";
 import { ContactTabs } from "./contact-tabs";
@@ -20,8 +20,11 @@ export default async function ContactPage({
 
   const defaultTab = sujet === "question" ? "question" : "devis";
   const requested =
-    typeof service === "string" ? findService(service) : undefined;
-  const services = ALL_SERVICES.map(({ slug, name }) => ({ slug, name }));
+    typeof service === "string" ? await getService(service) : undefined;
+  const services = (await getAllServices()).map(({ slug, name }) => ({
+    slug,
+    name,
+  }));
 
   return (
     <div className="pt-10 pb-8 sm:pt-14 sm:pb-12">

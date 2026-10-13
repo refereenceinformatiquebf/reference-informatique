@@ -3,11 +3,15 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma/client";
 import { requireProfile } from "@/lib/auth/dal";
-import { createClient } from "@/lib/supabase/server";
-import { findProduct, isProductAvailable } from "@/lib/catalog";
+import { isProductAvailable, type Product } from "@/lib/catalog";
+import { getProduct } from "@/lib/catalog/live";
 import { ensureProductRow } from "@/lib/catalog/db-sync";
 import { getVisitorCountry, isHomeCountry } from "@/lib/geo";
-import { shippingSchema, type ShippingInput } from "@/lib/validations/order";
+import {
+  MAX_KEY_QUANTITY,
+  shippingSchema,
+  type ShippingInput,
+} from "@/lib/validations/order";
 import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
 import { SITE, whatsappLink } from "@/lib/site";
 import { formatPrice } from "@/lib/format";
@@ -17,22 +21,24 @@ import {
 } from "@/lib/payments/saspay";
 import { syncSaspayOrder } from "@/lib/payments/saspay-sync";
 import {
-  sendOrderConfirmation,
-  sendNewOrderAdminNotification,
-} from "@/lib/email/send";
+  addOrderEvent,
+  getClientEmail,
+  notifyOrderCreated,
+} from "@/lib/orders";
 
 export type OrderFormState =
   | {
       error?: string;
-      fieldErrors?: Partial<Record<keyof ShippingInput, string[]>>;
+      fieldErrors?: Partial<Record<keyof ShippingInput | "quantity", string[]>>;
     }
   | undefined;
 
 type OrderContext = {
   profile: Awaited<ReturnType<typeof requireProfile>>;
-  catalogProduct: NonNullable<ReturnType<typeof findProduct>>;
+  catalogProduct: Product;
   productRow: NonNullable<Awaited<ReturnType<typeof ensureProductRow>>>;
   shipping: ShippingInput | null;
+  quantity: number;
   visitorCountry: Awaited<ReturnType<typeof getVisitorCountry>>;
 };
 
@@ -40,8 +46,9 @@ class OrderError extends Error {}
 
 /**
  * Prépare une commande : vérifie le produit, le pays du visiteur, la
- * livraison. Toute la logique de refus est ici, pour que le paiement en
- * ligne et la commande WhatsApp appliquent EXACTEMENT les mêmes règles.
+ * livraison, la quantité. Toute la logique de refus est ici, pour que le
+ * paiement en ligne et la commande WhatsApp appliquent EXACTEMENT les mêmes
+ * règles.
  *
  * Règle d'accès par pays : un produit réservé à un pays (les clés de
  * formations) ne peut pas être commandé depuis un autre pays, même en
@@ -55,7 +62,7 @@ async function prepareOrder(
   | { ok: false; state: NonNullable<OrderFormState> }
 > {
   const slug = String(formData.get("productSlug") ?? "");
-  const catalogProduct = findProduct(slug);
+  const catalogProduct = await getProduct(slug);
   const visitorCountry = await getVisitorCountry();
 
   // Même message pour « inconnu » et « réservé à un autre pays » : on ne
@@ -71,6 +78,7 @@ async function prepareOrder(
   }
 
   let shipping: ShippingInput | null = null;
+  let quantity = 1;
   if (catalogProduct.delivery === "cle-physique") {
     const parsed = shippingSchema.safeParse({
       city: formData.get("city"),
@@ -84,6 +92,24 @@ async function prepareOrder(
       };
     }
     shipping = parsed.data;
+
+    // Nombre de clés : borné côté serveur, jamais cru tel quel.
+    const rawQuantity = Number(formData.get("quantity") ?? 1);
+    if (
+      !Number.isInteger(rawQuantity) ||
+      rawQuantity < 1 ||
+      rawQuantity > MAX_KEY_QUANTITY
+    ) {
+      return {
+        ok: false,
+        state: {
+          fieldErrors: {
+            quantity: [`Choisissez entre 1 et ${MAX_KEY_QUANTITY} clés.`],
+          },
+        },
+      };
+    }
+    quantity = rawQuantity;
   }
 
   const profile = await requireProfile();
@@ -94,21 +120,35 @@ async function prepareOrder(
 
   return {
     ok: true,
-    context: { profile, catalogProduct, productRow, shipping, visitorCountry },
+    context: {
+      profile,
+      catalogProduct,
+      productRow,
+      shipping,
+      quantity,
+      visitorCountry,
+    },
   };
 }
 
 /**
- * Récupère (ou crée) la commande en attente pour ce produit. Empêche la
- * double commande sur un même produit, et remet la commande en attente au
- * prix ACTUEL du catalogue (un prix modifié ne laisse jamais une ancienne
- * commande à l'ancien tarif).
+ * Récupère (ou crée) la commande en attente pour ce produit.
+ *  - une commande en attente est remise au prix ACTUEL du catalogue (un prix
+ *    modifié ne laisse jamais une ancienne commande à l'ancien tarif) ;
+ *  - un produit numérique déjà payé ne se commande pas deux fois ;
+ *  - une clé USB peut être recommandée (famille, cadeau) : une nouvelle
+ *    commande est alors créée.
+ * Le montant est TOUJOURS calculé ici : prix du catalogue × quantité.
  */
 async function getOrCreatePendingOrder(
   context: OrderContext,
   channel: "BOUTIQUE" | "WHATSAPP",
 ) {
-  const { profile, catalogProduct, productRow, shipping } = context;
+  const { profile, catalogProduct, productRow, shipping, quantity } = context;
+  const physical = catalogProduct.delivery === "cle-physique";
+  const unitPrice = catalogProduct.price;
+  const amount = unitPrice * quantity;
+  const provider = channel === "BOUTIQUE" ? "SASPAY" : "WHATSAPP_MANUAL";
 
   const shippingData = shipping
     ? {
@@ -118,65 +158,63 @@ async function getOrCreatePendingOrder(
       }
     : {};
 
-  const existing = await prisma.order.findFirst({
+  const pending = await prisma.order.findFirst({
     where: {
       profileId: profile.id,
       productId: productRow.id,
-      status: { in: ["EN_ATTENTE", "PAYE"] },
+      status: "EN_ATTENTE",
     },
   });
 
-  if (existing) {
-    if (existing.status === "EN_ATTENTE") {
-      const updated = await prisma.order.update({
-        where: { id: existing.id },
-        data: {
-          amount: catalogProduct.price,
-          channel,
-          paymentProvider:
-            channel === "BOUTIQUE" ? "SASPAY" : "WHATSAPP_MANUAL",
-          ...shippingData,
-        },
-      });
-      return { order: updated, isNew: false };
-    }
-    return { order: existing, isNew: false };
+  if (pending) {
+    const updated = await prisma.order.update({
+      where: { id: pending.id },
+      data: {
+        amount,
+        unitPrice,
+        quantity,
+        channel,
+        paymentProvider: provider,
+        ...shippingData,
+      },
+    });
+    return { order: updated, isNew: false };
+  }
+
+  if (!physical) {
+    const paid = await prisma.order.findFirst({
+      where: {
+        profileId: profile.id,
+        productId: productRow.id,
+        status: "PAYE",
+      },
+    });
+    if (paid) return { order: paid, isNew: false };
   }
 
   const order = await prisma.order.create({
     data: {
       profileId: profile.id,
       productId: productRow.id,
-      amount: catalogProduct.price,
+      amount,
+      unitPrice,
+      quantity,
       channel,
-      paymentProvider: channel === "BOUTIQUE" ? "SASPAY" : "WHATSAPP_MANUAL",
+      paymentProvider: provider,
       status: "EN_ATTENTE",
       ...shippingData,
     },
   });
+  await addOrderEvent(
+    order.id,
+    "CREATED",
+    channel === "BOUTIQUE"
+      ? "Commande créée (paiement en ligne)."
+      : "Commande créée (paiement via WhatsApp).",
+    profile.email ?? profile.name,
+  );
 
   return { order, isNew: true };
-}
-
-async function notifyNewOrder(params: {
-  clientEmail: string;
-  clientName: string;
-  clientPhone: string;
-  productName: string;
-  amount: number;
-  channel: "BOUTIQUE" | "WHATSAPP";
-}) {
-  // Les échecs d'envoi d'email ne doivent jamais bloquer une commande déjà
-  // enregistrée en base — on les journalise sans interrompre le tunnel.
-  await Promise.all([
-    sendOrderConfirmation({
-      to: params.clientEmail,
-      clientName: params.clientName,
-      productName: params.productName,
-      amount: params.amount,
-    }),
-    sendNewOrderAdminNotification(params),
-  ]).catch((error) => console.error("[notifyNewOrder]", error));
 }
 
 /**
@@ -239,30 +277,23 @@ async function startSaspayCheckout(context: OrderContext): Promise<string> {
     if (alreadyPaid) return "/espace-client";
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user?.email) {
+  const email = await getClientEmail(profile);
+  if (!email) {
     throw new OrderError(
       "Votre compte n'a pas d'adresse email : impossible de lancer le paiement en ligne. Commandez par WhatsApp, nous vous aiderons.",
     );
   }
 
   if (isNew) {
-    await notifyNewOrder({
-      clientEmail: user.email,
-      clientName: profile.name,
-      clientPhone: profile.phone ?? "",
-      productName: catalogProduct.name,
-      amount: order.amount,
-      channel: "BOUTIQUE",
-    });
+    await notifyOrderCreated(order.id);
   }
 
+  const label =
+    order.quantity > 1
+      ? `${order.quantity} × ${catalogProduct.name}`
+      : catalogProduct.name;
   const session = await createSaspayCheckoutSession({
-    description: `${catalogProduct.name} — ${SITE.name}`,
+    description: `${label} — ${SITE.name}`,
     amount: order.amount,
     orderId: order.id,
     returnUrl: `${SITE.url}/commande/retour?order=${order.id}`,
@@ -270,7 +301,7 @@ async function startSaspayCheckout(context: OrderContext): Promise<string> {
     // laisse le client choisir son pays plutôt que d'en deviner un.
     country: isHomeCountry(visitorCountry) ? "BF" : undefined,
     customer: {
-      email: user.email,
+      email,
       name: profile.name,
       phone: order.shippingPhone ?? profile.phone ?? undefined,
     },
@@ -283,6 +314,12 @@ async function startSaspayCheckout(context: OrderContext): Promise<string> {
     where: { id: order.id },
     data: { providerSessionId: session.id },
   });
+  await addOrderEvent(
+    order.id,
+    "SESSION_OPENED",
+    `Page de paiement SasPay ouverte (${formatPrice(order.amount)}).`,
+    email,
+  );
 
   // L'ancienne page de paiement ne doit plus rester utilisable.
   if (previousSessionId) {
@@ -294,32 +331,19 @@ async function startSaspayCheckout(context: OrderContext): Promise<string> {
 
 /** Commande par WhatsApp : enregistre la commande puis ouvre la conversation. */
 async function startWhatsappOrder(context: OrderContext): Promise<string> {
-  const { profile, catalogProduct, shipping } = context;
+  const { catalogProduct, shipping } = context;
 
   const { order, isNew } = await getOrCreatePendingOrder(context, "WHATSAPP");
 
   if (order.status === "PAYE") return "/espace-client";
 
   if (isNew) {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user?.email) {
-      await notifyNewOrder({
-        clientEmail: user.email,
-        clientName: profile.name,
-        clientPhone: profile.phone ?? "",
-        productName: catalogProduct.name,
-        amount: order.amount,
-        channel: "WHATSAPP",
-      });
-    }
+    await notifyOrderCreated(order.id);
   }
 
   const lines = [
     "Bonjour, je souhaite commander :",
-    `${catalogProduct.name} — ${formatPrice(order.amount)}`,
+    `${order.quantity > 1 ? `${order.quantity} × ` : ""}${catalogProduct.name} — ${formatPrice(order.amount)}`,
     `Référence de commande : ${order.id}`,
   ];
   if (shipping) {

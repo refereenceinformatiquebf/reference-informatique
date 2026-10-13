@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import {
   PRODUCT_KINDS,
   PRODUCT_KIND_ORDER,
-  visibleProducts,
   type ProductKind,
 } from "@/lib/catalog";
+import { getVisibleProducts } from "@/lib/catalog/live";
 import { getVisitorCountry } from "@/lib/geo";
 import { fr } from "@/lib/typography";
 import { whatsappLink } from "@/lib/site";
@@ -26,7 +26,7 @@ export default async function BoutiquePage({
   searchParams,
 }: PageProps<"/boutique">) {
   const country = await getVisitorCountry();
-  const products = visibleProducts(country);
+  const products = await getVisibleProducts(country);
   const { famille } = await searchParams;
 
   // Seules les familles qui ont au moins un produit VISIBLE pour ce visiteur

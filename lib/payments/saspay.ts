@@ -94,6 +94,11 @@ export async function createSaspayCheckoutSession(
         // La doc exige une chaîne décimale ("5000.00").
         amount: `${params.amount}.00`,
         currency: "XOF",
+        // Les frais SasPay sont déduits du net reversé à l'entreprise : le
+        // client paie exactement le prix affiché sur le site. Ignoré par
+        // SasPay tant que « Autoriser le choix du mode de frais par l'API »
+        // n'est pas activé dans Paramètres → Frais du compte marchand.
+        fee_charge_mode: "DEDUCTED",
         description: params.description,
         ...(params.country ? { country: params.country } : {}),
         customer_email: params.customer.email,

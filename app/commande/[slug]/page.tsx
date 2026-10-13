@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { requireProfile } from "@/lib/auth/dal";
-import { findVisibleProduct, PRODUCT_KINDS } from "@/lib/catalog";
+import { PRODUCT_KINDS } from "@/lib/catalog";
+import { getVisibleProduct } from "@/lib/catalog/live";
 import { getVisitorCountry } from "@/lib/geo";
 import { Container } from "@/components/ui/section";
 import { Price } from "@/components/shop/price";
@@ -37,7 +38,7 @@ export default async function CommandePage({
   // Même règle que la fiche produit : un produit réservé à un autre pays
   // n'existe pas pour ce visiteur.
   const country = await getVisitorCountry();
-  const product = findVisibleProduct(slug, country);
+  const product = await getVisibleProduct(slug, country);
   if (!product) notFound();
 
   const kind = PRODUCT_KINDS[product.kind];
@@ -95,6 +96,7 @@ export default async function CommandePage({
             productSlug={product.slug}
             needsShipping={product.delivery === "cle-physique"}
             defaultPhone={profile.phone ?? undefined}
+            unitPrice={product.price}
           />
           <p className="text-ink-faint mt-6 flex items-start gap-2 text-xs leading-relaxed">
             <IconBouclier size={16} className="mt-px shrink-0" />

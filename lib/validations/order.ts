@@ -16,4 +16,7 @@ export const shippingSchema = z.object({
     .min(8, { error: "Indiquez un numéro joignable (WhatsApp si possible)." }),
 });
 
+/** Nombre maximal de clés USB par commande (une famille, un cadeau). */
+export const MAX_KEY_QUANTITY = 5;
+
 export type ShippingInput = z.infer<typeof shippingSchema>;

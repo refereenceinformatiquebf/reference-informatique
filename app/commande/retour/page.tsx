@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma/client";
 import { requireProfile } from "@/lib/auth/dal";
 import { syncSaspayOrder } from "@/lib/payments/saspay-sync";
-import { findProduct } from "@/lib/catalog";
+import { getProduct } from "@/lib/catalog/live";
 import { Button } from "@/components/ui/button";
 import { Container, IconChip } from "@/components/ui/section";
 import { IconWhatsapp } from "@/components/icons";
@@ -84,7 +84,7 @@ export default async function CommandeRetourPage({
 
   const isPaid = order.status === "PAYE";
   const delivery = order.product
-    ? findProduct(order.product.slug)?.delivery
+    ? (await getProduct(order.product.slug))?.delivery
     : undefined;
   const productName = order.product?.name ?? "votre commande";
 

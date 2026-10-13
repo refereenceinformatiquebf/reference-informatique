@@ -12,60 +12,74 @@
 /** Code pays ISO 3166-1 alpha-2 (« BF » = Burkina Faso). */
 export type CountryCode = string;
 
-export type IconKey =
-  | "cle-usb"
-  | "formation"
-  | "ebook"
-  | "pack"
-  | "logiciel"
-  | "modele"
-  | "outil"
-  | "service"
-  | "code"
-  | "agent-ia"
-  | "automatisation"
-  | "maintenance"
-  | "livraison"
-  | "paiement"
-  | "bouclier"
-  | "acces-a-vie"
-  | "hors-ligne"
-  | "support"
-  | "certificat"
-  | "verifie"
-  | "actualisation"
-  | "horloge"
-  | "eclair"
-  | "ordinateur"
-  | "plateforme"
-  | "telecharger"
-  | "globe"
-  | "lieu"
-  | "whatsapp"
-  | "cadeau"
-  | "devis"
-  | "video"
-  | "pdf"
-  | "panier"
-  | "utilisateur"
-  | "recherche"
-  | "mail"
-  | "telephone"
-  | "etoile"
-  | "cadenas";
+export const ICON_KEYS = [
+  "cle-usb",
+  "formation",
+  "ebook",
+  "pack",
+  "logiciel",
+  "modele",
+  "outil",
+  "service",
+  "code",
+  "agent-ia",
+  "automatisation",
+  "maintenance",
+  "livraison",
+  "paiement",
+  "bouclier",
+  "acces-a-vie",
+  "hors-ligne",
+  "support",
+  "certificat",
+  "verifie",
+  "actualisation",
+  "horloge",
+  "eclair",
+  "ordinateur",
+  "plateforme",
+  "telecharger",
+  "globe",
+  "lieu",
+  "whatsapp",
+  "cadeau",
+  "devis",
+  "video",
+  "pdf",
+  "panier",
+  "utilisateur",
+  "recherche",
+  "mail",
+  "telephone",
+  "etoile",
+  "cadenas",
+] as const;
+
+export type IconKey = (typeof ICON_KEYS)[number];
 
 /** Famille de produits de la boutique. */
-export type ProductKind =
-  "cle" | "formation" | "ebook" | "pack" | "modele" | "outil";
+export const PRODUCT_KIND_VALUES = [
+  "cle",
+  "formation",
+  "ebook",
+  "pack",
+  "modele",
+  "outil",
+] as const;
+export type ProductKind = (typeof PRODUCT_KIND_VALUES)[number];
 
 /** Teinte de la couverture générée (toutes issues de l'échelle bleue de la charte). */
-export type CoverTone = "navy" | "blue" | "deep" | "sky";
+export const COVER_TONES = ["navy", "blue", "deep", "sky"] as const;
+export type CoverTone = (typeof COVER_TONES)[number];
 
 /** Comment le client reçoit son achat. */
-export type DeliveryMode =
-  | "cle-physique" // clé USB livrée chez le client + accès plateforme
-  | "numerique" // accès par l'espace client (guide PDF, liens, fichiers)
-  | "manuel"; // l'équipe contacte le client sur WhatsApp après paiement
+export const DELIVERY_MODES = ["cle-physique", "numerique", "manuel"] as const;
+/**
+ * - cle-physique : clé USB livrée chez le client + accès plateforme
+ * - numerique    : accès par l'espace client (guide PDF, liens, fichiers)
+ * - manuel       : l'équipe contacte le client sur WhatsApp après paiement
+ */
+export type DeliveryMode = (typeof DELIVERY_MODES)[number];
 
 export type ProductContentGroup = {
   title: string;
@@ -91,6 +105,8 @@ export type Product = {
   /** F CFA, entier. */
   price: number;
   compareAtPrice?: number;
+  /** Fin de l'offre (ISO). Passé cette date, le prix revient au prix barré. */
+  promoEndsAt?: string;
   /** Mention courte et vraie (« Offre la plus complète »). */
   badge?: string;
   /** Affiche réelle du produit (fichier dans /public). Sans affiche, la

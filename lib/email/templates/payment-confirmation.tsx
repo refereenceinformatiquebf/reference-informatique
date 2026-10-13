@@ -1,16 +1,29 @@
-import { Text } from "@react-email/components";
-import { EmailLayout, emailTextStyle } from "./layout";
+import { Button, Text } from "@react-email/components";
+import { EmailLayout, emailButtonStyle, emailTextStyle } from "./layout";
+import { paidSentence } from "./delivery-copy";
 import { formatPrice } from "@/lib/format";
+import type { DeliveryMode } from "@/lib/catalog/types";
 
 export function PaymentConfirmationEmail({
   clientName,
   productName,
   amount,
+  quantity = 1,
+  delivery = "numerique",
+  orderRef,
+  ctaUrl,
 }: {
   clientName: string;
   productName: string;
   amount: number;
+  quantity?: number;
+  delivery?: DeliveryMode;
+  /** Référence courte de la commande, à citer au support. */
+  orderRef?: string;
+  /** Lien direct vers l'achat dans l'espace client. */
+  ctaUrl: string;
 }) {
+  const label = quantity > 1 ? `${quantity} × ${productName}` : productName;
   return (
     <EmailLayout
       preview={`Paiement confirmé — ${productName}`}
@@ -19,9 +32,16 @@ export function PaymentConfirmationEmail({
       <Text style={emailTextStyle}>Bonjour {clientName},</Text>
       <Text style={emailTextStyle}>
         Votre paiement de <strong>{formatPrice(amount)}</strong> pour{" "}
-        <strong>{productName}</strong> a bien été reçu. Votre accès est activé
-        dès maintenant dans votre espace client.
+        <strong>{label}</strong> a bien été reçu. {paidSentence(delivery)}
       </Text>
+      <Button href={ctaUrl} style={emailButtonStyle}>
+        Accéder à mon espace
+      </Button>
+      {orderRef ? (
+        <Text style={{ ...emailTextStyle, marginTop: 18, fontSize: 13 }}>
+          Référence de commande : {orderRef}
+        </Text>
+      ) : null}
     </EmailLayout>
   );
 }

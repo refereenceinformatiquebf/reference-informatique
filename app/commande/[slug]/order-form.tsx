@@ -1,12 +1,15 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { submitOrder, type OrderFormState } from "@/lib/actions/order";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { formatPrice } from "@/lib/format";
+import { MAX_KEY_QUANTITY } from "@/lib/validations/order";
 import { FieldError } from "@/components/ui/field-error";
 import { IconPaiement, IconWhatsapp } from "@/components/icons";
 
@@ -55,15 +58,19 @@ export function OrderForm({
   productSlug,
   needsShipping,
   defaultPhone,
+  unitPrice,
 }: {
   productSlug: string;
   needsShipping: boolean;
   defaultPhone?: string;
+  /** Prix d'une unité, pour l'affichage du total (le serveur recalcule). */
+  unitPrice: number;
 }) {
   const [state, action] = useActionState<OrderFormState, FormData>(
     submitOrder,
     undefined,
   );
+  const [quantity, setQuantity] = useState(1);
 
   return (
     <form action={action} className="flex flex-col gap-6">
@@ -120,6 +127,31 @@ export function OrderForm({
               aria-invalid={Boolean(state?.fieldErrors?.address)}
             />
             <FieldError message={state?.fieldErrors?.address?.[0]} />
+          </div>
+
+          <div className="flex flex-col gap-1.5 sm:max-w-xs">
+            <Label htmlFor="quantity">Nombre de clés</Label>
+            <Select
+              id="quantity"
+              name="quantity"
+              value={quantity}
+              onChange={(event) => setQuantity(Number(event.target.value))}
+              aria-invalid={Boolean(state?.fieldErrors?.quantity)}
+            >
+              {Array.from({ length: MAX_KEY_QUANTITY }, (_, index) => (
+                <option key={index + 1} value={index + 1}>
+                  {index + 1}
+                </option>
+              ))}
+            </Select>
+            <FieldError message={state?.fieldErrors?.quantity?.[0]} />
+            <p className="text-ink-soft text-sm">
+              Total à payer :{" "}
+              <strong className="text-ink tabular">
+                {formatPrice(unitPrice * quantity)}
+              </strong>
+              {quantity > 1 ? " — livrées ensemble, à la même adresse." : ""}
+            </p>
           </div>
         </fieldset>
       ) : null}

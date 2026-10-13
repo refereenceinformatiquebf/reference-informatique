@@ -26,11 +26,17 @@ enum Role {
 }
 
 model Profile {
-  id        String   @id @db.Uuid // == auth.users.id
-  name      String
-  phone     String?
-  role      Role     @default(CLIENT)
-  createdAt DateTime @default(now()) @map("created_at")
+  id           String   @id @db.Uuid // == auth.users.id
+  name         String
+  phone        String?
+  // Miroir de auth.users.email, tenu à jour par un déclencheur (voir
+  // supabase/migrations/0004_profile_email.sql) : permet de chercher un
+  // client par email sans appeler l'API d'authentification.
+  email        String?  @unique
+  role         Role     @default(CLIENT)
+  // Note interne de l'équipe sur ce client (jamais visible du client).
+  internalNote String?  @map("internal_note") @db.Text
+  createdAt    DateTime @default(now()) @map("created_at")
 
   orders        Order[]
   quoteRequests QuoteRequest[]
@@ -41,23 +47,38 @@ model Profile {
 }
 
 model Product {
-  id               String   @id @default(uuid()) @db.Uuid
-  slug             String   @unique
+  id               String    @id @default(uuid()) @db.Uuid
+  slug             String    @unique
   name             String
-  shortDescription String   @map("short_description")
-  longDescription  String?  @map("long_description") @db.Text
+  shortDescription String    @map("short_description")
+  longDescription  String?   @map("long_description") @db.Text
   price            Int // F CFA, entier — jamais de décimales sur cette devise
-  compareAtPrice   Int?     @map("compare_at_price")
-  coverImageUrl    String?  @map("cover_image_url")
-  galleryUrls      String[] @map("gallery_urls")
+  compareAtPrice   Int?      @map("compare_at_price")
+  coverImageUrl    String?   @map("cover_image_url")
+  galleryUrls      String[]  @map("gallery_urls")
   contents         String[] // liste "ce que contient cette formation"
   faq              Json? // [{ "question": "...", "answer": "..." }]
-  whyChooseUs      String?  @map("why_choose_us") @db.Text
-  targetAudience   String[] @map("target_audience")
-  active           Boolean  @default(true)
-  displayOrder     Int      @default(0) @map("display_order")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  whyChooseUs      String?   @map("why_choose_us") @db.Text
+  targetAudience   String[]  @map("target_audience")
+  active           Boolean   @default(true)
+  displayOrder     Int       @default(0) @map("display_order")
+  // CODE : produit défini dans lib/catalog (la ligne sert de réglage commercial).
+  // ADMIN : produit créé depuis l'administration (tout son contenu est dans `content`).
+  source           String    @default("CODE")
+  // Mention courte affichée sur la carte (surcharge celle du code si renseignée).
+  badge            String?
+  // Fin de l'offre : passé cette date, le prix barré n'est plus affiché.
+  promoEndsAt      DateTime? @map("promo_ends_at")
+  // Contenu éditorial complet (forme lib/catalog/types.ts → Product, sans les
+  // champs commerciaux). Null = on utilise le contenu du code.
+  content          Json?
+  // Affiche téléversée depuis l'administration (bucket public « medias »).
+  posterUrl        String?   @map("poster_url")
+  // Renseigné dès que l'équipe enregistre ce produit depuis l'administration :
+  // jusque-là, le code (lib/catalog) fait foi ; ensuite, la base fait foi.
+  adminEditedAt    DateTime? @map("admin_edited_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
   modules      Module[]
   orders       Order[]
@@ -87,17 +108,24 @@ enum PriceType {
 }
 
 model Service {
-  id           String          @id @default(uuid()) @db.Uuid
-  categoryId   String          @map("category_id") @db.Uuid
-  category     ServiceCategory @relation(fields: [categoryId], references: [id])
-  slug         String          @unique
-  name         String
-  description  String          @db.Text
-  priceType    PriceType       @map("price_type")
-  priceFrom    Int?            @map("price_from") // F CFA, si priceType = FIXED ou FROM
-  features     String[]
-  active       Boolean         @default(true)
-  displayOrder Int             @default(0) @map("display_order")
+  id            String          @id @default(uuid()) @db.Uuid
+  categoryId    String          @map("category_id") @db.Uuid
+  category      ServiceCategory @relation(fields: [categoryId], references: [id])
+  slug          String          @unique
+  name          String
+  description   String          @db.Text
+  priceType     PriceType       @map("price_type")
+  priceFrom     Int?            @map("price_from") // F CFA, si priceType = FIXED ou FROM
+  features      String[]
+  active        Boolean         @default(true)
+  displayOrder  Int             @default(0) @map("display_order")
+  // Réglages éditables depuis l'administration (null = valeur du code).
+  tagline       String?
+  priceNote     String?         @map("price_note") @db.Text
+  timeline      String?
+  // Même règle que pour les produits : le code fait foi jusqu'à la première
+  // modification enregistrée depuis l'administration.
+  adminEditedAt DateTime?       @map("admin_edited_at")
 
   orders        Order[]
   quoteRequests QuoteRequest[]
@@ -143,6 +171,12 @@ enum PaymentProvider {
   WHATSAPP_MANUAL
 }
 
+enum DeliveryStatus {
+  A_PREPARER
+  EN_LIVRAISON
+  LIVREE
+}
+
 enum OrderStatus {
   EN_ATTENTE
   PAYE
@@ -173,12 +207,27 @@ model Order {
   shippingAddress   String?         @map("shipping_address") @db.Text
   shippingPhone     String?         @map("shipping_phone")
   status            OrderStatus     @default(EN_ATTENTE)
+  // Nombre d'exemplaires (clés USB) ; le montant total est toujours calculé
+  // côté serveur : unitPrice × quantity.
+  quantity          Int             @default(1)
+  unitPrice         Int?            @map("unit_price")
+  // Suivi de la livraison physique (null pour les produits non physiques).
+  deliveryStatus    DeliveryStatus? @map("delivery_status")
+  deliveredAt       DateTime?       @map("delivered_at")
+  refundedAt        DateTime?       @map("refunded_at")
+  // Commande créée par l'équipe (client mal localisé, paiement hors site…).
+  manual            Boolean         @default(false)
+  internalNote      String?         @map("internal_note") @db.Text
   createdAt         DateTime        @default(now()) @map("created_at")
   updatedAt         DateTime        @updatedAt @map("updated_at")
 
   payments Payment[]
+  events   OrderEvent[]
 
   @@index([providerSessionId])
+  @@index([status, createdAt])
+  @@index([profileId])
+  @@index([productId])
   // Contrainte applicative (vérifiée en code, pas en DB) : productId XOR
   // serviceId, jamais les deux ni aucun des deux.
   @@map("orders")
@@ -261,15 +310,18 @@ model Progress {
 }
 
 model Testimonial {
-  id         String   @id @default(uuid()) @db.Uuid
-  productId  String?  @map("product_id") @db.Uuid
-  product    Product? @relation(fields: [productId], references: [id])
-  authorName String   @map("author_name")
-  authorCity String?  @map("author_city")
-  quote      String   @db.Text
-  rating     Int      @default(5)
-  published  Boolean  @default(false)
-  createdAt  DateTime @default(now()) @map("created_at")
+  id           String   @id @default(uuid()) @db.Uuid
+  productId    String?  @map("product_id") @db.Uuid
+  product      Product? @relation(fields: [productId], references: [id])
+  authorName   String   @map("author_name")
+  authorCity   String?  @map("author_city")
+  quote        String   @db.Text
+  rating       Int      @default(5)
+  published    Boolean  @default(false)
+  // Ordre d'affichage (plus petit = plus haut) ; affichage à l'accueil si `featured`.
+  displayOrder Int      @default(0) @map("display_order")
+  featured     Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
 
   @@map("testimonials")
 }
@@ -344,4 +396,86 @@ model LegacyClient {
 
   @@index([batch])
   @@map("legacy_clients")
+}
+
+/// Historique d'une commande (création, paiement, livraison, remboursement…).
+model OrderEvent {
+  id         String   @id @default(uuid()) @db.Uuid
+  orderId    String   @map("order_id") @db.Uuid
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  type       String
+  message    String
+  actorLabel String?  @map("actor_label")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([orderId, createdAt])
+  @@map("order_events")
+}
+
+/// Journal d'audit : qui a fait quoi dans l'administration.
+model AdminAuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  adminId    String?  @map("admin_id") @db.Uuid
+  adminLabel String?  @map("admin_label")
+  action     String
+  entity     String?
+  entityId   String?  @map("entity_id")
+  summary    String?
+  details    Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([entity, entityId])
+  @@index([adminId, createdAt])
+  @@map("admin_audit_log")
+}
+
+/// Trace de chaque email transactionnel (envoyé ou en échec).
+model EmailLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  toEmail        String   @map("to_email")
+  subject        String
+  template       String
+  status         String // SENT | FAILED
+  error          String?
+  providerId     String?  @map("provider_id")
+  relatedOrderId String?  @map("related_order_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@map("email_log")
+}
+
+/// Webhooks reçus (SasPay) : sert au tableau de bord et au diagnostic.
+model WebhookEvent {
+  id         String   @id @default(uuid()) @db.Uuid
+  provider   String
+  eventType  String   @map("event_type")
+  status     String // VERIFIED | REJECTED | ERROR
+  detail     String?
+  receivedAt DateTime @default(now()) @map("received_at")
+
+  @@index([provider, receivedAt])
+  @@map("webhook_events")
+}
+
+/// Limite de débit partagée entre toutes les instances du site.
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime @map("reset_at")
+
+  @@index([resetAt])
+  @@map("rate_limits")
+}
+
+/// Réglages modifiables depuis l'administration (mentions légales, contacts…).
+model SiteSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedBy String?  @map("updated_by")
+
+  @@map("site_settings")
 }

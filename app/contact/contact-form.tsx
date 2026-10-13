@@ -6,6 +6,7 @@ import {
   sendContactMessage,
   type ContactFormState,
 } from "@/lib/actions/contact";
+import { Honeypot } from "@/components/ui/honeypot";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,7 +44,8 @@ export function ContactForm() {
   }
 
   return (
-    <form action={action} className="flex flex-col gap-5">
+    <form action={action} className="relative flex flex-col gap-5">
+      <Honeypot />
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="contact-name">Votre nom</Label>
         <Input id="contact-name" name="name" autoComplete="name" required />

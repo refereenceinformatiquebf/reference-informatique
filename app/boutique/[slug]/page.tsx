@@ -20,12 +20,8 @@ import { ProductCard } from "@/components/shop/product-card";
 import { ProductCover } from "@/components/shop/product-cover";
 import { IconBouclier, IconWhatsapp } from "@/components/icons";
 import { formatPrice } from "@/lib/format";
-import {
-  PRODUCT_KINDS,
-  discountPercent,
-  findVisibleProduct,
-  relatedProducts,
-} from "@/lib/catalog";
+import { PRODUCT_KINDS, discountPercent } from "@/lib/catalog";
+import { getRelatedProducts, getVisibleProduct } from "@/lib/catalog/live";
 import { getVisitorCountry } from "@/lib/geo";
 import { SITE, whatsappLink } from "@/lib/site";
 import { fr } from "@/lib/typography";
@@ -35,7 +31,7 @@ export async function generateMetadata({
 }: PageProps<"/boutique/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const country = await getVisitorCountry();
-  const product = findVisibleProduct(slug, country);
+  const product = await getVisibleProduct(slug, country);
   if (!product) {
     return {
       title: "Page introuvable",
@@ -61,12 +57,12 @@ export default async function ProductPage({
   const country = await getVisitorCountry();
   // Un produit réservé à un autre pays est INVISIBLE : 404, comme s'il
   // n'existait pas. On ne révèle ni son existence ni son contenu.
-  const product = findVisibleProduct(slug, country);
+  const product = await getVisibleProduct(slug, country);
   if (!product) notFound();
 
   const kind = PRODUCT_KINDS[product.kind];
   const percent = discountPercent(product);
-  const related = relatedProducts(product, country, 3);
+  const related = await getRelatedProducts(product, country, 3);
   const orderHref = `/commande/${product.slug}`;
   const isKey = product.kind === "cle";
 

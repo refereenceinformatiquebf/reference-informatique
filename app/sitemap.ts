@@ -1,20 +1,21 @@
 import type { MetadataRoute } from "next";
-import {
-  ALL_PRODUCTS,
-  ALL_SERVICES,
-  ALL_SERVICE_FAMILIES,
-} from "@/lib/catalog";
+import { ALL_SERVICE_FAMILIES } from "@/lib/catalog";
+import { getAllProducts, getAllServices } from "@/lib/catalog/live";
 import { SITE } from "@/lib/site";
 
 /**
- * Plan du site, construit depuis le catalogue (aucune lecture en base : il
- * reste disponible même si la base est injoignable).
+ * Plan du site, construit depuis le catalogue vivant (produits et services
+ * actifs ; si la base est injoignable, le catalogue du code prend le relais).
  *
  * Les produits réservés à un pays (les clés de formations) n'y figurent
  * PAS : le plan du site est public et lu par les robots depuis n'importe où,
  * il ne doit pas révéler l'existence d'une offre invisible hors du Burkina Faso.
  */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [products, services] = await Promise.all([
+    getAllProducts(),
+    getAllServices(),
+  ]);
   const url = (path: string) => `${SITE.url}${path}`;
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -36,13 +37,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  const productRoutes: MetadataRoute.Sitemap = ALL_PRODUCTS.filter(
-    (product) => !product.restrictedTo || product.restrictedTo.length === 0,
-  ).map((product) => ({
-    url: url(`/boutique/${product.slug}`),
-    changeFrequency: "monthly",
-    priority: 0.8,
-  }));
+  const productRoutes: MetadataRoute.Sitemap = products
+    .filter(
+      (product) => !product.restrictedTo || product.restrictedTo.length === 0,
+    )
+    .map((product) => ({
+      url: url(`/boutique/${product.slug}`),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    }));
 
   const familyRoutes: MetadataRoute.Sitemap = ALL_SERVICE_FAMILIES.map(
     (family) => ({
@@ -52,7 +55,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }),
   );
 
-  const serviceRoutes: MetadataRoute.Sitemap = ALL_SERVICES.map((service) => ({
+  const serviceRoutes: MetadataRoute.Sitemap = services.map((service) => ({
     url: url(`/services/${service.family}/${service.slug}`),
     changeFrequency: "monthly",
     priority: 0.8,

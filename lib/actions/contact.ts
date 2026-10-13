@@ -3,6 +3,8 @@
 import { prisma } from "@/lib/prisma/client";
 import { contactSchema } from "@/lib/validations/contact";
 import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
+import { isHoneypotFilled } from "@/lib/honeypot";
+import { sendContactMessage as sendContactEmails } from "@/lib/email/send";
 
 export type ContactFormState =
   | {
@@ -23,6 +25,14 @@ export async function sendContactMessage(
     throw error;
   }
 
+  // Robot détecté par le champ piège : on fait semblant, sans rien enregistrer.
+  if (isHoneypotFilled(formData)) {
+    return {
+      success: true,
+      message: "Message envoyé. Nous vous répondons rapidement.",
+    };
+  }
+
   const validated = contactSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
@@ -34,11 +44,17 @@ export async function sendContactMessage(
     return { errors: validated.error.flatten().fieldErrors };
   }
 
-  await prisma.contactMessage.create({ data: validated.data });
+  const saved = await prisma.contactMessage.create({ data: validated.data });
 
-  // L'envoi d'un email de notification à l'équipe est branché à l'Étape 12
-  // (Brevo) — le message est déjà enregistré et visible dans l'admin
-  // (Étape 14) même sans cette étape.
+  // Le message est déjà enregistré : un échec d'envoi ne doit jamais le perdre
+  // ni faire croire au client que rien n'est parti. L'équipe le retrouve de
+  // toute façon dans l'administration (Messages).
+  await sendContactEmails({
+    name: saved.name,
+    email: saved.email,
+    phone: saved.phone,
+    message: saved.message,
+  }).catch((error) => console.error("[contact] email", error));
 
   return {
     success: true,

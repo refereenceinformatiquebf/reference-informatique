@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { devisSchema } from "@/lib/validations/devis";
 import { sendDevisReceived } from "@/lib/email/send";
 import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
+import { isHoneypotFilled } from "@/lib/honeypot";
 
 export type DevisFormState =
   | {
@@ -24,6 +25,11 @@ export async function requestDevis(
   } catch (error) {
     if (error instanceof RateLimitError) return { message: error.message };
     throw error;
+  }
+
+  // Robot détecté par le champ piège : on fait semblant, sans rien enregistrer.
+  if (isHoneypotFilled(formData)) {
+    return { success: true, message: "Merci, votre demande est bien reçue." };
   }
 
   const validated = devisSchema.safeParse({
