@@ -43,6 +43,10 @@ async function sendEmail(params: {
 
   await getBrevoClient().transactionalEmails.sendTransacEmail({
     sender: SENDER,
+    // Les clients répondent à « cet email » : la réponse doit arriver dans la
+    // boîte de l'équipe, même si l'adresse d'expédition n'a pas de boîte de
+    // réception.
+    replyTo: { email: ADMIN_EMAIL, name: SITE.name },
     to: [params.to],
     subject: params.subject,
     htmlContent: html,
