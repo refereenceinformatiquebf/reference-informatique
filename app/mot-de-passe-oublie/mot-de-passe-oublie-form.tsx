@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FieldError } from "@/components/ui/field-error";
+import { Honeypot } from "@/components/ui/honeypot";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -32,7 +33,8 @@ export function MotDePasseOublieForm() {
   }
 
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <form action={action} className="relative flex flex-col gap-4">
+      <Honeypot />
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="email">Email</Label>
         <Input

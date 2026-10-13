@@ -11,8 +11,17 @@ export const metadata: Metadata = {
 };
 export const dynamic = "force-dynamic";
 
-export default async function EspaceClientPage() {
+export default async function EspaceClientPage({
+  searchParams,
+}: PageProps<"/espace-client">) {
   const profile = await requireProfile();
+  const { bienvenue, onglet } = await searchParams;
+  const isWelcome = bienvenue === "1";
+  const defaultTab = isWelcome
+    ? "profil"
+    : onglet === "commandes" || onglet === "devis" || onglet === "profil"
+      ? onglet
+      : "formations";
 
   const [access, orders, quotes] = await Promise.all([
     prisma.access.findMany({
@@ -43,8 +52,20 @@ export default async function EspaceClientPage() {
           Retrouvez ici vos formations, vos commandes et vos demandes de devis.
         </p>
 
+        {isWelcome ? (
+          <p
+            role="status"
+            className="bg-brand-50 text-ink mt-6 rounded-lg px-4 py-3 text-sm leading-relaxed"
+          >
+            Bienvenue ! Votre adresse est confirmée. Prenez une minute pour
+            vérifier votre nom et votre téléphone ci-dessous : ils nous servent
+            à vous livrer et à vous joindre sur WhatsApp.
+          </p>
+        ) : null}
+
         <EspaceClientTabs
           profile={profile}
+          defaultTab={defaultTab}
           access={access}
           orders={orders}
           quotes={quotes}

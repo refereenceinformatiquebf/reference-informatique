@@ -10,6 +10,7 @@ import { formatPrice } from "@/lib/format";
 import { whatsappLink } from "@/lib/site";
 import { ORDER_STATUS_LABELS, QUOTE_STATUS_LABELS } from "@/lib/status-labels";
 import { signOut } from "@/lib/actions/auth";
+import { PasswordForm, ProfileForm } from "./profile-forms";
 import type {
   Access,
   Order,
@@ -21,10 +22,18 @@ import type {
 
 type Props = {
   profile: Profile;
+  /** Onglet affiché à l'arrivée (« profil » pour un compte tout juste créé). */
+  defaultTab?: "formations" | "commandes" | "devis" | "profil";
   access: (Access & { product: Product })[];
   orders: (Order & { product: Product | null; service: Service | null })[];
   quotes: (QuoteRequest & { service: Service })[];
 };
+
+const DELIVERY_LABELS = {
+  A_PREPARER: "en préparation",
+  EN_LIVRAISON: "en cours de livraison",
+  LIVREE: "remise",
+} as const;
 
 const dateFormat: Intl.DateTimeFormatOptions = {
   day: "numeric",
@@ -32,9 +41,15 @@ const dateFormat: Intl.DateTimeFormatOptions = {
   year: "numeric",
 };
 
-export function EspaceClientTabs({ profile, access, orders, quotes }: Props) {
+export function EspaceClientTabs({
+  profile,
+  defaultTab = "formations",
+  access,
+  orders,
+  quotes,
+}: Props) {
   return (
-    <Tabs defaultValue="formations" className="mt-8">
+    <Tabs defaultValue={defaultTab} className="mt-8">
       <TabsList aria-label="Sections de votre espace">
         <TabsTrigger value="formations">
           Mes formations ({access.length})
@@ -108,8 +123,17 @@ export function EspaceClientTabs({ profile, access, orders, quotes }: Props) {
                     </p>
                     <p className="text-ink-faint tabular mt-0.5 text-xs">
                       {order.createdAt.toLocaleDateString("fr-FR")} ·{" "}
+                      {order.quantity > 1 ? `${order.quantity} × · ` : ""}
                       {formatPrice(order.amount)}
                     </p>
+                    {order.status === "PAYE" && order.deliveryStatus ? (
+                      <p className="text-ink-soft mt-1 text-xs">
+                        Livraison de votre clé :{" "}
+                        <strong className="text-ink font-medium">
+                          {DELIVERY_LABELS[order.deliveryStatus]}
+                        </strong>
+                      </p>
+                    ) : null}
                   </div>
                   <div className="flex items-center gap-3">
                     {canResume ? (
@@ -163,25 +187,44 @@ export function EspaceClientTabs({ profile, access, orders, quotes }: Props) {
       </TabsContent>
 
       <TabsContent value="profil">
-        <div className="border-line bg-paper max-w-md rounded-lg border p-6">
-          <div className="bg-brand text-brand-contrast font-display flex h-14 w-14 items-center justify-center rounded-full text-2xl">
-            {profile.name.charAt(0).toUpperCase()}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="border-line bg-paper rounded-lg border p-6">
+            <div className="flex items-center gap-4">
+              <div className="bg-brand text-brand-contrast font-display flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-2xl">
+                {profile.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="font-display text-ink truncate text-[1.375rem] leading-tight">
+                  {profile.name}
+                </p>
+                <p className="text-ink-faint mt-1 text-xs">
+                  Membre depuis{" "}
+                  {profile.createdAt.toLocaleDateString("fr-FR", {
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
+            </div>
+            <div className="mt-6">
+              <ProfileForm
+                name={profile.name}
+                phone={profile.phone}
+                email={profile.email}
+              />
+            </div>
           </div>
-          <p className="font-display text-ink mt-4 text-[1.375rem] leading-tight">
-            {profile.name}
-          </p>
-          {profile.phone ? (
-            <p className="text-ink-soft mt-1 text-sm">{profile.phone}</p>
-          ) : null}
-          <p className="text-ink-faint mt-1 text-xs">
-            Membre depuis{" "}
-            {profile.createdAt.toLocaleDateString("fr-FR", {
-              month: "long",
-              year: "numeric",
-            })}
-          </p>
 
-          <div className="mt-6 flex flex-col gap-3">
+          <div className="border-line bg-paper rounded-lg border p-6">
+            <h3 className="font-display text-ink text-[1.25rem] leading-tight">
+              Mot de passe
+            </h3>
+            <div className="mt-4">
+              <PasswordForm />
+            </div>
+          </div>
+
+          <div className="border-line bg-paper flex flex-col gap-3 rounded-lg border p-6 sm:flex-row sm:items-center sm:justify-between lg:col-span-2">
             <Button asChild variant="whatsapp">
               <a
                 href={whatsappLink(
