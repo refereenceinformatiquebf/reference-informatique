@@ -59,7 +59,7 @@ export default async function ServiceFamilyPage({
               { label: family.name },
             ]}
           />
-          <div className="mt-8 grid gap-10 lg:grid-cols-[1.4fr_1fr] lg:items-start">
+          <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[1.4fr_1fr] lg:items-start">
             <div className="flex flex-col items-start gap-5">
               <IconChip name={family.icon} size={56} />
               <h1 className="text-ink text-[2.25rem] leading-[1.05] tracking-[-0.02em] sm:text-[3rem]">
@@ -120,7 +120,7 @@ export default async function ServiceFamilyPage({
               "Chaque fiche explique ce que vous recevez, comment ça se passe et ce que ça coûte.",
             )}
           />
-          <div className="mt-10 grid gap-5 md:grid-cols-2">
+          <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2">
             {services.map((service, index) => (
               <ServiceCard key={service.slug} service={service} index={index} />
             ))}
@@ -135,7 +135,7 @@ export default async function ServiceFamilyPage({
             eyebrow="Comment ça se passe"
             title="Quatre étapes, sans surprise"
           />
-          <ol className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <ol className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {WORK_STEPS.map((step, index) => (
               <li key={step.title} className="flex flex-col gap-3">
                 <span className="font-display text-brand tabular text-[2.25rem] leading-none">
@@ -155,7 +155,7 @@ export default async function ServiceFamilyPage({
 
       {/* ============================== FAQ ============================== */}
       <section className="py-14 sm:py-20">
-        <Container className="grid gap-10 lg:grid-cols-[1fr_1.6fr]">
+        <Container className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.6fr]">
           <SectionHeading
             eyebrow="Questions fréquentes"
             title="Avant de nous écrire"
@@ -165,7 +165,7 @@ export default async function ServiceFamilyPage({
       </section>
 
       {/* ============================== Appel final ============================== */}
-      <section className="px-4 pb-16 sm:pb-20">
+      <section className="px-4 pb-10 sm:pb-12">
         <div className="illus-zone mx-auto max-w-6xl rounded-xl px-6 py-12 text-center sm:px-12">
           <h2 className="mx-auto max-w-xl text-[1.75rem] leading-[1.15] sm:text-[2.25rem]">
             {fr(`Un projet de ${family.name.toLowerCase()} ?`)}

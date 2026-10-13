@@ -147,15 +147,8 @@ export default async function HomePage() {
     <div className="flex flex-col">
       {/* ============================== Héros ============================== */}
       <section className="illus-zone">
-        <Container className="grid gap-10 pt-14 pb-24 sm:pt-20 lg:grid-cols-[1.25fr_1fr] lg:items-center lg:pb-28">
+        <Container className="grid grid-cols-1 gap-10 pt-8 pb-20 sm:pt-10 lg:grid-cols-[1.25fr_1fr] lg:items-center lg:pb-24">
           <div className="rise-in flex flex-col items-start gap-6">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3.5 py-1.5 text-xs font-medium tracking-wide ring-1 ring-white/20">
-              <span
-                aria-hidden
-                className="bg-brand-200 h-1.5 w-1.5 rounded-full"
-              />
-              Burkina Faso · pour les entreprises et les particuliers
-            </span>
             <h1 className="text-[2.5rem] leading-[1.05] tracking-[-0.02em] sm:text-[3.5rem]">
               {fr("Le numérique qui travaille pour vous.")}
             </h1>
@@ -165,7 +158,12 @@ export default async function HomePage() {
               )}
             </p>
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button asChild variant="inverse" size="lg">
+              <Button
+                asChild
+                variant="inverse"
+                size="lg"
+                className="w-full sm:w-auto"
+              >
                 <Link href="/services">
                   Voir nos services
                   <IconFleche size={18} />
@@ -174,7 +172,7 @@ export default async function HomePage() {
               <Button
                 asChild
                 size="lg"
-                className="bg-white/10 text-white ring-1 ring-white/30 hover:bg-white/16"
+                className="w-full bg-white/10 text-white ring-1 ring-white/30 hover:bg-white/16 sm:w-auto"
               >
                 <a
                   href={whatsappLink(
@@ -264,7 +262,7 @@ export default async function HomePage() {
             { icon: "paiement", label: "Paiement Mobile Money et carte" },
             {
               icon: "verifie",
-              label: "Plus de 170 clients nous font confiance",
+              label: "Plus de 160 clients nous font confiance",
             },
           ].map((item) => (
             <li
@@ -290,7 +288,7 @@ export default async function HomePage() {
               "Chaque service part de votre situation, pas d'un catalogue. Vous expliquez votre besoin, nous proposons la solution la plus simple qui le résout.",
             )}
           />
-          <div className="mt-10 grid gap-5 sm:grid-cols-2">
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2">
             {ALL_SERVICE_FAMILIES.map((family, index) => {
               const services = ALL_SERVICES.filter(
                 (s) => s.family === family.slug,
@@ -366,7 +364,7 @@ export default async function HomePage() {
             title={fr("Ce que vous pouvez attendre de nous")}
             align="center"
           />
-          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {PROMESSES.map((item, index) => (
               <div
                 key={item.title}
@@ -405,7 +403,7 @@ export default async function HomePage() {
                 </Link>
               </Button>
             </div>
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {featured.map((product, index) => (
                 <ProductCard
                   key={product.slug}
@@ -427,7 +425,7 @@ export default async function HomePage() {
               {fr("De votre message à la mise en service, en quatre étapes")}
             </h2>
           </div>
-          <ol className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <ol className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {ETAPES.map((step, index) => (
               <li key={step.title} className="flex flex-col gap-3">
                 <span className="font-display text-brand-200 tabular text-[2.5rem] leading-none">
@@ -454,7 +452,7 @@ export default async function HomePage() {
               title={fr("Ce que disent nos clients")}
               lead="Des messages reçus de clients, publiés tels quels."
             />
-            <div className="mt-10 grid gap-5 md:grid-cols-2">
+            <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2">
               {testimonials.map((t, index) => (
                 <figure
                   key={t.author}
@@ -478,7 +476,7 @@ export default async function HomePage() {
 
       {/* ============================== FAQ ============================== */}
       <section className="bg-paper border-line border-y py-20 sm:py-24">
-        <Container className="grid gap-10 lg:grid-cols-[1fr_1.4fr]">
+        <Container className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.4fr]">
           <div className="flex flex-col gap-5">
             <SectionHeading
               eyebrow="Questions fréquentes"
@@ -494,7 +492,7 @@ export default async function HomePage() {
       </section>
 
       {/* ============================== Appel final ============================== */}
-      <section className="px-4 py-16 sm:py-20">
+      <section className="px-4 pt-4 pb-10 sm:pt-8 sm:pb-12">
         <div className="illus-zone mx-auto max-w-6xl rounded-xl px-6 py-14 text-center sm:px-12 sm:py-16">
           <h2 className="mx-auto max-w-2xl text-[1.75rem] leading-[1.15] sm:text-[2.5rem]">
             {fr("Parlons de votre projet.")}
@@ -505,13 +503,18 @@ export default async function HomePage() {
             )}
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button asChild variant="inverse" size="lg">
+            <Button
+              asChild
+              variant="inverse"
+              size="lg"
+              className="w-full sm:w-auto"
+            >
               <Link href="/contact">Demander un devis</Link>
             </Button>
             <Button
               asChild
               size="lg"
-              className="bg-white/10 text-white ring-1 ring-white/30 hover:bg-white/16"
+              className="w-full bg-white/10 text-white ring-1 ring-white/30 hover:bg-white/16 sm:w-auto"
             >
               <a
                 href={whatsappLink(

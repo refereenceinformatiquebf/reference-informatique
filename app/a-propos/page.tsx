@@ -63,7 +63,7 @@ export default function AProposPage() {
 
       {/* ============================== Mission ============================== */}
       <section className="py-16 sm:py-24">
-        <Container className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-16">
+        <Container className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-16">
           <SectionHeading
             eyebrow="Notre mission"
             title={fr("Rendre l'informatique utile, simple et accessible")}
@@ -96,7 +96,7 @@ export default function AProposPage() {
             title="Ce qui guide notre travail"
             align="center"
           />
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {VALEURS.map((valeur, index) => (
               <div
                 key={valeur.title}
@@ -119,9 +119,9 @@ export default function AProposPage() {
       {/* ============================== Chiffre vérifié ============================== */}
       <section className="py-16 sm:py-24">
         <Container>
-          <div className="border-line bg-paper grid gap-8 rounded-xl border p-8 sm:grid-cols-[auto_1fr] sm:items-center sm:gap-12 sm:p-12">
+          <div className="border-line bg-paper grid grid-cols-1 gap-8 rounded-xl border p-8 sm:grid-cols-[auto_1fr] sm:items-center sm:gap-12 sm:p-12">
             <p className="font-display text-brand tabular text-[4rem] leading-none sm:text-[5.5rem]">
-              170+
+              160+
             </p>
             <div>
               <h2 className="font-display text-ink text-[1.5rem] leading-tight sm:text-[1.875rem]">
@@ -129,7 +129,7 @@ export default function AProposPage() {
               </h2>
               <p className="text-ink-soft mt-3 max-w-xl text-[1rem] leading-relaxed">
                 {fr(
-                  "Chaque accès correspond à une vraie commande. C'est le chiffre exact de notre base de clients, pas une estimation.",
+                  "Chaque accès correspond à une vraie commande, vérifiée dans notre base de clients.",
                 )}
               </p>
             </div>
@@ -138,7 +138,7 @@ export default function AProposPage() {
       </section>
 
       {/* ============================== Appel final ============================== */}
-      <section className="px-4 pb-16 sm:pb-24">
+      <section className="px-4 pb-10 sm:pb-12">
         <div className="illus-zone mx-auto max-w-6xl rounded-xl px-6 py-14 text-center sm:px-12">
           <h2 className="mx-auto max-w-xl text-[1.75rem] leading-[1.15] sm:text-[2.25rem]">
             {fr("Travaillons ensemble.")}

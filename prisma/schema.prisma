@@ -316,3 +316,32 @@ model ContactMessage {
 
   @@map("contact_messages")
 }
+
+/// Clients de l'ancien site (groupe d'import « RI01 »). Ce sont de simples
+/// fiches de suivi pour l'administration : AUCUN compte de connexion n'est
+/// créé pour eux, et aucun mot de passe n'est conservé. Voir
+/// lib/legacy/ et prisma/import-legacy-clients.ts.
+model LegacyClient {
+  id           String    @id @default(uuid()) @db.Uuid
+  /// Groupe d'import. « RI01 » = les clients de l'ancien site, avant la refonte.
+  batch        String    @default("RI01")
+  /// Code lisible et stable, ex. RI01-001.
+  code         String    @unique
+  name         String
+  /// Null quand l'adresse d'origine était une adresse interne fictive (@ri-client.bf).
+  email        String?
+  /// Format international, ex. +22670123456.
+  phone        String?
+  city         String?
+  /// Identifiant de l'utilisateur dans l'ancienne base : rend l'import rejouable.
+  legacyUserId Int       @unique @map("legacy_user_id")
+  signedUpAt   DateTime? @map("signed_up_at")
+  /// [{ product, productSlug, amount, status, date }]
+  purchases    Json
+  adminNote    String?   @map("admin_note") @db.Text
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@index([batch])
+  @@map("legacy_clients")
+}

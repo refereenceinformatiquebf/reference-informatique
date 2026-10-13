@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "prepare": "husky",
     "postinstall": "prisma generate",
-    "test": "node --conditions=react-server --import tsx --test tests/*.test.ts"
+    "test": "node --conditions=react-server --import tsx --test tests/*.test.ts",
+    "import:legacy": "tsx prisma/import-legacy-clients.ts"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [

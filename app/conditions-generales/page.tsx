@@ -87,7 +87,7 @@ export default async function ConditionsGeneralesPage() {
   const atHome = isHomeCountry(await getVisitorCountry());
 
   return (
-    <div className="py-12 sm:py-16">
+    <div className="pt-12 pb-8 sm:pt-14 sm:pb-10">
       <Container className="flex max-w-3xl flex-col gap-10">
         <SectionHeading
           as="h1"

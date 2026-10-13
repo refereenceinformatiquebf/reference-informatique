@@ -82,11 +82,11 @@ export default async function BoutiquePage({
         </Container>
       </section>
 
-      <section className="py-12 sm:py-16">
+      <section className="pt-10 pb-10 sm:pt-12 sm:pb-12">
         <Container>
           {selected === "cle" ? <CleExplainer /> : null}
 
-          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {list.map((product, index) => (
               <li key={product.slug}>
                 <ProductCard
@@ -190,7 +190,7 @@ function CleExplainer() {
     },
   ];
   return (
-    <div className="bg-paper border-line mb-10 grid gap-6 rounded-lg border p-6 sm:grid-cols-3 sm:p-8">
+    <div className="bg-paper border-line mb-10 grid grid-cols-1 gap-6 rounded-lg border p-6 sm:grid-cols-3 sm:p-8">
       {points.map((point) => (
         <div key={point.title} className="flex flex-col gap-3">
           <IconChip name={point.icon} size={48} />

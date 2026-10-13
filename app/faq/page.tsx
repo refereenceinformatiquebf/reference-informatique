@@ -105,7 +105,7 @@ export default async function FaqPage() {
   const all = groups.flatMap((group) => group.items);
 
   return (
-    <div className="py-12 sm:py-16">
+    <div className="pt-12 pb-8 sm:pt-14 sm:pb-10">
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -130,7 +130,7 @@ export default async function FaqPage() {
         {groups.map((group) => (
           <section
             key={group.title}
-            className="grid gap-6 lg:grid-cols-[1fr_1.8fr] lg:gap-14"
+            className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.8fr] lg:gap-14"
           >
             <h2 className="text-ink text-[1.5rem] leading-tight sm:text-[1.875rem]">
               {group.title}

@@ -112,7 +112,7 @@ export default async function ProductPage({
             ]}
           />
 
-          <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-14">
+          <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-14">
             {/* Visuel */}
             <div className="lg:sticky lg:top-24 lg:self-start">
               <div className="border-line bg-paper-raised relative overflow-hidden rounded-xl border">
@@ -218,7 +218,7 @@ export default async function ProductPage({
 
       {/* ======================= Le récit ======================= */}
       <section className="py-14 sm:py-20">
-        <Container className="grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:gap-16">
+        <Container className="grid grid-cols-1 gap-10 lg:grid-cols-[1.3fr_1fr] lg:gap-16">
           <div>
             <Eyebrow>
               {isKey ? "Pourquoi cette clé" : "Pourquoi ce produit"}
@@ -258,7 +258,7 @@ export default async function ProductPage({
                 isKey ? "Ce que contient la clé" : "Ce que contient ce produit"
               }
             />
-            <div className="mt-10 grid gap-5 md:grid-cols-2">
+            <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2">
               {product.contents.map((group) => (
                 <div
                   key={group.title}
@@ -296,7 +296,7 @@ export default async function ProductPage({
 
       {/* ======================= Pour qui ======================= */}
       <section className="py-14 sm:py-20">
-        <Container className="grid gap-10 md:grid-cols-2">
+        <Container className="grid grid-cols-1 gap-10 md:grid-cols-2">
           <div>
             <SectionHeading
               as="h2"
@@ -365,7 +365,7 @@ export default async function ProductPage({
 
       {/* ======================= FAQ ======================= */}
       <section className="bg-paper border-line border-y py-14 sm:py-20">
-        <Container className="grid gap-10 lg:grid-cols-[1fr_1.6fr]">
+        <Container className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.6fr]">
           <SectionHeading
             eyebrow="Questions fréquentes"
             title="Avant de commander"
@@ -377,13 +377,13 @@ export default async function ProductPage({
 
       {/* ======================= Suggestions ======================= */}
       {related.length > 0 ? (
-        <section className="py-14 sm:py-20">
+        <section className="pt-14 pb-10 sm:pt-16 sm:pb-12">
           <Container>
             <SectionHeading
               eyebrow="Pour aller plus loin"
               title="Vous aimerez aussi"
             />
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((item, index) => (
                 <ProductCard key={item.slug} product={item} index={index} />
               ))}

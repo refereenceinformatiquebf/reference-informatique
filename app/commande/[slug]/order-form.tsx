@@ -79,7 +79,7 @@ export function OrderForm({
             vous remettre votre clé.
           </p>
 
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="city">Ville</Label>
               <Input

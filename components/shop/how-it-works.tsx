@@ -68,7 +68,7 @@ const STEPS: Record<DeliveryMode, { title: string; text: string }[]> = {
 export function HowItWorks({ mode }: { mode: DeliveryMode }) {
   const steps = STEPS[mode];
   return (
-    <ol className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <ol className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
       {steps.map((step, index) => (
         <li key={step.title} className="flex flex-col gap-2.5">
           <span className="font-display text-brand tabular text-[2rem] leading-none">

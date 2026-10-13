@@ -104,7 +104,7 @@ export default async function ServicePage({
               { label: service.name },
             ]}
           />
-          <div className="mt-8 grid gap-10 lg:grid-cols-[1.5fr_1fr] lg:items-start">
+          <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[1.5fr_1fr] lg:items-start">
             <div className="flex flex-col items-start gap-5">
               <Badge variant="neutral">{family.name}</Badge>
               <h1 className="text-ink text-[2.25rem] leading-[1.05] tracking-[-0.02em] sm:text-[3rem]">
@@ -174,7 +174,7 @@ export default async function ServicePage({
             eyebrow="Votre situation"
             title={service.problem.title}
           />
-          <ul className="mt-10 grid gap-5 md:grid-cols-3">
+          <ul className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
             {service.problem.points.map((point, index) => (
               <li
                 key={point}
@@ -208,7 +208,7 @@ export default async function ServicePage({
             eyebrow="Ce que vous recevez"
             title="Concrètement, voici ce que vous obtenez"
           />
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {service.deliverables.map((item, index) => (
               <div
                 key={item.title}
@@ -230,7 +230,7 @@ export default async function ServicePage({
 
       {/* ============================== Comment ça se passe ============================== */}
       <section className="py-14 sm:py-20">
-        <Container className="grid gap-10 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
+        <Container className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
           <div className="flex flex-col gap-6">
             <SectionHeading
               eyebrow="Comment ça se passe"
@@ -271,7 +271,7 @@ export default async function ServicePage({
 
       {/* ============================== FAQ ============================== */}
       <section className="bg-paper border-line border-y py-14 sm:py-20">
-        <Container className="grid gap-10 lg:grid-cols-[1fr_1.6fr]">
+        <Container className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.6fr]">
           <SectionHeading
             eyebrow="Questions fréquentes"
             title="Ce que l'on nous demande sur ce service"
@@ -282,7 +282,7 @@ export default async function ServicePage({
 
       {/* ============================== Devis ============================== */}
       <section id="devis" className="scroll-mt-20 py-14 sm:py-20">
-        <Container className="grid gap-10 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
+        <Container className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
           <div className="flex flex-col gap-6">
             <Eyebrow>Votre devis gratuit</Eyebrow>
             <h2 className="text-ink text-[1.75rem] leading-[1.1] sm:text-[2.25rem]">
@@ -336,7 +336,7 @@ export default async function ServicePage({
 
       {/* ============================== Autres prestations ============================== */}
       {siblings.length > 0 ? (
-        <section className="bg-paper border-line border-t py-14 sm:py-20">
+        <section className="bg-paper border-line border-t pt-14 pb-10 sm:pt-16 sm:pb-12">
           <Container>
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <SectionHeading
@@ -347,7 +347,7 @@ export default async function ServicePage({
                 <Link href="/services">Tous les services</Link>
               </Button>
             </div>
-            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
               {siblings.slice(0, 3).map((item, index) => (
                 <ServiceCard key={item.slug} service={item} index={index} />
               ))}

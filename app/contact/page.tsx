@@ -24,8 +24,8 @@ export default async function ContactPage({
   const services = ALL_SERVICES.map(({ slug, name }) => ({ slug, name }));
 
   return (
-    <div className="py-12 sm:py-16">
-      <Container className="grid gap-12 lg:grid-cols-[1fr_1.35fr] lg:gap-16">
+    <div className="pt-10 pb-8 sm:pt-14 sm:pb-12">
+      <Container className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_1.35fr] lg:gap-16">
         <div className="flex flex-col gap-8">
           <SectionHeading
             as="h1"

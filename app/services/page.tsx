@@ -50,7 +50,7 @@ export default function ServicesPage() {
     <div className="flex flex-col">
       {/* ============================== Entrée ============================== */}
       <section className="bg-paper border-line border-b">
-        <Container className="py-14 sm:py-20">
+        <Container className="py-10 sm:py-14">
           <SectionHeading
             as="h1"
             eyebrow="Nos services"
@@ -96,7 +96,7 @@ export default function ServicesPage() {
             }
           >
             <Container>
-              <div className="grid gap-8 lg:grid-cols-[1fr_1.7fr] lg:gap-14">
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.7fr] lg:gap-14">
                 <div className="flex flex-col items-start gap-5 lg:sticky lg:top-24 lg:self-start">
                   <IconChip name={family.icon} size={56} />
                   <h2 className="text-ink text-[1.75rem] leading-[1.1] sm:text-[2.25rem]">
@@ -121,7 +121,7 @@ export default function ServicesPage() {
                   </Button>
                 </div>
 
-                <div className="grid content-start gap-5 sm:grid-cols-2">
+                <div className="grid grid-cols-1 content-start gap-5 sm:grid-cols-2">
                   {services.map((service, index) => (
                     <ServiceCard
                       key={service.slug}
@@ -147,7 +147,7 @@ export default function ServicesPage() {
               {fr("Ce que vous pouvez attendre de nous")}
             </h2>
           </div>
-          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {ARGUMENTS.map((item) => (
               <div key={item.title} className="flex flex-col gap-4">
                 <IconChip name={item.icon} tone="solid" size={52} />
@@ -170,7 +170,7 @@ export default function ServicesPage() {
             eyebrow="Comment ça se passe"
             title={fr("Du premier message à la mise en service")}
           />
-          <ol className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <ol className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {WORK_STEPS.map((step, index) => (
               <li key={step.title} className="flex flex-col gap-3">
                 <span className="font-display text-brand tabular text-[2.5rem] leading-none">
@@ -190,7 +190,7 @@ export default function ServicesPage() {
 
       {/* ============================== FAQ ============================== */}
       <section className="bg-paper border-line border-y py-16 sm:py-20">
-        <Container className="grid gap-10 lg:grid-cols-[1fr_1.6fr]">
+        <Container className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.6fr]">
           <SectionHeading
             eyebrow="Questions fréquentes"
             title={fr("Ce que l'on nous demande avant de commencer")}
@@ -200,7 +200,7 @@ export default function ServicesPage() {
       </section>
 
       {/* ============================== Appel final ============================== */}
-      <section className="px-4 py-16 sm:py-20">
+      <section className="px-4 pt-4 pb-10 sm:pt-8 sm:pb-12">
         <div className="illus-zone mx-auto max-w-6xl rounded-xl px-6 py-14 text-center sm:px-12">
           <h2 className="mx-auto max-w-2xl text-[1.75rem] leading-[1.15] sm:text-[2.5rem]">
             {fr("Un projet en tête ? Parlons-en.")}

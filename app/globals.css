@@ -216,59 +216,67 @@
   --text-2xl: 3rem; /* 48 — héros */
 }
 
-html {
-  scroll-behavior: smooth;
-}
+/*
+ * Règles de base DANS la couche `base` de Tailwind. Hors de toute couche, un
+ * sélecteur d'élément (h1, p…) l'emporte sur TOUTES les classes utilitaires
+ * (truncate, leading-*, tracking-*, font-body…) quelle que soit leur
+ * spécificité : c'est ce qui empêchait `truncate` de fonctionner.
+ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
 
-body {
-  background: var(--paper-raised);
-  color: var(--ink);
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  line-height: 1.65;
-  text-rendering: optimizeLegibility;
-}
+  body {
+    background: var(--paper-raised);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: 1.65;
+    text-rendering: optimizeLegibility;
+  }
 
-/* Titres : DM Serif Display 400, jamais en gras (le gras faux dégrade la
-   forme du caractère). Letter-spacing de la charte : -0.02em en display. */
-h1,
-h2,
-h3,
-h4 {
-  font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: -0.015em;
-  line-height: 1.15;
-  text-wrap: balance;
-}
+  /* Titres : DM Serif Display 400, jamais en gras (le gras faux dégrade la
+     forme du caractère). Letter-spacing de la charte : -0.02em en display. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
 
-/* Titres explicitement mis en gras (écrans applicatifs : espace client,
-   administration) : on passe à DM Sans, comme le « H2 » de la charte.
-   DM Serif Display n'existe qu'en graisse 400 — un gras serait synthétisé
-   par le navigateur et dégrade le dessin des lettres. */
-:is(h1, h2, h3, h4)[class*="font-bold"],
-:is(h1, h2, h3, h4)[class*="font-semibold"] {
-  font-family: var(--font-body);
-  letter-spacing: -0.01em;
-}
+  /* Titres explicitement mis en gras (écrans applicatifs : espace client,
+     administration) : on passe à DM Sans, comme le « H2 » de la charte.
+     DM Serif Display n'existe qu'en graisse 400 — un gras serait synthétisé
+     par le navigateur et dégrade le dessin des lettres. */
+  :is(h1, h2, h3, h4)[class*="font-bold"],
+  :is(h1, h2, h3, h4)[class*="font-semibold"] {
+    font-family: var(--font-body);
+    letter-spacing: -0.01em;
+  }
 
-p {
-  text-wrap: pretty;
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--brand-100);
+    color: var(--brand-900);
+  }
 }
 
 /* Chiffres alignés en colonne (prix, dates, statistiques) */
 .tabular {
   font-variant-numeric: tabular-nums;
-}
-
-:focus-visible {
-  outline: 2px solid var(--brand);
-  outline-offset: 2px;
-}
-
-::selection {
-  background: var(--brand-100);
-  color: var(--brand-900);
 }
 
 /* ---------- Mouvement de la charte ---------- */

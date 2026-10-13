@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
  *  - inverse   : blanc plein — sur fond marine/bleu (héros, bandeaux)
  */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-md font-medium whitespace-nowrap transition-[transform,filter,background-color,border-color,color,box-shadow] duration-200 ease-[var(--ease-standard)] hover:scale-[1.02] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-55 focus-visible:shadow-[var(--focus-halo)] focus-visible:outline-none",
+  "inline-flex items-center justify-center gap-2 rounded-md text-center leading-snug font-medium transition-[transform,filter,background-color,border-color,color,box-shadow] duration-200 ease-[var(--ease-standard)] hover:scale-[1.02] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-55 focus-visible:shadow-[var(--focus-halo)] focus-visible:outline-none",
   {
     variants: {
       variant: {
@@ -28,9 +28,9 @@ const buttonVariants = cva(
         inverse: "text-brand-900 bg-white hover:bg-brand-50",
       },
       size: {
-        sm: "h-9 px-3.5 text-[0.8125rem]",
-        md: "h-11 px-5 text-sm",
-        lg: "h-12 px-6 text-[0.9375rem]",
+        sm: "min-h-9 px-3.5 py-1.5 text-[0.8125rem]",
+        md: "min-h-11 px-5 py-2.5 text-sm",
+        lg: "min-h-12 px-6 py-3 text-[0.9375rem]",
       },
     },
     defaultVariants: {
