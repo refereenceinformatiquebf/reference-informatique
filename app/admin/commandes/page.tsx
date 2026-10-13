@@ -1,154 +1,237 @@
 import type { Metadata } from "next";
-import type { OrderStatus } from "@/lib/generated/prisma/enums";
-import { prisma } from "@/lib/prisma/client";
-import { formatPrice } from "@/lib/format";
-import { ORDER_STATUS_LABELS } from "@/lib/status-labels";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import {
-  confirmWhatsappPayment,
-  cancelOrder,
-} from "@/lib/actions/admin-orders";
+  AdminHeader,
+  FilterBar,
+  FilterField,
+  Pager,
+  ResponsiveTable,
+  RowLink,
+  StatusBadge,
+  fieldClass,
+  pageCountFor,
+  pageParam,
+} from "@/components/admin/ui";
+import { Button } from "@/components/ui/button";
+import { listOrders, parseOrderFilters } from "@/lib/admin/orders-query";
+import { getAllProducts } from "@/lib/catalog/live";
+import { formatDateTime, formatPrice } from "@/lib/format";
+import { ORDER_STATUS_LABELS } from "@/lib/status-labels";
 
 export const metadata: Metadata = { title: "Commandes" };
 export const dynamic = "force-dynamic";
 
-const FILTERS: { label: string; value: OrderStatus | "TOUTES" }[] = [
-  { label: "Toutes", value: "TOUTES" },
-  { label: "En attente", value: "EN_ATTENTE" },
-  { label: "Payées", value: "PAYE" },
-  { label: "Annulées", value: "ANNULE" },
-];
+const DELIVERY_LABELS = {
+  A_PREPARER: { label: "À préparer", variant: "warning" },
+  EN_LIVRAISON: { label: "En livraison", variant: "neutral" },
+  LIVREE: { label: "Livrée", variant: "success" },
+} as const;
 
-export default async function AdminCommandesPage({
+export default async function AdminOrdersPage({
   searchParams,
 }: PageProps<"/admin/commandes">) {
-  const { statut } = await searchParams;
-  const statusFilter = typeof statut === "string" ? statut : "TOUTES";
+  const params = await searchParams;
+  const filters = parseOrderFilters(params);
+  const page = pageParam(params.page);
+  const [{ rows, total }, products] = await Promise.all([
+    listOrders(filters, page),
+    getAllProducts(),
+  ]);
 
-  const orders = await prisma.order.findMany({
-    where:
-      statusFilter === "TOUTES" ? {} : { status: statusFilter as OrderStatus },
-    include: { product: true, service: true, profile: true },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
+  const exportQuery = new URLSearchParams(
+    Object.entries(filters).filter(([, value]) => value) as [string, string][],
+  ).toString();
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-ink text-xl font-bold">Commandes</h1>
-        <div className="flex gap-1">
-          {FILTERS.map((filter) => (
-            <a
-              key={filter.value}
-              href={
-                filter.value === "TOUTES"
-                  ? "/admin/commandes"
-                  : `/admin/commandes?statut=${filter.value}`
-              }
-              aria-current={statusFilter === filter.value ? "true" : undefined}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                statusFilter === filter.value
-                  ? "bg-brand text-white"
-                  : "border-line text-ink-soft border"
-              }`}
-            >
-              {filter.label}
-            </a>
-          ))}
-        </div>
-      </div>
+    <>
+      <AdminHeader
+        title="Commandes"
+        subtitle={`${total} commande${total > 1 ? "s" : ""}${Object.values(filters).some(Boolean) ? " correspondant aux filtres" : ""}.`}
+        actions={
+          <>
+            <Button asChild variant="outline" size="sm">
+              <a
+                href={`/admin/export/commandes${exportQuery ? `?${exportQuery}` : ""}`}
+              >
+                Exporter en CSV
+              </a>
+            </Button>
+            <Button asChild size="sm">
+              <Link href="/admin/commandes/nouvelle">Créer une commande</Link>
+            </Button>
+          </>
+        }
+      />
 
-      {orders.length === 0 ? (
-        <p className="text-ink-soft text-sm">Aucune commande.</p>
-      ) : (
-        <div className="border-line overflow-x-auto rounded-lg border">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-line text-ink-faint border-b text-left text-xs uppercase">
-                <th className="px-4 py-3 font-semibold">Client</th>
-                <th className="px-4 py-3 font-semibold">Produit / service</th>
-                <th className="px-4 py-3 font-semibold">Montant</th>
-                <th className="px-4 py-3 font-semibold">Canal</th>
-                <th className="px-4 py-3 font-semibold">Statut</th>
-                <th className="px-4 py-3 font-semibold">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order) => {
-                const status = ORDER_STATUS_LABELS[order.status];
-                const canConfirmWhatsapp =
-                  order.status === "EN_ATTENTE" &&
-                  order.paymentProvider === "WHATSAPP_MANUAL";
+      <FilterBar action="/admin/commandes" resetHref="/admin/commandes">
+        <FilterField label="Recherche" className="min-w-56 flex-1">
+          <input
+            name="q"
+            defaultValue={filters.q}
+            placeholder="Nom, email, téléphone, référence…"
+            className={fieldClass}
+          />
+        </FilterField>
+        <FilterField label="Statut">
+          <select
+            name="statut"
+            defaultValue={filters.statut ?? ""}
+            className={fieldClass}
+          >
+            <option value="">Tous</option>
+            {Object.entries(ORDER_STATUS_LABELS).map(([value, status]) => (
+              <option key={value} value={value}>
+                {status.label}
+              </option>
+            ))}
+          </select>
+        </FilterField>
+        <FilterField label="Canal">
+          <select
+            name="canal"
+            defaultValue={filters.canal ?? ""}
+            className={fieldClass}
+          >
+            <option value="">Tous</option>
+            <option value="BOUTIQUE">Paiement en ligne</option>
+            <option value="WHATSAPP">WhatsApp</option>
+          </select>
+        </FilterField>
+        <FilterField label="Livraison">
+          <select
+            name="livraison"
+            defaultValue={filters.livraison ?? ""}
+            className={fieldClass}
+          >
+            <option value="">Toutes</option>
+            <option value="A_PREPARER">À préparer</option>
+            <option value="EN_LIVRAISON">En livraison</option>
+            <option value="LIVREE">Livrée</option>
+          </select>
+        </FilterField>
+        <FilterField label="Produit" className="min-w-48">
+          <select
+            name="produit"
+            defaultValue={filters.produit ?? ""}
+            className={fieldClass}
+          >
+            <option value="">Tous</option>
+            {products.map((product) => (
+              <option key={product.slug} value={product.slug}>
+                {product.name}
+              </option>
+            ))}
+          </select>
+        </FilterField>
+        <FilterField label="Du">
+          <input
+            type="date"
+            name="du"
+            defaultValue={filters.du}
+            className={fieldClass}
+          />
+        </FilterField>
+        <FilterField label="Au">
+          <input
+            type="date"
+            name="au"
+            defaultValue={filters.au}
+            className={fieldClass}
+          />
+        </FilterField>
+      </FilterBar>
 
-                return (
-                  <tr
-                    key={order.id}
-                    className="border-line border-b last:border-0"
-                  >
-                    <td className="px-4 py-3">
-                      <p className="text-ink font-medium">
-                        {order.profile.name}
-                      </p>
-                      <p className="text-ink-faint text-xs">
-                        {order.profile.phone}
-                      </p>
-                    </td>
-                    <td className="text-ink-soft px-4 py-3">
-                      {order.product?.name ?? order.service?.name ?? "—"}
-                    </td>
-                    <td className="text-ink tabular px-4 py-3 font-semibold">
-                      {formatPrice(order.amount)}
-                    </td>
-                    <td className="text-ink-soft px-4 py-3 text-xs">
-                      {order.channel === "BOUTIQUE" ? "SasPay" : "WhatsApp"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge variant={status.variant}>{status.label}</Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      {canConfirmWhatsapp ? (
-                        <div className="flex gap-2">
-                          <form action={confirmWhatsappPayment}>
-                            <input
-                              type="hidden"
-                              name="orderId"
-                              value={order.id}
-                            />
-                            <Button type="submit" size="sm">
-                              Confirmer le paiement
-                            </Button>
-                          </form>
-                          <form action={cancelOrder}>
-                            <input
-                              type="hidden"
-                              name="orderId"
-                              value={order.id}
-                            />
-                            <Button type="submit" size="sm" variant="ghost">
-                              Annuler
-                            </Button>
-                          </form>
-                        </div>
-                      ) : (
-                        <a
-                          href={`https://wa.me/${order.profile.phone?.replace(/\D/g, "")}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-success text-xs font-semibold hover:underline"
-                        >
-                          Contacter
-                        </a>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+      <ResponsiveTable
+        rows={rows}
+        rowKey={(order) => order.id}
+        empty="Aucune commande ne correspond à ces filtres."
+        columns={[
+          {
+            header: "Date",
+            hideOnMobile: true,
+            cell: (order) => (
+              <span className="text-ink-soft text-xs">
+                {formatDateTime(order.createdAt)}
+              </span>
+            ),
+          },
+          {
+            header: "Client",
+            cell: (order) => (
+              <div className="min-w-0">
+                <RowLink href={`/admin/commandes/${order.id}`}>
+                  {order.profile.name}
+                </RowLink>
+                <p className="text-ink-faint text-xs">
+                  {order.profile.phone ?? order.profile.email ?? ""}
+                </p>
+              </div>
+            ),
+          },
+          {
+            header: "Produit",
+            cell: (order) => (
+              <span>
+                {order.quantity > 1 ? `${order.quantity} × ` : ""}
+                {order.product?.name ?? "—"}
+                {order.manual ? (
+                  <span className="text-ink-faint block text-xs">
+                    Créée par l&apos;équipe
+                  </span>
+                ) : null}
+              </span>
+            ),
+          },
+          {
+            header: "Montant",
+            right: true,
+            cell: (order) => (
+              <span className="tabular font-semibold">
+                {formatPrice(order.amount)}
+              </span>
+            ),
+          },
+          {
+            header: "Canal",
+            hideOnMobile: true,
+            cell: (order) => (
+              <span className="text-ink-soft text-xs">
+                {order.channel === "BOUTIQUE" ? "SasPay" : "WhatsApp"}
+              </span>
+            ),
+          },
+          {
+            header: "Statut",
+            cell: (order) => {
+              const status = ORDER_STATUS_LABELS[order.status];
+              return (
+                <StatusBadge label={status.label} variant={status.variant} />
+              );
+            },
+          },
+          {
+            header: "Livraison",
+            cell: (order) => {
+              if (!order.deliveryStatus || order.status !== "PAYE") return "—";
+              const delivery = DELIVERY_LABELS[order.deliveryStatus];
+              return (
+                <StatusBadge
+                  label={delivery.label}
+                  variant={delivery.variant}
+                />
+              );
+            },
+          },
+        ]}
+      />
+
+      <Pager
+        page={page}
+        pageCount={pageCountFor(total)}
+        total={total}
+        basePath="/admin/commandes"
+        params={filters}
+      />
+    </>
   );
 }

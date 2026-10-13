@@ -28,3 +28,16 @@ export function whatsappLink(message?: string) {
   const base = `https://wa.me/${SITE.whatsapp}`;
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
+
+/**
+ * Lien WhatsApp vers le numéro d'un CLIENT (et non celui de l'entreprise),
+ * pour l'administration. Le numéro est nettoyé ; s'il n'a pas d'indicatif
+ * pays (8 chiffres), on ajoute celui du Burkina Faso (226).
+ */
+export function whatsappLinkTo(phone: string, message?: string) {
+  let digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("00")) digits = digits.slice(2);
+  if (digits.length === 8) digits = `226${digits}`;
+  const base = `https://wa.me/${digits}`;
+  return message ? `${base}?text=${encodeURIComponent(message)}` : base;
+}

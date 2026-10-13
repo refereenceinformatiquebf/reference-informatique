@@ -5,6 +5,7 @@ import { contactSchema } from "@/lib/validations/contact";
 import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
 import { isHoneypotFilled } from "@/lib/honeypot";
 import { sendContactMessage as sendContactEmails } from "@/lib/email/send";
+import { runAfterResponse } from "@/lib/after-response";
 
 export type ContactFormState =
   | {
@@ -49,12 +50,14 @@ export async function sendContactMessage(
   // Le message est déjà enregistré : un échec d'envoi ne doit jamais le perdre
   // ni faire croire au client que rien n'est parti. L'équipe le retrouve de
   // toute façon dans l'administration (Messages).
-  await sendContactEmails({
-    name: saved.name,
-    email: saved.email,
-    phone: saved.phone,
-    message: saved.message,
-  }).catch((error) => console.error("[contact] email", error));
+  runAfterResponse(() =>
+    sendContactEmails({
+      name: saved.name,
+      email: saved.email,
+      phone: saved.phone,
+      message: saved.message,
+    }),
+  );
 
   return {
     success: true,

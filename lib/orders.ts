@@ -6,6 +6,7 @@ import type {
 } from "@/lib/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { getProduct } from "@/lib/catalog/live";
+import { runAfterResponse } from "@/lib/after-response";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cancelSaspaySession } from "@/lib/payments/saspay";
 import {
@@ -154,6 +155,7 @@ export async function markOrderPaid(params: MarkOrderPaidParams) {
           where: { id: current.id },
           data: {
             status: "PAYE",
+            paidAt: new Date(),
             ...(needsDelivery && !current.deliveryStatus
               ? { deliveryStatus: "A_PREPARER" }
               : {}),
@@ -223,10 +225,9 @@ export async function markOrderPaid(params: MarkOrderPaidParams) {
   }
 
   if (outcome.justPaid) {
-    // Les emails sont HORS transaction : un échec d'envoi n'annule rien.
-    await notifyPaymentConfirmed(params.orderId).catch((error) =>
-      console.error("[markOrderPaid] notification", error),
-    );
+    // Les emails sont HORS transaction et APRÈS la réponse : un échec d'envoi
+    // n'annule rien et personne n'attend l'envoi.
+    runAfterResponse(() => notifyPaymentConfirmed(params.orderId));
   }
 
   const updated = await prisma.order.findUnique({
@@ -443,16 +444,18 @@ export async function refundPaidOrder(params: {
   });
 
   if (params.notifyClient && order.product) {
-    const email = await getClientEmail(order.profile);
-    if (email) {
+    const product = order.product;
+    runAfterResponse(async () => {
+      const email = await getClientEmail(order.profile);
+      if (!email) return;
       await sendRefundNotice({
         to: email,
         clientName: order.profile.name,
-        productName: order.product.name,
+        productName: product.name,
         amount: order.amount,
         orderId: order.id,
-      }).catch((error) => console.error("[refund] email", error));
-    }
+      });
+    });
   }
   return {
     ok: true,
@@ -505,16 +508,19 @@ export async function updateDeliveryStatus(params: {
   );
 
   if (params.notifyClient && params.status !== "A_PREPARER" && order.product) {
-    const email = await getClientEmail(order.profile);
-    if (email) {
+    const product = order.product;
+    const status = params.status;
+    runAfterResponse(async () => {
+      const email = await getClientEmail(order.profile);
+      if (!email) return;
       await sendDeliveryUpdate({
         to: email,
         clientName: order.profile.name,
-        productName: order.product.name,
-        status: params.status,
+        productName: product.name,
+        status,
         orderId: order.id,
-      }).catch((error) => console.error("[delivery] email", error));
-    }
+      });
+    });
   }
   return { ok: true, message: `Livraison : ${label}.` };
 }

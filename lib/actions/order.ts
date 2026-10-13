@@ -25,6 +25,7 @@ import {
   getClientEmail,
   notifyOrderCreated,
 } from "@/lib/orders";
+import { runAfterResponse } from "@/lib/after-response";
 
 export type OrderFormState =
   | {
@@ -285,7 +286,7 @@ async function startSaspayCheckout(context: OrderContext): Promise<string> {
   }
 
   if (isNew) {
-    await notifyOrderCreated(order.id);
+    runAfterResponse(() => notifyOrderCreated(order.id));
   }
 
   const label =
@@ -338,7 +339,7 @@ async function startWhatsappOrder(context: OrderContext): Promise<string> {
   if (order.status === "PAYE") return "/espace-client";
 
   if (isNew) {
-    await notifyOrderCreated(order.id);
+    runAfterResponse(() => notifyOrderCreated(order.id));
   }
 
   const lines = [

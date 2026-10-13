@@ -1,59 +1,74 @@
-import Link from "next/link";
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { requireAdmin } from "@/lib/auth/dal";
 import { signOut } from "@/lib/actions/auth";
-import { Button } from "@/components/ui/button";
+import { adminBadgeCounts } from "@/lib/admin/counts";
+import { AdminShell, type AdminNavGroup } from "@/components/admin/admin-shell";
 
-const ADMIN_NAV = [
-  { href: "/admin", label: "Tableau de bord" },
-  { href: "/admin/commandes", label: "Commandes" },
-  { href: "/admin/devis", label: "Devis" },
-  { href: "/admin/clients", label: "Clients" },
-] as const;
+export const metadata: Metadata = {
+  title: { default: "Administration", template: "%s — Administration" },
+  robots: { index: false, follow: false },
+};
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
-  await requireAdmin();
+  const admin = await requireAdmin();
+  const counts = await adminBadgeCounts();
+
+  const groups: AdminNavGroup[] = [
+    {
+      title: "Ventes",
+      items: [
+        { href: "/admin", label: "Tableau de bord", exact: true },
+        {
+          href: "/admin/commandes",
+          label: "Commandes",
+          badge: counts.deliveries + counts.whatsapp,
+        },
+        { href: "/admin/clients", label: "Clients" },
+        { href: "/admin/acces", label: "Accès" },
+      ],
+    },
+    {
+      title: "Catalogue",
+      items: [
+        { href: "/admin/produits", label: "Produits" },
+        { href: "/admin/services", label: "Services" },
+        { href: "/admin/temoignages", label: "Témoignages" },
+      ],
+    },
+    {
+      title: "Relation client",
+      items: [
+        { href: "/admin/devis", label: "Devis", badge: counts.quotes },
+        { href: "/admin/messages", label: "Messages", badge: counts.messages },
+      ],
+    },
+    {
+      title: "Système",
+      items: [
+        { href: "/admin/parametres", label: "Paramètres" },
+        { href: "/admin/emails", label: "Emails envoyés" },
+        { href: "/admin/journal", label: "Journal d'audit" },
+        { href: "/admin/administrateurs", label: "Administrateurs" },
+        { href: "/admin/securite", label: "Sécurité (2FA)" },
+        { href: "/admin/etat", label: "État du système" },
+      ],
+    },
+  ];
 
   return (
-    <div className="bg-paper-raised min-h-screen">
-      <header className="border-line bg-paper border-b">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-6">
-            <span className="text-ink text-sm font-bold">Administration</span>
-            <nav className="hidden gap-1 sm:flex">
-              {ADMIN_NAV.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="text-ink-soft hover:text-brand hover:bg-brand/5 rounded-md px-3 py-1.5 text-sm font-medium"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-          <form action={signOut}>
-            <Button variant="ghost" size="sm" type="submit">
-              Déconnexion
-            </Button>
-          </form>
-        </div>
-        <nav className="flex gap-1 overflow-x-auto px-4 pb-3 sm:hidden">
-          {ADMIN_NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-ink-soft hover:text-brand shrink-0 rounded-md px-3 py-1.5 text-xs font-medium whitespace-nowrap"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-      </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
-    </div>
+    <AdminShell
+      groups={groups}
+      adminName={admin.email ?? admin.name}
+      signOutAction={signOut}
+    >
+      {children}
+    </AdminShell>
   );
 }

@@ -7,6 +7,7 @@ import { devisSchema } from "@/lib/validations/devis";
 import { sendDevisReceived } from "@/lib/email/send";
 import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
 import { isHoneypotFilled } from "@/lib/honeypot";
+import { runAfterResponse } from "@/lib/after-response";
 
 export type DevisFormState =
   | {
@@ -81,14 +82,16 @@ export async function requestDevis(
     include: { service: true },
   });
 
-  await sendDevisReceived({
-    clientEmail: quoteRequest.email,
-    clientName: quoteRequest.name,
-    clientPhone: quoteRequest.phone,
-    serviceName: quoteRequest.service.name,
-    message: quoteRequest.message,
-    budget: quoteRequest.budget ?? undefined,
-  }).catch((error) => console.error("[requestDevis] email", error));
+  runAfterResponse(() =>
+    sendDevisReceived({
+      clientEmail: quoteRequest.email,
+      clientName: quoteRequest.name,
+      clientPhone: quoteRequest.phone,
+      serviceName: quoteRequest.service.name,
+      message: quoteRequest.message,
+      budget: quoteRequest.budget ?? undefined,
+    }),
+  );
 
   return {
     success: true,

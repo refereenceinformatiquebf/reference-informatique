@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Header } from "@/components/marketing/header";
 import { Footer } from "@/components/marketing/footer";
+import { ShellFrame } from "@/components/shell-frame";
 
 /**
  * Structure commune à toutes les pages publiques : en-tête, contenu, pied de
@@ -11,23 +12,14 @@ import { Footer } from "@/components/marketing/footer";
  * marketing statiques. L'état de connexion est donc résolu côté client
  * dans le Header (voir use-current-profile.ts), qui est le seul élément
  * du Shell qui en a besoin.
+ *
+ * L'administration (/admin) a son propre cadre : ShellFrame retire alors
+ * l'en-tête et le pied de page publics.
  */
 export function Shell({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* Lien d'évitement — invisible tant qu'il n'a pas le focus clavier,
-          permet de sauter la navigation répétée sur chaque page (Étape 18). */}
-      <a
-        href="#main-content"
-        className="bg-brand fixed -top-full left-3 z-[100] rounded-md px-4 py-2 text-sm font-semibold text-white transition-[top] focus:top-3 focus:left-3"
-      >
-        Aller au contenu principal
-      </a>
-      <Header />
-      <main id="main-content" className="flex-1">
-        {children}
-      </main>
-      <Footer />
-    </div>
+    <ShellFrame header={<Header />} footer={<Footer />}>
+      {children}
+    </ShellFrame>
   );
 }

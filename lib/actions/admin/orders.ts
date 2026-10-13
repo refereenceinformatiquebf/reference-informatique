@@ -1,0 +1,414 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma/client";
+import { requireAdmin } from "@/lib/auth/dal";
+import { actorLabel, audit } from "@/lib/admin/audit";
+import { done, fail, type ActionResult } from "@/lib/admin/action";
+import {
+  addOrderEvent,
+  cancelUnpaidOrder,
+  getClientEmail,
+  markOrderPaid,
+  refundPaidOrder,
+  updateDeliveryStatus,
+} from "@/lib/orders";
+import { getProduct } from "@/lib/catalog/live";
+import { ensureProductRow } from "@/lib/catalog/db-sync";
+import { shippingSchema, MAX_KEY_QUANTITY } from "@/lib/validations/order";
+import {
+  getSaspaySessionStatus,
+  isSaspaySessionPaid,
+} from "@/lib/payments/saspay";
+import { syncSaspayOrder } from "@/lib/payments/saspay-sync";
+import { sendPaymentConfirmation } from "@/lib/email/send";
+
+function refresh(orderId?: string) {
+  revalidatePath("/admin/commandes");
+  if (orderId) revalidatePath(`/admin/commandes/${orderId}`);
+  revalidatePath("/admin");
+}
+
+function orderIdFrom(formData: FormData) {
+  return String(formData.get("orderId") ?? "");
+}
+
+function reasonFrom(formData: FormData) {
+  return String(formData.get("reason") ?? "").trim();
+}
+
+/** Revérifie auprès de SasPay une commande payée en ligne et encore « en attente ». */
+export async function verifySaspayOrderAction(
+  _state: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const orderId = orderIdFrom(formData);
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order) return fail("Commande introuvable.");
+  if (order.status === "PAYE") return done("Cette commande est déjà payée.");
+  if (order.paymentProvider !== "SASPAY" || !order.providerSessionId) {
+    return fail("Cette commande n'a pas de paiement SasPay à vérifier.");
+  }
+
+  try {
+    const status = await getSaspaySessionStatus(order.providerSessionId);
+    if (!isSaspaySessionPaid(status)) {
+      return done(
+        `Toujours non payée chez SasPay (statut : ${status.status}). Rien à faire pour l'instant.`,
+      );
+    }
+    await syncSaspayOrder(order);
+    await audit(
+      admin,
+      "order.verify",
+      "order",
+      order.id,
+      "Paiement SasPay vérifié : payé",
+    );
+    refresh(order.id);
+    return done("SasPay confirme le paiement : commande passée à « payé ».");
+  } catch (error) {
+    console.error("[admin] vérification SasPay :", error);
+    return fail(
+      "SasPay ne répond pas pour le moment. Réessayez dans un instant.",
+    );
+  }
+}
+
+/** Paiement reçu hors du site (Mobile Money direct, espèces, WhatsApp…). */
+export async function validateOrderManuallyAction(
+  _state: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const orderId = orderIdFrom(formData);
+  const reason = reasonFrom(formData);
+  if (reason.length < 5)
+    return fail("Indiquez un motif (5 caractères minimum).");
+
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order) return fail("Commande introuvable.");
+  if (order.status === "PAYE") return done("Cette commande est déjà payée.");
+  if (order.status === "REMBOURSE" || order.status === "ANNULE") {
+    return fail("Cette commande est clôturée : créez-en une nouvelle.");
+  }
+
+  // Une session de paiement encore ouverte ne doit plus pouvoir être payée.
+  if (order.providerSessionId) {
+    const { cancelSaspaySession } = await import("@/lib/payments/saspay");
+    await cancelSaspaySession(order.providerSessionId);
+  }
+
+  const result = await markOrderPaid({
+    orderId: order.id,
+    provider: "WHATSAPP_MANUAL",
+    providerRef: `manual:${order.id}`,
+    amount: order.amount,
+    rawStatus: "validated_by_admin",
+    actorLabel: actorLabel(admin),
+    eventMessage: `Paiement validé manuellement : ${reason}`,
+  });
+  if (!result.ok) return fail("Validation impossible : commande introuvable.");
+
+  await audit(
+    admin,
+    "order.validate_manual",
+    "order",
+    order.id,
+    `Validation manuelle : ${reason}`,
+  );
+  refresh(order.id);
+  return done("Paiement validé : accès activé, client prévenu.");
+}
+
+export async function cancelOrderAction(
+  _state: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const orderId = orderIdFrom(formData);
+  const reason = reasonFrom(formData);
+  const result = await cancelUnpaidOrder({
+    orderId,
+    actorLabel: actorLabel(admin),
+    reason: reason || undefined,
+  });
+  if (!result.ok) return fail(result.error);
+  await audit(admin, "order.cancel", "order", orderId, reason || "Annulation");
+  refresh(orderId);
+  return done(result.message);
+}
+
+export async function refundOrderAction(
+  _state: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const orderId = orderIdFrom(formData);
+  const reason = reasonFrom(formData);
+  if (reason.length < 5)
+    return fail("Indiquez un motif (5 caractères minimum).");
+  const result = await refundPaidOrder({
+    orderId,
+    actorLabel: actorLabel(admin),
+    reason,
+    notifyClient: formData.get("notify") === "on",
+  });
+  if (!result.ok) return fail(result.error);
+  await audit(
+    admin,
+    "order.refund",
+    "order",
+    orderId,
+    `Remboursement : ${reason}`,
+  );
+  refresh(orderId);
+  revalidatePath("/admin/acces");
+  return done(result.message);
+}
+
+const deliverySchema = z.enum(["A_PREPARER", "EN_LIVRAISON", "LIVREE"]);
+
+export async function setDeliveryStatusAction(
+  _state: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const orderId = orderIdFrom(formData);
+  const status = deliverySchema.safeParse(formData.get("status"));
+  if (!status.success) return fail("Statut de livraison inconnu.");
+  const result = await updateDeliveryStatus({
+    orderId,
+    status: status.data,
+    actorLabel: actorLabel(admin),
+    notifyClient: formData.get("notify") === "on",
+  });
+  if (!result.ok) return fail(result.error);
+  await audit(admin, "order.delivery", "order", orderId, result.message);
+  refresh(orderId);
+  return done(result.message);
+}
+
+export async function saveOrderNoteAction(
+  _state: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const orderId = orderIdFrom(formData);
+  const note = String(formData.get("note") ?? "")
+    .trim()
+    .slice(0, 2000);
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order) return fail("Commande introuvable.");
+  await prisma.order.update({
+    where: { id: orderId },
+    data: { internalNote: note || null },
+  });
+  await addOrderEvent(
+    orderId,
+    "NOTE",
+    note ? "Note interne mise à jour." : "Note interne effacée.",
+    actorLabel(admin),
+  );
+  await audit(admin, "order.note", "order", orderId, "Note interne");
+  refresh(orderId);
+  return done("Note enregistrée.");
+}
+
+/** Renvoie au client l'email de confirmation de paiement (message perdu, boîte pleine…). */
+export async function resendPaymentEmailAction(
+  _state: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const orderId = orderIdFrom(formData);
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { product: true, profile: true },
+  });
+  if (!order || !order.product) return fail("Commande introuvable.");
+  if (order.status !== "PAYE")
+    return fail("Seule une commande payée a un email de confirmation.");
+  const email = await getClientEmail(order.profile);
+  if (!email) return fail("Ce client n'a pas d'adresse email connue.");
+  const catalogProduct = await getProduct(order.product.slug);
+  const delivery = catalogProduct?.delivery ?? "numerique";
+  try {
+    await sendPaymentConfirmation({
+      to: email,
+      clientName: order.profile.name,
+      productName: order.product.name,
+      amount: order.amount,
+      quantity: order.quantity,
+      delivery,
+      orderId: order.id,
+      ctaPath:
+        delivery === "numerique"
+          ? `/espace-client/formations/${order.product.slug}`
+          : "/espace-client",
+    });
+  } catch {
+    return fail(
+      "L'envoi a échoué. Consultez « Emails envoyés » pour le détail.",
+    );
+  }
+  await addOrderEvent(
+    order.id,
+    "EMAIL",
+    "Email de confirmation renvoyé au client.",
+    actorLabel(admin),
+  );
+  await audit(
+    admin,
+    "order.resend_email",
+    "order",
+    order.id,
+    "Email de confirmation renvoyé",
+  );
+  refresh(order.id);
+  return done("Email renvoyé au client.");
+}
+
+/* ----------------------------- Commande manuelle ----------------------------- */
+
+export type ManualOrderState =
+  | {
+      ok: boolean;
+      message: string;
+      orderId?: string;
+      errors?: Record<string, string[]>;
+    }
+  | undefined;
+
+const manualOrderSchema = z.object({
+  clientEmail: z.email({ error: "Adresse email invalide." }),
+  productSlug: z.string().min(1, { error: "Choisissez un produit." }),
+  quantity: z.coerce.number().int().min(1).max(MAX_KEY_QUANTITY),
+  markPaid: z.boolean(),
+  reason: z.string().trim().max(300),
+});
+
+/**
+ * Crée une commande pour un client qui a déjà un compte : client mal localisé
+ * (ne voit pas les clés), paiement reçu en direct, geste commercial. Le prix
+ * vient du catalogue ; la règle d'accès par pays ne s'applique PAS ici : c'est
+ * l'équipe qui décide, pour un client réel, avec une adresse de livraison.
+ */
+export async function createManualOrderAction(
+  _state: ManualOrderState,
+  formData: FormData,
+): Promise<ManualOrderState> {
+  const admin = await requireAdmin();
+  const parsed = manualOrderSchema.safeParse({
+    clientEmail: formData.get("clientEmail"),
+    productSlug: formData.get("productSlug"),
+    quantity: formData.get("quantity") ?? 1,
+    markPaid: formData.get("markPaid") === "on",
+    reason: formData.get("reason") ?? "",
+  });
+  if (!parsed.success) {
+    return {
+      ok: false,
+      message: "Vérifiez le formulaire.",
+      errors: parsed.error.flatten().fieldErrors,
+    };
+  }
+  const data = parsed.data;
+  if (data.markPaid && data.reason.length < 5) {
+    return {
+      ok: false,
+      message:
+        "Pour une commande déjà payée, indiquez comment elle a été réglée (5 caractères minimum).",
+      errors: { reason: ["Motif obligatoire."] },
+    };
+  }
+
+  const profile = await prisma.profile.findUnique({
+    where: { email: data.clientEmail.trim().toLowerCase() },
+  });
+  if (!profile) {
+    return {
+      ok: false,
+      message:
+        "Aucun compte avec cette adresse. Demandez au client de se connecter une première fois avec son email (un lien lui est envoyé), puis recommencez.",
+      errors: { clientEmail: ["Aucun compte pour cette adresse."] },
+    };
+  }
+
+  const product = await getProduct(data.productSlug);
+  if (!product)
+    return {
+      ok: false,
+      message: "Ce produit n'est pas (ou plus) au catalogue.",
+      errors: { productSlug: ["Produit introuvable."] },
+    };
+
+  const physical = product.delivery === "cle-physique";
+  let shipping: { city: string; address: string; phone: string } | null = null;
+  if (physical) {
+    const parsedShipping = shippingSchema.safeParse({
+      city: formData.get("city"),
+      address: formData.get("address"),
+      phone: formData.get("phone"),
+    });
+    if (!parsedShipping.success) {
+      return {
+        ok: false,
+        message: "L'adresse de livraison est obligatoire pour une clé USB.",
+        errors: parsedShipping.error.flatten().fieldErrors,
+      };
+    }
+    shipping = parsedShipping.data;
+  }
+
+  const productRow = await ensureProductRow(product.slug);
+  if (!productRow) return { ok: false, message: "Produit indisponible." };
+
+  const quantity = physical ? data.quantity : 1;
+  const order = await prisma.order.create({
+    data: {
+      profileId: profile.id,
+      productId: productRow.id,
+      amount: product.price * quantity,
+      unitPrice: product.price,
+      quantity,
+      channel: "WHATSAPP",
+      paymentProvider: "WHATSAPP_MANUAL",
+      status: "EN_ATTENTE",
+      manual: true,
+      shippingCity: shipping?.city,
+      shippingAddress: shipping?.address,
+      shippingPhone: shipping?.phone,
+    },
+  });
+  await addOrderEvent(
+    order.id,
+    "CREATED",
+    `Commande créée par l'équipe${data.reason ? ` : ${data.reason}` : "."}`,
+    actorLabel(admin),
+  );
+
+  if (data.markPaid) {
+    await markOrderPaid({
+      orderId: order.id,
+      provider: "WHATSAPP_MANUAL",
+      providerRef: `manual:${order.id}`,
+      amount: order.amount,
+      rawStatus: "validated_by_admin",
+      actorLabel: actorLabel(admin),
+      eventMessage: `Paiement validé à la création : ${data.reason}`,
+    });
+  }
+
+  await audit(
+    admin,
+    "order.create_manual",
+    "order",
+    order.id,
+    `Commande manuelle ${product.name} × ${quantity}${data.markPaid ? " (payée)" : ""}`,
+  );
+  refresh(order.id);
+  return { ok: true, message: "Commande créée.", orderId: order.id };
+}

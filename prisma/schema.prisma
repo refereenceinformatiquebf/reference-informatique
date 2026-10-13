@@ -214,6 +214,7 @@ model Order {
   // Suivi de la livraison physique (null pour les produits non physiques).
   deliveryStatus    DeliveryStatus? @map("delivery_status")
   deliveredAt       DateTime?       @map("delivered_at")
+  paidAt            DateTime?       @map("paid_at")
   refundedAt        DateTime?       @map("refunded_at")
   // Commande créée par l'équipe (client mal localisé, paiement hors site…).
   manual            Boolean         @default(false)
@@ -226,6 +227,7 @@ model Order {
 
   @@index([providerSessionId])
   @@index([status, createdAt])
+  @@index([paidAt])
   @@index([profileId])
   @@index([productId])
   // Contrainte applicative (vérifiée en code, pas en DB) : productId XOR
