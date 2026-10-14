@@ -4,6 +4,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { MotDePasseOublieForm } from "./mot-de-passe-oublie-form";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/mot-de-passe-oublie" },
   title: "Mot de passe oublié",
   robots: { index: false, follow: true },
 };

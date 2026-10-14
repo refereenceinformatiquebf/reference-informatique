@@ -1,0 +1,57 @@
+name: Vérifications
+
+# Lancé à chaque modification poussée et à chaque demande de fusion :
+# typage, règles de code, tests, et compilation de production.
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typage
+        run: npm run typecheck
+
+      - name: Règles de code
+        run: npm run lint
+
+      - name: Tests
+        run: npm test
+
+      - name: Compilation de production
+        run: npm run build
+        env:
+          # Valeurs factices : la compilation n'appelle ni la base ni les services externes.
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+          NEXT_PUBLIC_SUPABASE_URL: https://ci.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key
+          SUPABASE_SERVICE_ROLE_KEY: ci-service-key
+          NEXT_PUBLIC_SITE_URL: https://www.reference-informatique.com
+          CATALOG_SKIP_DB: "1"
+
+  secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Recherche de clés oubliées dans le code
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

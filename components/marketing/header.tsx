@@ -24,7 +24,6 @@ export function Header() {
       <div className="mx-auto flex h-[4.25rem] max-w-6xl items-center justify-between gap-4 px-4">
         <Link
           href="/"
-          aria-label="Référence Informatique — accueil"
           className="rounded-md focus-visible:shadow-[var(--focus-halo)]"
         >
           <Brand size={40} />

@@ -15,7 +15,8 @@ import {
 } from "@/components/admin/ui";
 import { AdminAction } from "@/components/admin/admin-action";
 import { prisma } from "@/lib/prisma/client";
-import { getAllProducts } from "@/lib/catalog/live";
+import { getAdminProducts } from "@/lib/catalog/live";
+import { optionsFrom } from "@/lib/admin/product-options";
 import { formatDate } from "@/lib/format";
 import { revokeAccessAction } from "@/lib/actions/admin/access";
 import { GrantAccessForm } from "./grant-access-form";
@@ -57,7 +58,7 @@ export default async function AdminAccessPage({
       include: { profile: true, product: true },
     }),
     prisma.access.count({ where }),
-    getAllProducts(),
+    getAdminProducts().then(optionsFrom),
   ]);
 
   return (

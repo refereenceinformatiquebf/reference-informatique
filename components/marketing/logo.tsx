@@ -54,7 +54,7 @@ export function Wordmark({
         )}
       >
         Référence
-      </span>
+      </span>{" "}
       <span
         className={cn(
           "mt-[3px] text-[0.5625rem] leading-none font-medium tracking-[0.15em] uppercase",

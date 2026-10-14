@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma/client";
 import { requireAdmin } from "@/lib/auth/dal";
 import { actorLabel, audit } from "@/lib/admin/audit";
 import { done, fail, type ActionResult } from "@/lib/admin/action";
-import { getProduct } from "@/lib/catalog/live";
+import { getAdminProduct } from "@/lib/catalog/live";
 import { ensureProductRow } from "@/lib/catalog/db-sync";
 import { getClientEmail } from "@/lib/orders";
 import { runAfterResponse } from "@/lib/after-response";
@@ -50,7 +50,8 @@ export async function grantAccessAction(
     );
   }
 
-  const product = await getProduct(slug);
+  // Tous les produits, y compris masqués (ancien produit, produit en préparation).
+  const product = (await getAdminProduct(slug))?.product;
   if (!product) return fail("Produit introuvable.");
   const row = await ensureProductRow(product.slug);
   if (!row) return fail("Produit indisponible.");

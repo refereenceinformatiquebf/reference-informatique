@@ -15,6 +15,12 @@ export async function GET(
 ) {
   const { productSlug, lessonId } = await params;
 
+  // Un identifiant qui n'est pas un UUID ne peut correspondre à aucune leçon :
+  // 404 tout de suite, sans interroger la base (qui répondrait par une erreur).
+  if (!/^[0-9a-f-]{36}$/i.test(lessonId)) {
+    return NextResponse.json({ error: "Leçon introuvable." }, { status: 404 });
+  }
+
   const profile = await getCurrentProfile();
   if (!profile) {
     return NextResponse.json({ error: "Non authentifié." }, { status: 401 });

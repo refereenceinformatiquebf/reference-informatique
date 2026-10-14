@@ -18,13 +18,17 @@ import { getProduct, getService } from "@/lib/catalog/live";
 
 /** Ligne `products` pour ce slug (créée si besoin), ou null si le slug est inconnu. */
 export async function ensureProductRow(slug: string) {
-  const product = await getProduct(slug);
-  if (!product) return null;
-
+  // Un produit géré depuis l'administration (créé ou modifié là) a toujours sa
+  // ligne, MÊME masqué : l'équipe doit pouvoir préparer son contenu et ses
+  // accès avant de le rendre visible. Les clients, eux, ne passent jamais par
+  // ici pour un produit masqué (la commande vérifie d'abord le catalogue visible).
   const existing = await prisma.product.findUnique({ where: { slug } });
   if (existing && (existing.adminEditedAt || existing.source === "ADMIN")) {
     return existing;
   }
+
+  const product = await getProduct(slug);
+  if (!product) return null;
 
   const data = {
     name: product.name,

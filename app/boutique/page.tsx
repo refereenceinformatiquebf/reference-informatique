@@ -10,7 +10,7 @@ import {
   type ProductKind,
 } from "@/lib/catalog";
 import { getVisibleProducts } from "@/lib/catalog/live";
-import { getVisitorCountry } from "@/lib/geo";
+import { getVisitorCountry, isHomeCountry } from "@/lib/geo";
 import { fr } from "@/lib/typography";
 import { whatsappLink } from "@/lib/site";
 import { IconWhatsapp } from "@/components/icons";
@@ -86,6 +86,9 @@ export default async function BoutiquePage({
         <Container>
           {selected === "cle" ? <CleExplainer /> : null}
 
+          <h2 className="sr-only">
+            {selected ? PRODUCT_KINDS[selected].plural : "Tous les produits"}
+          </h2>
           <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {list.map((product, index) => (
               <li key={product.slug}>
@@ -125,6 +128,24 @@ export default async function BoutiquePage({
               </a>
             </Button>
           </div>
+
+          {isHomeCountry(country) ? null : (
+            <p className="text-ink-faint mt-5 text-center text-sm leading-relaxed">
+              Vous êtes au Burkina Faso et vous ne voyez pas toutes nos offres ?
+              Votre connexion est peut-être localisée à l&rsquo;étranger.{" "}
+              <a
+                href={whatsappLink(
+                  "Bonjour, je suis au Burkina Faso mais je ne vois pas toutes les offres de la boutique.",
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-text font-medium underline underline-offset-4"
+              >
+                Écrivez-nous sur WhatsApp
+              </a>
+              , nous vous aidons.
+            </p>
+          )}
         </Container>
       </section>
     </div>
@@ -158,7 +179,7 @@ function FilterChip({
         <span
           className={cn(
             "tabular rounded-full px-1.5 text-xs",
-            active ? "bg-white/20" : "bg-paper-raised text-ink-faint",
+            active ? "bg-brand-900/40" : "bg-paper-raised text-ink-faint",
           )}
         >
           {count}

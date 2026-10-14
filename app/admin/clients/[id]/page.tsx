@@ -19,7 +19,8 @@ import { whatsappLinkTo } from "@/lib/site";
 import { saveClientNoteAction } from "@/lib/actions/admin/clients";
 import { revokeAccessAction } from "@/lib/actions/admin/access";
 import { GrantAccessForm } from "../../acces/grant-access-form";
-import { getAllProducts } from "@/lib/catalog/live";
+import { getAdminProducts } from "@/lib/catalog/live";
+import { optionsFrom } from "@/lib/admin/product-options";
 
 export const metadata: Metadata = { title: "Client" };
 export const dynamic = "force-dynamic";
@@ -46,7 +47,7 @@ export default async function AdminClientDetailPage({
   });
   if (!profile) notFound();
 
-  const products = await getAllProducts();
+  const products = optionsFrom(await getAdminProducts());
   const paid = profile.orders.filter((order) => order.status === "PAYE");
   const spent = paid.reduce((sum, order) => sum + order.amount, 0);
 

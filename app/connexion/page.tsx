@@ -4,6 +4,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { ConnexionForm } from "./connexion-form";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/connexion" },
   title: "Connexion",
   robots: { index: false, follow: true },
 };

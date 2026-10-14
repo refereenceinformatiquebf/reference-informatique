@@ -28,6 +28,7 @@ export const metadata: Metadata = {
     absolute: `${SITE.name} — Sites web, agents IA, maintenance et formations`,
   },
   description: SITE.description,
+  alternates: { canonical: "/" },
 };
 
 /** Les quatre garanties de méthode : seulement des engagements qu'on tient. */

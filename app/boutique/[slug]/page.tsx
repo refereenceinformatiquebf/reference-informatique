@@ -46,8 +46,20 @@ export async function generateMetadata({
     openGraph: {
       title: product.seo.title,
       description: product.seo.description,
-      images: product.poster ? [{ url: product.poster.src }] : undefined,
+      // Sans affiche, l'image du site : un openGraph défini ici remplace sinon
+      // celui du site et la fiche n'aurait aucune image de partage.
+      images: product.poster
+        ? [{ url: product.poster.src, alt: product.poster.alt }]
+        : [
+            {
+              url: "/opengraph-image.png",
+              width: 1200,
+              height: 630,
+              alt: SITE.name,
+            },
+          ],
     },
+    twitter: { card: "summary_large_image" },
   };
 }
 

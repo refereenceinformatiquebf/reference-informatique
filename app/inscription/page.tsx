@@ -4,6 +4,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { InscriptionForm } from "./inscription-form";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/inscription" },
   title: "Créer un compte",
   robots: { index: false, follow: true },
 };
