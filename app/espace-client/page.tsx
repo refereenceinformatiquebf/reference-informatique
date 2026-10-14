@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma/client";
 import { requireProfile } from "@/lib/auth/dal";
+import { getProduct } from "@/lib/catalog/live";
 import { Container, Eyebrow } from "@/components/ui/section";
 import { fr } from "@/lib/typography";
 import { EspaceClientTabs } from "./espace-client-tabs";
@@ -23,7 +24,7 @@ export default async function EspaceClientPage({
       ? onglet
       : "formations";
 
-  const [access, orders, quotes] = await Promise.all([
+  const [accessRows, orders, quotes] = await Promise.all([
     prisma.access.findMany({
       where: { profileId: profile.id },
       include: { product: true },
@@ -40,6 +41,16 @@ export default async function EspaceClientPage({
       orderBy: { createdAt: "desc" },
     }),
   ]);
+
+  // Un produit "licence-edn" s'affiche différemment des formations (clé à activer, pas de
+  // leçon) — déterminé via le catalogue (la base ne porte pas le mode de livraison).
+  const access = await Promise.all(
+    accessRows.map(async (item) => ({
+      ...item,
+      isLicence:
+        (await getProduct(item.product.slug))?.delivery === "licence-edn",
+    })),
+  );
 
   return (
     <div className="py-10 sm:py-14">

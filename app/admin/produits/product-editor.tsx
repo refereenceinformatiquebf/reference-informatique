@@ -38,6 +38,7 @@ const DELIVERY_LABELS: Record<(typeof DELIVERY_MODES)[number], string> = {
   "cle-physique": "Clé USB livrée chez le client (+ accès plateforme)",
   numerique: "Accès numérique dans l'espace client (PDF, fichiers)",
   manuel: "Remise par l'équipe sur WhatsApp après paiement",
+  "licence-edn": "Licence d'activation récupérée automatiquement (EDN)",
 };
 
 function Submit({ label }: { label: string }) {

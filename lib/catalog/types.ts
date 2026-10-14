@@ -73,11 +73,18 @@ export const COVER_TONES = ["navy", "blue", "deep", "sky"] as const;
 export type CoverTone = (typeof COVER_TONES)[number];
 
 /** Comment le client reçoit son achat. */
-export const DELIVERY_MODES = ["cle-physique", "numerique", "manuel"] as const;
+export const DELIVERY_MODES = [
+  "cle-physique",
+  "numerique",
+  "manuel",
+  "licence-edn",
+] as const;
 /**
  * - cle-physique : clé USB livrée chez le client + accès plateforme
  * - numerique    : accès par l'espace client (guide PDF, liens, fichiers)
  * - manuel       : l'équipe contacte le client sur WhatsApp après paiement
+ * - licence-edn  : licence d'activation récupérée automatiquement auprès d'un fournisseur externe
+ *                  (voir lib/licences/) — clé + application d'activation, pas de leçon à suivre
  */
 export type DeliveryMode = (typeof DELIVERY_MODES)[number];
 

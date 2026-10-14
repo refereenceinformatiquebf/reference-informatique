@@ -917,4 +917,101 @@ export const PRODUCTS: Product[] = [
     },
     order: 19,
   },
+
+  /* ------------------------ Licence Expert — Office 365 & Windows 11 ------------------------ */
+  {
+    slug: "licence-expert-office-365-windows-11",
+    name: "Licence Expert — Office 365 & Windows 11",
+    tagline:
+      "Une seule licence active Microsoft Office 365 et Windows 11 — générée automatiquement, en quelques minutes.",
+    summary:
+      "Licence Expert, Microsoft Office 365 et Windows 11 : activez les deux en quelques minutes, licence générée automatiquement après paiement.",
+    kind: "pack",
+    price: 4000,
+    cover: { tone: "navy", motif: "logiciel" },
+    poster: {
+      src: "/produits/affiches/licence-expert-office-365-windows-11.webp",
+      alt: "Licence Expert — Office 365 et Windows 11 : une licence générée automatiquement après paiement, pour activer les deux en quelques minutes.",
+    },
+    delivery: "licence-edn",
+    facts: [
+      { icon: "eclair", label: "Licence en quelques minutes" },
+      { icon: "ordinateur", label: "Office 365 + Windows 11" },
+      { icon: "acces-a-vie", label: "Licence à vie" },
+      { icon: "support", label: "Guide + aide WhatsApp" },
+    ],
+    story: [
+      "Windows qui réclame son activation, Office qui refuse d'enregistrer un document : ça arrive au pire moment, en plein rapport ou en pleine présentation. Racheter une licence Microsoft au prix fort n'est pas toujours la solution la plus simple quand il faut activer les deux à la fois.",
+      "Cette licence Expert fait les deux en une seule fois : elle active Microsoft Office 365 (Word, Excel, PowerPoint, Outlook, OneNote) et Windows 11 sur votre ordinateur, avec une seule petite application à installer. Vous payez, votre licence personnelle est générée automatiquement, vous l'installez : c'est fait.",
+      "Pas d'abonnement à renouveler, pas de compte tiers à créer : une licence à vie, à vous, avec un guide d'installation et notre équipe disponible si une étape bloque.",
+    ],
+    highlights: [
+      "Licence personnelle, générée automatiquement après votre paiement",
+      "Active à la fois Microsoft Office 365 et Windows 11",
+      "Application d'activation incluse : une seule installation, quelques minutes",
+      "Licence à vie, aucun abonnement à renouveler",
+      "Guide d'installation détaillé, étape par étape",
+      "Assistance sur WhatsApp si une étape bloque",
+    ],
+    contents: [
+      {
+        title: "Ce que contient la licence",
+        items: [
+          {
+            name: "Licence Expert",
+            detail:
+              "Votre clé d'activation personnelle, pas une simple licence Windows",
+          },
+          {
+            name: "Microsoft Office 365",
+            detail: "Word, Excel, PowerPoint, Outlook, OneNote",
+          },
+          { name: "Windows 11", detail: "Activation complète, à vie" },
+          {
+            name: "Application d'activation",
+            detail:
+              "Un seul outil pour tout activer, avec guide d'installation",
+          },
+        ],
+      },
+    ],
+    forWho: [
+      "Toute personne dont Windows ou Office n'est plus activé",
+      "Étudiants, entrepreneurs et salariés qui ont besoin d'Office pour travailler",
+      "Qui vient d'installer ou de réinitialiser son PC",
+      "Qui veut une licence à vie plutôt qu'un abonnement à renouveler",
+    ],
+    notForWho: ["Ordinateurs Mac (cette licence est conçue pour Windows)"],
+    faq: [
+      {
+        question: "Comment vais-je recevoir ma licence ?",
+        answer:
+          "Dès que votre paiement est confirmé, votre licence est générée automatiquement et apparaît dans votre espace client, rubrique « Mes licences » — avec l'application d'activation et le guide d'installation. Aucune attente.",
+      },
+      {
+        question:
+          "C'est une licence pour Windows seulement, ou aussi pour Office ?",
+        answer:
+          "Les deux. Une seule licence Expert active à la fois Microsoft Office 365 et Windows 11 — ce n'est pas une simple licence Windows.",
+      },
+      {
+        question: "Sur combien d'appareils puis-je l'utiliser ?",
+        answer:
+          "Votre licence active 2 appareils. Besoin d'un appareil supplémentaire ? Une nouvelle licence est disponible à l'achat : écrivez-nous sur WhatsApp.",
+      },
+      {
+        question: "Est-ce que la licence expire ou faut-il la renouveler ?",
+        answer:
+          "Non, c'est une licence à vie : pas d'abonnement, pas de renouvellement à prévoir.",
+      },
+      faqPaiementNumerique,
+      faqAcces,
+    ],
+    seo: {
+      title: "Licence Expert — Office 365 & Windows 11 activés automatiquement",
+      description:
+        "Une licence pour activer Microsoft Office 365 et Windows 11. Générée automatiquement après paiement, licence à vie. 4 000 F.",
+    },
+    order: 20,
+  },
 ];

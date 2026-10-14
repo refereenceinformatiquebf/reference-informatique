@@ -24,6 +24,7 @@ import { DeliveryUpdateEmail } from "./templates/delivery-update";
 import { RefundNoticeEmail } from "./templates/refund-notice";
 import { AdminReplyEmail } from "./templates/admin-reply";
 import { AuthLinkEmail, type AuthLinkKind } from "./templates/auth-link";
+import { LicenceStockAlertEmail } from "./templates/licence-stock-alert";
 
 const SENDER = {
   name: SITE.name,
@@ -180,6 +181,9 @@ export async function sendPaymentConfirmation(params: {
   orderId: string;
   /** Lien direct vers l'achat (fiche du produit dans l'espace client). */
   ctaPath?: string;
+  /** Renseignés uniquement pour une livraison "licence-edn". */
+  licenceKey?: string | null;
+  installerUrl?: string | null;
 }) {
   await sendEmail({
     to: { email: params.to, name: params.clientName },
@@ -191,6 +195,26 @@ export async function sendPaymentConfirmation(params: {
     }),
     template: "payment-confirmation",
     relatedOrderId: params.orderId,
+  });
+}
+
+/** Alerte interne : stock local de licences EDN bas ou épuisé (voir lib/licences/stock.ts). */
+export async function sendLicenceStockAlert(params: {
+  milestone: "low" | "empty";
+  available: number;
+}) {
+  const subject =
+    params.milestone === "empty"
+      ? "Stock de licences épuisé"
+      : "Stock de licences bas";
+  await sendEmail({
+    to: adminRecipients(),
+    subject,
+    react: LicenceStockAlertEmail({
+      ...params,
+      adminUrl: `${SITE.url}/admin/licences`,
+    }),
+    template: "licence-stock-alert",
   });
 }
 

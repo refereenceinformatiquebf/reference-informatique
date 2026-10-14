@@ -36,6 +36,7 @@ export default async function AdminLayout({
         },
         { href: "/admin/clients", label: "Clients" },
         { href: "/admin/acces", label: "Accès" },
+        { href: "/admin/licences", label: "Licences EDN" },
       ],
     },
     {

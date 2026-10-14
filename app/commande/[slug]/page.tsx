@@ -24,6 +24,8 @@ const DELIVERY_LINE = {
     "Accès activé dans votre espace client dès que le paiement est confirmé.",
   manuel:
     "Après la confirmation du paiement, notre équipe vous contacte sur WhatsApp pour vous remettre votre accès.",
+  "licence-edn":
+    "Votre licence d'activation est générée automatiquement et vous attend dans votre espace client dès que le paiement est confirmé.",
 } as const;
 
 export default async function CommandePage({

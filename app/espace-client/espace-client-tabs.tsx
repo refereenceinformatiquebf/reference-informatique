@@ -24,7 +24,7 @@ type Props = {
   profile: Profile;
   /** Onglet affiché à l'arrivée (« profil » pour un compte tout juste créé). */
   defaultTab?: "formations" | "commandes" | "devis" | "profil";
-  access: (Access & { product: Product })[];
+  access: (Access & { product: Product; isLicence: boolean })[];
   orders: (Order & { product: Product | null; service: Service | null })[];
   quotes: (QuoteRequest & { service: Service })[];
 };
@@ -77,7 +77,10 @@ export function EspaceClientTabs({
                 key={item.id}
                 className="border-line bg-paper flex flex-col rounded-lg border p-5"
               >
-                <IconChip name="formation" size={44} />
+                <IconChip
+                  name={item.isLicence ? "cadenas" : "formation"}
+                  size={44}
+                />
                 <h3 className="font-display text-ink mt-4 text-[1.25rem] leading-tight">
                   {item.product.name}
                 </h3>
@@ -86,8 +89,16 @@ export function EspaceClientTabs({
                   {item.grantedAt.toLocaleDateString("fr-FR", dateFormat)}
                 </p>
                 <Button asChild className="mt-5 w-full">
-                  <Link href={`/espace-client/formations/${item.product.slug}`}>
-                    Accéder à mon contenu
+                  <Link
+                    href={
+                      item.isLicence
+                        ? `/espace-client/licences/${item.product.slug}`
+                        : `/espace-client/formations/${item.product.slug}`
+                    }
+                  >
+                    {item.isLicence
+                      ? "Accéder à ma licence"
+                      : "Accéder à mon contenu"}
                   </Link>
                 </Button>
               </div>

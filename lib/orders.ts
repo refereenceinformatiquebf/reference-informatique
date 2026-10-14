@@ -11,11 +11,18 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { cancelSaspaySession } from "@/lib/payments/saspay";
 import {
   sendDeliveryUpdate,
+  sendLicenceStockAlert,
   sendOrderAlert,
   sendOrderConfirmation,
   sendPaymentConfirmation,
   sendRefundNotice,
 } from "@/lib/email/send";
+import {
+  claimFromLocalStock,
+  claimLiveFallback,
+  checkLowStock,
+} from "@/lib/licences/stock";
+import { audit } from "@/lib/admin/audit";
 
 /* ----------------------------- Historique ----------------------------- */
 
@@ -111,11 +118,12 @@ export async function markOrderPaid(params: MarkOrderPaidParams) {
     return { ok: false as const, reason: "order_not_found" as const };
   }
 
-  // Livraison physique ? Décidé avant la transaction (lecture du catalogue).
+  // Livraison physique / licence EDN ? Décidé avant la transaction (lecture du catalogue).
   const catalogProduct = order.product
     ? await getProduct(order.product.slug)
     : undefined;
   const needsDelivery = catalogProduct?.delivery === "cle-physique";
+  const isLicenceProduct = catalogProduct?.delivery === "licence-edn";
 
   const run = (): Promise<PaidOutcome> =>
     prisma.$transaction(async (tx): Promise<PaidOutcome> => {
@@ -162,6 +170,12 @@ export async function markOrderPaid(params: MarkOrderPaidParams) {
           },
         });
         if (current.productId) {
+          // Stock local d'abord (même transaction, zéro appel réseau) : si vide, l'Access est
+          // quand même créé SANS licence — ensureLicenceFulfilled() (appelée après la
+          // transaction, voir notifyPaymentConfirmed) tente alors le repli direct auprès d'EDN.
+          const stock = isLicenceProduct
+            ? await claimFromLocalStock(current.id, tx)
+            : null;
           await tx.access.upsert({
             where: {
               profileId_productId: {
@@ -173,6 +187,12 @@ export async function markOrderPaid(params: MarkOrderPaidParams) {
             create: {
               profileId: current.profileId,
               productId: current.productId,
+              ...(stock
+                ? {
+                    licenseKey: stock.licenseKey,
+                    installerUrl: stock.installerUrl,
+                  }
+                : {}),
             },
           });
         }
@@ -261,11 +281,78 @@ async function loadOrderForEmail(orderId: string) {
   return { order, product: order.product, catalogProduct, email, shipping };
 }
 
+/**
+ * Pour un produit "licence-edn" : si le stock local n'a rien pu fournir pendant la transaction
+ * de paiement (Access créé sans licence), tente le repli direct auprès d'EDN — jamais pendant la
+ * transaction (appel réseau). Si le stock A fourni la licence, vérifie seulement le seuil
+ * d'alerte. Retourne la licence finale (pour l'inclure dans l'e-mail), ou null si ce n'est pas un
+ * produit à licence.
+ */
+async function ensureLicenceFulfilled(
+  order: { id: string; profileId: string; productId: string | null },
+  catalogProduct: { delivery: string } | undefined,
+  clientName: string,
+  clientEmail: string | null,
+): Promise<{ licenseKey: string; installerUrl: string } | null> {
+  if (catalogProduct?.delivery !== "licence-edn" || !order.productId)
+    return null;
+
+  const access = await prisma.access.findUnique({
+    where: {
+      profileId_productId: {
+        profileId: order.profileId,
+        productId: order.productId,
+      },
+    },
+  });
+  if (!access) return null;
+
+  if (access.licenseKey && access.installerUrl) {
+    const milestone = await checkLowStock().catch(() => null);
+    if (milestone) {
+      const available = await prisma.licenseStock.count({
+        where: { assignedOrderId: null },
+      });
+      await sendLicenceStockAlert({ milestone, available }).catch((err) =>
+        console.error("[licences] alerte stock non envoyée :", err),
+      );
+    }
+    return { licenseKey: access.licenseKey, installerUrl: access.installerUrl };
+  }
+
+  if (!clientEmail) return null; // pas de contact possible, reste en attente
+
+  const result = await claimLiveFallback(clientName, clientEmail, order.id);
+  if ("error" in result) {
+    await audit(
+      null,
+      result.quotaReached ? "licence.quota_reached" : "licence.claim_failed",
+      "order",
+      order.id,
+      result.error,
+    );
+    return null;
+  }
+
+  await prisma.access.update({
+    where: { id: access.id },
+    data: { licenseKey: result.licenseKey, installerUrl: result.installerUrl },
+  });
+  return result;
+}
+
 async function notifyPaymentConfirmed(orderId: string) {
   const data = await loadOrderForEmail(orderId);
   if (!data) return;
   const { order, product, catalogProduct, email, shipping } = data;
   const delivery = catalogProduct?.delivery ?? "numerique";
+
+  const licence = await ensureLicenceFulfilled(
+    order,
+    catalogProduct,
+    order.profile.name,
+    email,
+  );
 
   const tasks: Promise<unknown>[] = [
     sendOrderAlert({
@@ -294,7 +381,11 @@ async function notifyPaymentConfirmed(orderId: string) {
         ctaPath:
           delivery === "numerique"
             ? `/espace-client/formations/${product.slug}`
-            : "/espace-client",
+            : delivery === "licence-edn"
+              ? `/espace-client/licences/${product.slug}`
+              : "/espace-client",
+        licenceKey: licence?.licenseKey,
+        installerUrl: licence?.installerUrl,
       }),
     );
   }

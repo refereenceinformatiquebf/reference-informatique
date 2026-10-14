@@ -270,6 +270,23 @@ export const AFFICHES = [
     artH: 710,
     alt: "Performance PC : un scan d'environ 30 secondes pour savoir pourquoi votre ordinateur ralentit, puis la marche à suivre.",
   },
+  {
+    slug: "licence-expert-office-365-windows-11",
+    tone: "navy",
+    kind: "pack",
+    title: "Licence Expert — Office 365 & Windows 11",
+    lead: "Une seule licence active Microsoft Office 365 et Windows 11 — générée automatiquement après paiement.",
+    facts: [
+      ["Minutes", "licence générée"],
+      ["Office", "+ Windows 11"],
+      ["À vie", "aucun abonnement"],
+      ["Guide +", "aide WhatsApp"],
+    ],
+    footer: OK_NUM,
+    art: Art.artLicence,
+    artH: 650,
+    alt: "Licence Expert — Office 365 et Windows 11 : une licence générée automatiquement après paiement, pour activer les deux en quelques minutes.",
+  },
 ];
 
 /* ---------------------------------------------------------------------- */

@@ -24,6 +24,8 @@ const PAID_MESSAGE = {
     "Votre accès est activé. Vous le retrouvez dans votre espace client, à tout moment.",
   manuel:
     "Votre paiement est confirmé. Notre équipe vous contacte sur WhatsApp pour vous remettre votre accès.",
+  "licence-edn":
+    "Votre paiement est confirmé. Votre licence d'activation vous attend dans votre espace client.",
 } as const;
 
 export default async function CommandeRetourPage({

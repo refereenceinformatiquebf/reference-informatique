@@ -367,3 +367,45 @@ export function artPerformance() {
     <div style="position:absolute;left:40px;right:40px;bottom:32px;border-radius:18px;background:#1565c0;padding:22px 30px;font-size:29px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:16px"><span>Le problème précis, puis les clics à faire dans l'ordre</span><span style="font-size:40px;line-height:1">→</span></div>
   </div>`;
 }
+
+export function artLicence() {
+  const keyIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:52px;height:52px"><circle cx="8" cy="15" r="4"/><path d="M10.5 12.5L20 3M20 3v4h-4M16.5 6.5L20 3"/></svg>`;
+  const okIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
+
+  const apps = [
+    ["W", "Windows 11", "#0b1f3a"],
+    ["W", "Word", "#1a5fb4"],
+    ["X", "Excel", "#157a45"],
+    ["P", "PowerPoint", "#c4401a"],
+    ["O", "Outlook", "#1565c0"],
+    ["N", "OneNote", "#7719aa"],
+  ];
+  const tiles = apps
+    .map(
+      ([mono, name, color]) => `
+    <div class="card" style="padding:26px 24px;height:188px;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="width:78px;height:78px;border-radius:18px;background:${color};color:#fff;display:flex;align-items:center;justify-content:center" class="serif">
+        <span style="font-size:36px;line-height:1">${mono}</span>
+      </div>
+      <div style="font-size:26px;font-weight:700;color:#0b1f3a;line-height:1.1">${name}</div>
+    </div>`,
+    )
+    .join("");
+
+  return `<div class="abs" style="inset:0;display:flex;flex-direction:column;gap:28px">
+    <div class="card" style="width:1056px;height:216px;padding:0 44px;display:flex;align-items:center;justify-content:space-between;flex:none">
+      <div style="display:flex;align-items:center;gap:30px">
+        <div style="width:116px;height:116px;border-radius:28px;background:linear-gradient(150deg,#0b1f3a,#1565c0);display:flex;align-items:center;justify-content:center;flex:none">${keyIcon}</div>
+        <div>
+          <div class="muted" style="font-size:23px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Licence Expert</div>
+          <div class="serif" style="font-size:46px;color:#0b1f3a;margin-top:8px;letter-spacing:.02em">XXXX · XXXX · XXXX</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:16px 28px;border-radius:999px;background:#e5f6ec;color:#157a45;font-weight:700;font-size:25px;flex:none">
+        <span class="chk" style="background:#157a45;width:38px;height:38px">${okIcon}</span>
+        Activée
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;width:1056px">${tiles}</div>
+  </div>`;
+}

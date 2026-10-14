@@ -222,8 +222,9 @@ model Order {
   createdAt         DateTime        @default(now()) @map("created_at")
   updatedAt         DateTime        @updatedAt @map("updated_at")
 
-  payments Payment[]
-  events   OrderEvent[]
+  payments     Payment[]
+  events       OrderEvent[]
+  licenseStock LicenseStock?
 
   @@index([providerSessionId])
   @@index([status, createdAt])
@@ -262,9 +263,43 @@ model Access {
   productId String   @map("product_id") @db.Uuid
   product   Product  @relation(fields: [productId], references: [id])
   grantedAt DateTime @default(now()) @map("granted_at")
+  // Renseignes uniquement pour un produit a livraison "licence-edn" (voir lib/edn-license/) : la
+  // licence Windows + Office recuperee automatiquement aupres de L'Expert du Numerique.
+  licenseKey   String? @map("license_key")
+  installerUrl String? @map("installer_url")
 
   @@unique([profileId, productId])
   @@map("access")
+}
+
+/**
+ * Stock local de licences Expert du Numerique, recues a l'avance par lots (voir
+ * lib/edn-license/stock.ts) — rend la vente independante de la disponibilite de l'API externe au
+ * moment precis ou le client paie : on consomme notre propre stock plutot que d'appeler en direct
+ * a chaque vente (l'appel direct reste un repli, voir lib/orders.ts).
+ */
+model LicenseStock {
+  id              String    @id @default(uuid()) @db.Uuid
+  licenseKey      String    @map("license_key")
+  installerUrl    String    @map("installer_url")
+  assignedOrderId String?   @unique @map("assigned_order_id") @db.Uuid
+  assignedOrder   Order?    @relation(fields: [assignedOrderId], references: [id])
+  assignedAt      DateTime? @map("assigned_at")
+  receivedAt      DateTime  @default(now()) @map("received_at")
+
+  @@index([receivedAt])
+  @@map("license_stock")
+}
+
+/// Alerte stock bas/epuise — une seule ligne (singleton, un seul fournisseur EDN) : empeche de
+/// renvoyer le meme e-mail a chaque vente une fois le seuil franchi. Remise a zero quand un
+/// nouveau lot est recu.
+model LicenseStockAlert {
+  id              String    @id @default("singleton")
+  lowNotifiedAt   DateTime? @map("low_notified_at")
+  emptyNotifiedAt DateTime? @map("empty_notified_at")
+
+  @@map("license_stock_alerts")
 }
 
 model Module {
