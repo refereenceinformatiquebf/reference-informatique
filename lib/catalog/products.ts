@@ -48,6 +48,10 @@ export const PRODUCTS: Product[] = [
     kind: "formation",
     price: 9900,
     cover: { tone: "navy", motif: "formation" },
+    poster: {
+      src: "/produits/affiches/pack-formations-completes-office-ia.webp",
+      alt: "Pack de Formations Complètes : Excel de A à Z, Excel et IA, Word, PowerPoint, Access et intelligence artificielle réunis dans un seul accès à vie.",
+    },
     delivery: "numerique",
     facts: [
       { icon: "eclair", label: "Accès immédiat" },
@@ -135,6 +139,10 @@ export const PRODUCTS: Product[] = [
     kind: "pack",
     price: 4900,
     cover: { tone: "blue", motif: "pack" },
+    poster: {
+      src: "/produits/affiches/pack-120-logiciels-excel.webp",
+      alt: "Pack de plus de 120 logiciels Excel : facturation, stock, paie, budget et comptabilité, avec une formation Excel et 100 livres PDF en bonus.",
+    },
     delivery: "numerique",
     facts: [
       { icon: "eclair", label: "Accès immédiat" },
@@ -227,6 +235,10 @@ export const PRODUCTS: Product[] = [
     price: 4900,
     compareAtPrice: 25000,
     cover: { tone: "sky", motif: "modele" },
+    poster: {
+      src: "/produits/affiches/pack-5500-diapositives-powerpoint.webp",
+      alt: "Pack de plus de 5 500 diapositives PowerPoint : des modèles modernes et modifiables pour vos réunions et vos soutenances.",
+    },
     delivery: "numerique",
     facts: [
       { icon: "eclair", label: "Accès immédiat" },
@@ -300,6 +312,10 @@ export const PRODUCTS: Product[] = [
     kind: "formation",
     price: 3900,
     cover: { tone: "navy", motif: "formation" },
+    poster: {
+      src: "/produits/affiches/prise-de-parole-en-public.webp",
+      alt: "Pack Prise de Parole en Public : le trac et les émotions, la construction du discours, la persuasion, avec 10 livres et audios en bonus.",
+    },
     delivery: "numerique",
     facts: [
       { icon: "eclair", label: "Accès immédiat" },
@@ -374,6 +390,10 @@ export const PRODUCTS: Product[] = [
     kind: "formation",
     price: 2900,
     cover: { tone: "blue", motif: "formation" },
+    poster: {
+      src: "/produits/affiches/formation-anglais-professionnel.webp",
+      alt: "Pack de Formation en Anglais : 250 vidéos, 200 exercices, 250 audios et 150 fiches PDF, du niveau débutant au niveau avancé.",
+    },
     delivery: "numerique",
     facts: [
       { icon: "eclair", label: "Accès immédiat" },
@@ -456,6 +476,10 @@ export const PRODUCTS: Product[] = [
     price: 6000,
     compareAtPrice: 25000,
     cover: { tone: "deep", motif: "ebook" },
+    poster: {
+      src: "/produits/affiches/le-chercheur-augmente.webp",
+      alt: "Le Chercheur Augmenté : guide IA pour la recherche académique, avec des prompts, une revue de littérature flash et une checklist de vérification.",
+    },
     delivery: "numerique",
     facts: [
       { icon: "eclair", label: "Accès immédiat" },
@@ -556,6 +580,10 @@ export const PRODUCTS: Product[] = [
     price: 3900,
     compareAtPrice: 15000,
     cover: { tone: "sky", motif: "ebook" },
+    poster: {
+      src: "/produits/affiches/comprends-ce-quelle-traverse.webp",
+      alt: "Comprends ce qu'elle traverse : guide de bien-être féminin sur la fatigue, la tristesse, les bouffées de chaleur et l'irritabilité. Ne remplace pas un avis médical.",
+    },
     delivery: "numerique",
     facts: [
       { icon: "eclair", label: "Accès immédiat" },
@@ -615,6 +643,10 @@ export const PRODUCTS: Product[] = [
     kind: "ebook",
     price: 3000,
     cover: { tone: "deep", motif: "ebook" },
+    poster: {
+      src: "/produits/affiches/verites-cachees-couples.webp",
+      alt: "Les Vérités Cachées qui Détruisent les Couples : un livre PDF de 76 pages sur les non-dits et la communication qui répare.",
+    },
     delivery: "numerique",
     facts: [
       { icon: "eclair", label: "Accès immédiat" },
@@ -673,6 +705,10 @@ export const PRODUCTS: Product[] = [
     price: 6000,
     compareAtPrice: 10000,
     cover: { tone: "deep", motif: "outil" },
+    poster: {
+      src: "/produits/affiches/formation-maintenance-logicielle.webp",
+      alt: "Formation Maintenance Logicielle : 12 modules en direct sur 20 jours, groupes de 15 personnes maximum, attestation de participation.",
+    },
     delivery: "manuel",
     facts: [
       { icon: "video", label: "En direct, 100 % en ligne" },
@@ -813,6 +849,10 @@ export const PRODUCTS: Product[] = [
     kind: "outil",
     price: 10000,
     cover: { tone: "navy", motif: "outil" },
+    poster: {
+      src: "/produits/affiches/performance-pc.webp",
+      alt: "Performance PC : un scan d'environ 30 secondes pour savoir pourquoi votre ordinateur ralentit, puis la marche à suivre.",
+    },
     delivery: "manuel",
     facts: [
       { icon: "horloge", label: "Scan d'environ 30 secondes" },

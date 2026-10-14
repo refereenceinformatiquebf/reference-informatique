@@ -10,6 +10,8 @@
  */
 import "./setup";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import { describe, it } from "node:test";
 import {
   ALL_PRODUCTS,
@@ -155,10 +157,28 @@ describe("intégrité du catalogue", () => {
     }
   });
 
-  it("les clés ont une affiche réelle, les autres produits une couverture générée", () => {
+  it("chaque produit a une affiche réelle : fichier présent, texte alternatif utile", () => {
     for (const product of ALL_PRODUCTS) {
-      if (product.kind === "cle") assert.ok(product.poster, product.slug);
-      else assert.equal(product.poster, undefined, product.slug);
+      assert.ok(product.poster, `${product.slug} : affiche manquante`);
+      const file = path.join(process.cwd(), "public", product.poster.src);
+      assert.ok(fs.existsSync(file), `${product.slug} : ${product.poster.src}`);
+      assert.ok(
+        product.poster.alt.length >= 40 && product.poster.alt.length <= 200,
+        `${product.slug} : texte alternatif (${product.poster.alt.length} car.)`,
+      );
+    }
+  });
+
+  it("aucune affiche ne montre de prix (il change, l'image non)", () => {
+    // Les affiches des produits sont générées sans prix (scripts/affiches).
+    // Les affiches des clés, fournies par le propriétaire, sont exclues.
+    for (const product of ALL_PRODUCTS) {
+      if (product.kind === "cle") continue;
+      assert.match(
+        product.poster?.src ?? "",
+        /^\/produits\/affiches\//,
+        product.slug,
+      );
     }
   });
 
