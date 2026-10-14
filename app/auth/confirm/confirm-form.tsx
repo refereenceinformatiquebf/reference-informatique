@@ -6,6 +6,7 @@ import Link from "next/link";
 import { confirmAuthLink, type AuthFormState } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field-error";
+import { Form } from "@/components/ui/form";
 
 function SubmitButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
@@ -33,7 +34,7 @@ export function ConfirmForm({
   );
 
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <Form action={action} className="flex flex-col gap-4">
       <input type="hidden" name="token_hash" value={tokenHash} />
       <input type="hidden" name="type" value={type} />
       <input type="hidden" name="next" value={next} />
@@ -49,6 +50,6 @@ export function ConfirmForm({
           </Link>
         </div>
       ) : null}
-    </form>
+    </Form>
   );
 }

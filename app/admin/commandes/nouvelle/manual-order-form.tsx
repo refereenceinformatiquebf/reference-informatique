@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { FieldError } from "@/components/ui/field-error";
 import { formatPrice } from "@/lib/format";
 import { MAX_KEY_QUANTITY } from "@/lib/validations/order";
+import { Form } from "@/components/ui/form";
 
 type ProductOption = {
   slug: string;
@@ -56,7 +57,7 @@ export function ManualOrderForm({
   }, [state, router]);
 
   return (
-    <form action={action} className="flex flex-col gap-5">
+    <Form action={action} className="flex flex-col gap-5">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="clientEmail">
           Email du client (il doit avoir un compte)
@@ -168,6 +169,6 @@ export function ManualOrderForm({
       <div>
         <Submit />
       </div>
-    </form>
+    </Form>
   );
 }

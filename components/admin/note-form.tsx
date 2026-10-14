@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import type { ActionResult } from "@/lib/admin/action";
+import { Form } from "@/components/ui/form";
 
 function Submit({ label }: { label: string }) {
   const { pending } = useFormStatus();
@@ -42,7 +43,7 @@ export function NoteForm({
   );
   const id = `note-${name}-${Object.values(hidden).join("-")}`;
   return (
-    <form action={formAction} className="flex flex-col gap-3">
+    <Form action={formAction} className="flex flex-col gap-3">
       {Object.entries(hidden).map(([key, value]) => (
         <input key={key} type="hidden" name={key} value={value} />
       ))}
@@ -67,6 +68,6 @@ export function NoteForm({
           </p>
         ) : null}
       </div>
-    </form>
+    </Form>
   );
 }

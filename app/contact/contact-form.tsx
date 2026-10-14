@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { FieldError } from "@/components/ui/field-error";
 import { IconCoche } from "@/components/icons";
+import { Form } from "@/components/ui/form";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -44,7 +45,7 @@ export function ContactForm() {
   }
 
   return (
-    <form action={action} className="relative flex flex-col gap-5">
+    <Form action={action} className="relative flex flex-col gap-5">
       <Honeypot />
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="contact-name">Votre nom</Label>
@@ -86,6 +87,6 @@ export function ContactForm() {
       <FieldError message={state?.message} />
 
       <SubmitButton />
-    </form>
+    </Form>
   );
 }

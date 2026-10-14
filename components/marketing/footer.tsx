@@ -2,6 +2,7 @@ import Link from "next/link";
 import { IconWhatsapp, IconTelephone } from "@/components/icons";
 import { ALL_SERVICE_FAMILIES } from "@/lib/catalog";
 import { SITE, whatsappLink } from "@/lib/site";
+import { getLegalSettings, isLegalComplete } from "@/lib/settings";
 import { Brand } from "./logo";
 
 /**
@@ -9,7 +10,8 @@ import { Brand } from "./logo";
  * en-têtes, donc il ne rend aucune page dynamique. Il ne cite aucune offre
  * réservée à un pays — les clés de formations n'y apparaissent pas.
  */
-export function Footer() {
+export async function Footer() {
+  const showLegal = isLegalComplete(await getLegalSettings());
   return (
     <footer className="on-navy bg-brand-900 text-white">
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
@@ -61,6 +63,9 @@ export function Footer() {
           <FooterLink href="/politique-de-confidentialite">
             Confidentialité
           </FooterLink>
+          {showLegal ? (
+            <FooterLink href="/mentions-legales">Mentions légales</FooterLink>
+          ) : null}
           <a
             href={`tel:${SITE.phoneInternational}`}
             className="mt-1 inline-flex items-center gap-2 text-[0.9375rem] text-white/70 transition-colors hover:text-white"

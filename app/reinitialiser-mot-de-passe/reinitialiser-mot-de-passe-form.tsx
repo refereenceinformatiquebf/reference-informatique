@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FieldError } from "@/components/ui/field-error";
+import { Form } from "@/components/ui/form";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -24,7 +25,7 @@ export function ReinitialiserMotDePasseForm() {
   );
 
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <Form action={action} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="password">Nouveau mot de passe</Label>
         <Input
@@ -52,6 +53,6 @@ export function ReinitialiserMotDePasseForm() {
       <FieldError message={state?.message} />
 
       <SubmitButton />
-    </form>
+    </Form>
   );
 }

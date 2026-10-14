@@ -12,6 +12,7 @@ import { formatPrice } from "@/lib/format";
 import { MAX_KEY_QUANTITY } from "@/lib/validations/order";
 import { FieldError } from "@/components/ui/field-error";
 import { IconPaiement, IconWhatsapp } from "@/components/icons";
+import { Form } from "@/components/ui/form";
 
 function Actions() {
   const { pending, data } = useFormStatus();
@@ -73,7 +74,7 @@ export function OrderForm({
   const [quantity, setQuantity] = useState(1);
 
   return (
-    <form action={action} className="flex flex-col gap-6">
+    <Form action={action} className="flex flex-col gap-6">
       <input type="hidden" name="productSlug" value={productSlug} />
 
       {needsShipping ? (
@@ -166,6 +167,6 @@ export function OrderForm({
       ) : null}
 
       <Actions />
-    </form>
+    </Form>
   );
 }

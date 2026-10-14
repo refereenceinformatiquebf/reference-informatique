@@ -23,6 +23,7 @@ import { formatPrice } from "@/lib/format";
 import { PRODUCT_KINDS, discountPercent } from "@/lib/catalog";
 import { getRelatedProducts, getVisibleProduct } from "@/lib/catalog/live";
 import { getVisitorCountry } from "@/lib/geo";
+import { getTestimonialForProduct } from "@/lib/testimonials";
 import { SITE, whatsappLink } from "@/lib/site";
 import { fr } from "@/lib/typography";
 
@@ -63,6 +64,7 @@ export default async function ProductPage({
   const kind = PRODUCT_KINDS[product.kind];
   const percent = discountPercent(product);
   const related = await getRelatedProducts(product, country, 3);
+  const testimonial = await getTestimonialForProduct(product.slug);
   const orderHref = `/commande/${product.slug}`;
   const isKey = product.kind === "cle";
 
@@ -335,20 +337,18 @@ export default async function ProductPage({
       </section>
 
       {/* ======================= Témoignage ======================= */}
-      {product.testimonial ? (
+      {testimonial ? (
         <section className="py-14 sm:py-20">
           <Container>
             <figure className="mx-auto max-w-3xl text-center">
               <blockquote className="font-display text-ink text-[1.5rem] leading-snug sm:text-[1.875rem]">
-                «&nbsp;{fr(product.testimonial.quote)}&nbsp;»
+                «&nbsp;{fr(testimonial.quote)}&nbsp;»
               </blockquote>
               <figcaption className="text-ink-soft mt-5 text-sm">
                 <span className="text-ink font-medium">
-                  {product.testimonial.author}
+                  {testimonial.author}
                 </span>
-                {product.testimonial.city
-                  ? `, ${product.testimonial.city}`
-                  : ""}
+                {testimonial.city ? `, ${testimonial.city}` : ""}
                 <span className="text-ink-faint">
                   {" "}
                   · message d&rsquo;un client

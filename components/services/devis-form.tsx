@@ -11,6 +11,7 @@ import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { FieldError } from "@/components/ui/field-error";
 import { IconCoche } from "@/components/icons";
+import { Form } from "@/components/ui/form";
 
 type ServiceOption = { slug: string; name: string };
 
@@ -58,7 +59,7 @@ export function DevisForm({
   }
 
   return (
-    <form action={action} className="relative flex flex-col gap-5">
+    <Form action={action} className="relative flex flex-col gap-5">
       <Honeypot />
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="serviceSlug">Prestation concernée</Label>
@@ -149,6 +150,6 @@ export function DevisForm({
         Gratuit et sans engagement. Vos informations servent uniquement à vous
         répondre.
       </p>
-    </form>
+    </Form>
   );
 }

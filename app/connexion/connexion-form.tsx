@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { FieldError } from "@/components/ui/field-error";
 import { Honeypot } from "@/components/ui/honeypot";
 import { IconMail } from "@/components/icons";
+import { Form } from "@/components/ui/form";
 
 function SubmitButton({
   label,
@@ -59,7 +60,7 @@ export function ConnexionForm({ nextPath }: { nextPath?: string }) {
           </div>
         ) : null}
 
-        <form action={linkAction} className="relative flex flex-col gap-4">
+        <Form action={linkAction} className="relative flex flex-col gap-4">
           <Honeypot />
           {nextPath ? (
             <input type="hidden" name="next" value={nextPath} />
@@ -91,7 +92,7 @@ export function ConnexionForm({ nextPath }: { nextPath?: string }) {
             Nous vous envoyons un lien : un clic et vous êtes dans votre espace.
             Pas encore de compte ? Il est créé automatiquement.
           </p>
-        </form>
+        </Form>
 
         <button
           type="button"
@@ -106,7 +107,7 @@ export function ConnexionForm({ nextPath }: { nextPath?: string }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <form action={passwordAction} className="flex flex-col gap-4">
+      <Form action={passwordAction} className="flex flex-col gap-4">
         {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
 
         <div className="flex flex-col gap-1.5">
@@ -144,7 +145,7 @@ export function ConnexionForm({ nextPath }: { nextPath?: string }) {
         <FieldError message={passwordState?.message} />
 
         <SubmitButton label="Se connecter" pendingLabel="Connexion…" />
-      </form>
+      </Form>
 
       <button
         type="button"

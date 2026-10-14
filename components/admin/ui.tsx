@@ -150,9 +150,9 @@ export function ResponsiveTable<T>({
         <table className="w-full text-left text-sm">
           <thead className="bg-paper-raised text-ink-faint text-xs tracking-wide uppercase">
             <tr>
-              {columns.map((column) => (
+              {columns.map((column, index) => (
                 <th
-                  key={column.header}
+                  key={`${index}-${column.header}`}
                   scope="col"
                   className={cn(
                     "px-4 py-3 font-semibold",
@@ -167,9 +167,9 @@ export function ResponsiveTable<T>({
           <tbody className="divide-line divide-y">
             {rows.map((row) => (
               <tr key={rowKey(row)} className="hover:bg-paper-raised/60">
-                {columns.map((column) => (
+                {columns.map((column, index) => (
                   <td
-                    key={column.header}
+                    key={`${index}-${column.header}`}
                     className={cn(
                       "px-4 py-3 align-middle",
                       column.right && "text-right",
@@ -191,10 +191,11 @@ export function ResponsiveTable<T>({
           >
             <dl className="space-y-1.5 text-sm">
               {columns
-                .filter((column) => !column.hideOnMobile)
-                .map((column) => (
+                .map((column, index) => ({ column, index }))
+                .filter(({ column }) => !column.hideOnMobile)
+                .map(({ column, index }) => (
                   <div
-                    key={column.header}
+                    key={`${index}-${column.header}`}
                     className="flex justify-between gap-3"
                   >
                     <dt className="text-ink-faint shrink-0">{column.header}</dt>

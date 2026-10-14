@@ -348,3 +348,107 @@ export async function getServicesOfFamily(
     (service) => service.family === family,
   );
 }
+
+/* ------------------------- Lecture pour l'administration ------------------------- */
+
+export type AdminProductEntry = {
+  product: Product;
+  /** Visible sur le site ? */
+  active: boolean;
+  /** « CODE » : produit du catalogue ; « ADMIN » : créé depuis l'administration. */
+  source: "CODE" | "ADMIN";
+  /** L'équipe a-t-elle déjà enregistré ce produit (la base fait-elle foi) ? */
+  edited: boolean;
+  /** Valeurs commerciales BRUTES (le prix affiché peut différer si une offre est terminée). */
+  commercial: {
+    price: number;
+    compareAtPrice: number | null;
+    promoEndsAt: string | null;
+    badge: string | null;
+    displayOrder: number;
+  };
+};
+
+/**
+ * Tous les produits, y compris masqués, avec leur état. Sans cache : l'équipe
+ * doit toujours voir l'état réel qu'elle vient de modifier.
+ */
+export async function getAdminProducts(): Promise<AdminProductEntry[]> {
+  const rows = await prisma.product.findMany({
+    select: {
+      slug: true,
+      name: true,
+      source: true,
+      price: true,
+      compareAtPrice: true,
+      active: true,
+      badge: true,
+      promoEndsAt: true,
+      content: true,
+      posterUrl: true,
+      displayOrder: true,
+      adminEditedAt: true,
+    },
+  });
+  const raw: ProductRowRaw[] = rows.map((row) => ({
+    ...row,
+    promoEndsAt: row.promoEndsAt?.toISOString() ?? null,
+    adminEditedAt: row.adminEditedAt?.toISOString() ?? null,
+  }));
+  const bySlug = new Map(raw.map((row) => [row.slug, row]));
+  const entries: AdminProductEntry[] = [];
+
+  for (const base of ALL_PRODUCTS) {
+    const row = bySlug.get(base.slug);
+    const edited = Boolean(row?.adminEditedAt);
+    entries.push({
+      product: row ? mergeProduct(base, row) : base,
+      active: row ? row.active : true,
+      source: "CODE",
+      edited,
+      commercial:
+        row && edited
+          ? {
+              price: row.price,
+              compareAtPrice: row.compareAtPrice,
+              promoEndsAt: row.promoEndsAt,
+              badge: row.badge,
+              displayOrder: row.displayOrder,
+            }
+          : {
+              price: base.price,
+              compareAtPrice: base.compareAtPrice ?? null,
+              promoEndsAt: base.promoEndsAt ?? null,
+              badge: base.badge ?? null,
+              displayOrder: base.order,
+            },
+    });
+  }
+
+  const baseSlugs = new Set(ALL_PRODUCTS.map((product) => product.slug));
+  for (const row of raw) {
+    if (row.source !== "ADMIN" || baseSlugs.has(row.slug)) continue;
+    const product = buildFromContent(row.slug, row, row.name);
+    if (!product) continue;
+    entries.push({
+      product,
+      active: row.active,
+      source: "ADMIN",
+      edited: true,
+      commercial: {
+        price: row.price,
+        compareAtPrice: row.compareAtPrice,
+        promoEndsAt: row.promoEndsAt,
+        badge: row.badge,
+        displayOrder: row.displayOrder,
+      },
+    });
+  }
+  return entries.sort((a, b) => a.product.order - b.product.order);
+}
+
+export async function getAdminProduct(slug: string) {
+  return (await getAdminProducts()).find(
+    (entry) => entry.product.slug === slug,
+  );
+}

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { ALL_SERVICE_FAMILIES } from "@/lib/catalog";
 import { getAllProducts, getAllServices } from "@/lib/catalog/live";
+import { getLegalSettings, isLegalComplete } from "@/lib/settings";
 import { SITE } from "@/lib/site";
 
 /**
@@ -12,9 +13,10 @@ import { SITE } from "@/lib/site";
  * il ne doit pas révéler l'existence d'une offre invisible hors du Burkina Faso.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [products, services] = await Promise.all([
+  const [products, services, legal] = await Promise.all([
     getAllProducts(),
     getAllServices(),
+    getLegalSettings(),
   ]);
   const url = (path: string) => `${SITE.url}${path}`;
 
@@ -61,5 +63,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...productRoutes, ...familyRoutes, ...serviceRoutes];
+  const legalRoutes: MetadataRoute.Sitemap = isLegalComplete(legal)
+    ? [
+        {
+          url: url("/mentions-legales"),
+          changeFrequency: "yearly",
+          priority: 0.2,
+        },
+      ]
+    : [];
+
+  return [
+    ...staticRoutes,
+    ...productRoutes,
+    ...familyRoutes,
+    ...serviceRoutes,
+    ...legalRoutes,
+  ];
 }

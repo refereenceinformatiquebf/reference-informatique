@@ -46,8 +46,5 @@ export function formatPhone(phone: string | null) {
     : phone;
 }
 
-/** Lien WhatsApp vers le numéro d'un client (chiffres uniquement). */
-export function whatsappLinkTo(phone: string, message?: string) {
-  const base = `https://wa.me/${phone.replace(/\D/g, "")}`;
-  return message ? `${base}?text=${encodeURIComponent(message)}` : base;
-}
+// Un seul lien WhatsApp « vers un client » pour tout le site (voir lib/site.ts).
+export { whatsappLinkTo } from "@/lib/site";

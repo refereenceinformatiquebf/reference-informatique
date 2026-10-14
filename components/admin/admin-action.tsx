@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import type { ActionResult } from "@/lib/admin/action";
+import { Form } from "@/components/ui/form";
 
 type Variant = "primary" | "outline" | "ghost" | "danger" | "whatsapp";
 
@@ -103,7 +104,7 @@ export function AdminAction({
 
   if (!confirm) {
     return (
-      <form action={formAction} className="inline-block">
+      <Form action={formAction} className="inline-block">
         {hiddenInputs}
         <Submit
           label={label}
@@ -112,7 +113,7 @@ export function AdminAction({
           className={className}
         />
         <Feedback state={state} />
-      </form>
+      </Form>
     );
   }
 
@@ -140,7 +141,7 @@ export function AdminAction({
                 {confirm.description}
               </div>
             </Dialog.Description>
-            <form action={formAction} className="mt-5 flex flex-col gap-4">
+            <Form action={formAction} className="mt-5 flex flex-col gap-4">
               {hiddenInputs}
               {confirm.reasonLabel ? (
                 <div className="flex flex-col gap-1.5">
@@ -184,7 +185,7 @@ export function AdminAction({
                   size="md"
                 />
               </div>
-            </form>
+            </Form>
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FieldError } from "@/components/ui/field-error";
+import { Form } from "@/components/ui/form";
 
 function Submit({ label }: { label: string }) {
   const { pending } = useFormStatus();
@@ -50,7 +51,7 @@ export function ProfileForm({
     undefined,
   );
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <Form action={action} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="profile-email">Email</Label>
         <Input
@@ -89,7 +90,7 @@ export function ProfileForm({
       </div>
       <Feedback state={state} />
       <Submit label="Enregistrer" />
-    </form>
+    </Form>
   );
 }
 
@@ -100,7 +101,7 @@ export function PasswordForm() {
     undefined,
   );
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <Form action={action} className="flex flex-col gap-4">
       <p className="text-ink-soft text-sm leading-relaxed">
         Facultatif : vous pouvez toujours vous connecter avec un lien envoyé par
         email. Un mot de passe vous permet en plus d&apos;entrer directement.
@@ -129,6 +130,6 @@ export function PasswordForm() {
       </div>
       <Feedback state={state} />
       <Submit label="Enregistrer le mot de passe" />
-    </form>
+    </Form>
   );
 }

@@ -193,3 +193,117 @@ describe("validation de l'éditeur de produit", () => {
     );
   });
 });
+
+describe("éditeur de produit : aller-retour formulaire", () => {
+  it("enregistrer un produit sans rien changer ne modifie aucun de ses champs", async () => {
+    const { productToForm, formToContent } =
+      await import("../lib/catalog/form");
+    for (const product of ALL_PRODUCTS) {
+      const content = formToContent(productToForm(product), product.poster);
+      const parsed = productContentSchema.safeParse(content);
+      assert.ok(
+        parsed.success,
+        `${product.slug} : ${parsed.success ? "" : JSON.stringify(parsed.error.issues.slice(0, 3))}`,
+      );
+      const expected = productContentSchema.parse(product);
+      // Comparaison sémantique : une clé « undefined » équivaut à une clé absente.
+      assert.deepEqual(
+        JSON.parse(JSON.stringify(parsed.data)),
+        JSON.parse(JSON.stringify(expected)),
+        product.slug,
+      );
+    }
+  });
+
+  it("le contenu détaillé, les questions et la restriction pays survivent au formulaire", async () => {
+    const { productToForm, formToContent } =
+      await import("../lib/catalog/form");
+    const key = ALL_PRODUCTS.find((p) => p.restrictedTo?.includes("BF"))!;
+    const form = productToForm(key);
+    assert.equal(form.restrictedToBF, true);
+    form.restrictedToBF = false;
+    assert.equal(formToContent(form, key.poster).restrictedTo, undefined);
+    form.restrictedToBF = true;
+    form.restrictedOther = "ci, sn";
+    assert.deepEqual(formToContent(form, key.poster).restrictedTo, [
+      "BF",
+      "ci",
+      "sn",
+    ]);
+  });
+});
+
+describe("envoi d'images", () => {
+  it("reconnaît le vrai type d'une image, pas son extension", async () => {
+    const { detectImageType } = await import("../lib/admin/uploads");
+    const jpeg = Uint8Array.from([0xff, 0xd8, 0xff, 0xe0, 0, 0]);
+    const png = Uint8Array.from([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0,
+    ]);
+    const webp = new TextEncoder().encode(
+      "RIFF\u0000\u0000\u0000\u0000WEBPVP8 ",
+    );
+    const exe = new TextEncoder().encode(
+      "MZ\u0090\u0000\u0003\u0000\u0000\u0000",
+    );
+    const html = new TextEncoder().encode("<html><script>alert(1)</script>");
+    const svg = new TextEncoder().encode(
+      "<svg xmlns='http://www.w3.org/2000/svg'></svg>",
+    );
+    assert.equal(detectImageType(jpeg), "jpeg");
+    assert.equal(detectImageType(png), "png");
+    assert.equal(detectImageType(webp), "webp");
+    assert.equal(detectImageType(exe), null);
+    assert.equal(detectImageType(html), null);
+    assert.equal(detectImageType(svg), null);
+    assert.equal(detectImageType(new Uint8Array()), null);
+  });
+});
+
+describe("date de fin d'offre", () => {
+  it("la saisie est interprétée en UTC, quel que soit le fuseau de la machine", () => {
+    const parsed = productCommercialSchema.parse({
+      price: 4000,
+      compareAtPrice: 6000,
+      promoEndsAt: "2026-10-31T23:59",
+      badge: "",
+      active: true,
+      displayOrder: 0,
+    });
+    assert.equal(parsed.promoEndsAt?.toISOString(), "2026-10-31T23:59:00.000Z");
+    const none = productCommercialSchema.parse({
+      price: 4000,
+      compareAtPrice: "",
+      promoEndsAt: "",
+      badge: "",
+      active: true,
+      displayOrder: 0,
+    });
+    assert.equal(none.promoEndsAt, null);
+  });
+});
+
+describe("formulaire de service", () => {
+  it("tous les services actuels du catalogue sont enregistrables tels quels", async () => {
+    const { serviceFormSchema } = await import("../lib/catalog/service-schema");
+    const { ALL_SERVICES } = await import("../lib/catalog");
+    for (const service of ALL_SERVICES) {
+      const result = serviceFormSchema.safeParse({
+        slug: service.slug,
+        name: service.name,
+        summary: service.summary,
+        tagline: service.tagline,
+        priceType: service.priceType,
+        priceFrom: service.priceFrom ?? "",
+        priceNote: service.priceNote,
+        timeline: service.timeline,
+        active: true,
+        displayOrder: service.order,
+      });
+      assert.ok(
+        result.success,
+        `${service.slug} : ${result.success ? "" : JSON.stringify(result.error.issues.slice(0, 2))}`,
+      );
+    }
+  });
+});

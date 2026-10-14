@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
-import { getCurrentProfile } from "@/lib/auth/dal";
+import { getVerifiedAdmin } from "@/lib/auth/dal";
 import { audit } from "@/lib/admin/audit";
 import { toCsv } from "@/lib/admin/csv";
 import { buildOrderWhere, parseOrderFilters } from "@/lib/admin/orders-query";
@@ -20,8 +20,8 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ what: string }> },
 ) {
-  const profile = await getCurrentProfile();
-  if (!profile || profile.role !== "ADMIN") {
+  const profile = await getVerifiedAdmin();
+  if (!profile) {
     return new NextResponse("Not found", { status: 404 });
   }
 

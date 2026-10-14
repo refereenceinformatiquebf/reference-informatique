@@ -141,7 +141,17 @@ export const productCommercialSchema = z
     promoEndsAt: z
       .union([z.literal(""), z.string()])
       .optional()
-      .transform((value) => (value ? new Date(value) : null))
+      // Saisie « 2026-10-31T23:59 » (heure du Burkina Faso = UTC) : interprétée en
+      // UTC, jamais dans le fuseau de la machine qui exécute le code.
+      .transform((value) =>
+        value
+          ? new Date(
+              /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)
+                ? `${value}:00Z`
+                : value,
+            )
+          : null,
+      )
       .refine((date) => date === null || !Number.isNaN(date.getTime()), {
         error: "Date de fin d'offre invalide.",
       }),

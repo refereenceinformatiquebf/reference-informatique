@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Header } from "@/components/marketing/header";
 import { Footer } from "@/components/marketing/footer";
+import { AnnouncementBar } from "@/components/marketing/announcement-bar";
 import { ShellFrame } from "@/components/shell-frame";
 
 /**
@@ -18,7 +19,15 @@ import { ShellFrame } from "@/components/shell-frame";
  */
 export function Shell({ children }: { children: ReactNode }) {
   return (
-    <ShellFrame header={<Header />} footer={<Footer />}>
+    <ShellFrame
+      header={
+        <>
+          <AnnouncementBar />
+          <Header />
+        </>
+      }
+      footer={<Footer />}
+    >
       {children}
     </ShellFrame>
   );

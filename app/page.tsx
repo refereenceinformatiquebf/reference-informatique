@@ -12,6 +12,7 @@ import { FaqList } from "@/components/ui/faq-list";
 import { ProductCard } from "@/components/shop/product-card";
 import { IconFleche, IconWhatsapp } from "@/components/icons";
 import { ALL_SERVICE_FAMILIES, type Product } from "@/lib/catalog";
+import { getHomeTestimonials } from "@/lib/testimonials";
 import {
   getAllServices,
   getProduct,
@@ -137,13 +138,9 @@ export default async function HomePage() {
 
   // Témoignages réels des clients (clés de formations) : réservés aux
   // visiteurs du Burkina Faso, comme les offres dont ils parlent.
-  const testimonials = atHome
-    ? visible.flatMap((product) =>
-        product.testimonial
-          ? [{ ...product.testimonial, product: product.name }]
-          : [],
-      )
-    : [];
+  const testimonials = await getHomeTestimonials(
+    new Set(visible.map((product) => product.slug)),
+  );
 
   return (
     <div className="flex flex-col">
@@ -457,7 +454,7 @@ export default async function HomePage() {
             <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2">
               {testimonials.map((t, index) => (
                 <figure
-                  key={t.author}
+                  key={t.id}
                   className="rise-in border-line bg-paper flex flex-col justify-between gap-5 rounded-lg border p-6"
                   style={{ "--i": index } as React.CSSProperties}
                 >
@@ -467,7 +464,9 @@ export default async function HomePage() {
                   <figcaption className="text-ink-soft text-sm">
                     <span className="text-ink font-medium">{t.author}</span>
                     {t.city ? `, ${t.city}` : ""}
-                    <span className="text-ink-faint"> · {t.product}</span>
+                    {t.productName ? (
+                      <span className="text-ink-faint"> · {t.productName}</span>
+                    ) : null}
                   </figcaption>
                 </figure>
               ))}
