@@ -7,6 +7,7 @@ import {
   StatusBadge,
 } from "@/components/admin/ui";
 import {
+  getConsumptionForecast,
   getLocalStockOverview,
   listLicenceProblems,
   listLicenceSales,
@@ -24,14 +25,17 @@ const PROBLEM_LABELS: Record<string, string> = {
 };
 
 export default async function AdminLicencesPage() {
-  const [status, stock, sales, problems] = await Promise.all([
+  const [status, stock, sales, problems, forecast] = await Promise.all([
     safeGetEdnPartnerStatus(),
     getLocalStockOverview(),
     listLicenceSales(),
     listLicenceProblems(),
+    getConsumptionForecast(),
   ]);
   const lowStock =
     stock.available <= Math.max(5, Math.ceil(stock.totalReceived * 0.1));
+  const forecastUrgent =
+    forecast.daysRemaining !== null && forecast.daysRemaining <= 14;
 
   return (
     <>
@@ -55,6 +59,23 @@ export default async function AdminLicencesPage() {
         />
         <Kpi label="Licences vendues" value={sales.length} />
       </div>
+
+      {forecast.dailyRate > 0 ? (
+        <Panel className={`mt-5 ${forecastUrgent ? "border-warning" : ""}`}>
+          <p className="text-ink text-sm font-semibold">
+            {forecastUrgent ? "⚠️ " : ""}À ce rythme (
+            {forecast.dailyRate.toFixed(1)} licence
+            {forecast.dailyRate >= 2 ? "s" : ""}/jour sur les{" "}
+            {forecast.windowDays} derniers jours), le stock sera épuisé dans
+            environ{" "}
+            <strong>
+              {forecast.daysRemaining} jour
+              {forecast.daysRemaining !== 1 ? "s" : ""}
+            </strong>
+            .
+          </p>
+        </Panel>
+      ) : null}
 
       <Panel title="Stock local" className="mt-5">
         <p className="text-ink-soft mb-4 text-[0.8125rem] leading-relaxed">

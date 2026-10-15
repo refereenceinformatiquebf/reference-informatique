@@ -78,6 +78,33 @@ export async function pullAndStoreLicenceLot(count: number): Promise<number> {
   return licences.length;
 }
 
+export type ConsumptionForecast = {
+  dailyRate: number;
+  daysRemaining: number | null;
+  windowDays: number;
+};
+
+const FORECAST_WINDOW_DAYS = 7;
+
+/**
+ * Vitesse de consommation recente (licences attribuees sur les 7 derniers jours) et nombre de
+ * jours avant epuisement du stock local a ce rythme — alerte "a ce rythme, le stock sera
+ * epuise dans environ X jours" affichee en admin, en complement du seuil bas fixe.
+ */
+export async function getConsumptionForecast(): Promise<ConsumptionForecast> {
+  const since = new Date(
+    Date.now() - FORECAST_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+  );
+  const [consumed, available] = await Promise.all([
+    prisma.licenseStock.count({ where: { assignedAt: { gte: since } } }),
+    prisma.licenseStock.count({ where: { assignedOrderId: null } }),
+  ]);
+  const dailyRate = consumed / FORECAST_WINDOW_DAYS;
+  const daysRemaining =
+    dailyRate > 0 ? Math.floor(available / dailyRate) : null;
+  return { dailyRate, daysRemaining, windowDays: FORECAST_WINDOW_DAYS };
+}
+
 export type LocalStockRow = {
   id: string;
   licenseKey: string;
