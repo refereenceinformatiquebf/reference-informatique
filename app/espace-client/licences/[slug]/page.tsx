@@ -151,12 +151,6 @@ export default async function LicencePage({
                   "Installez l'application, collez votre licence ci-dessus dans l'application, puis activez Windows et Office en un clic.",
                 )}
               </p>
-              <p className="text-warning-text mt-2 text-xs leading-relaxed font-medium">
-                ⚠{" "}
-                {fr(
-                  "Ne saisissez ce code nulle part ailleurs — jamais dans l'assistant d'installation de Windows ou d'Office.",
-                )}
-              </p>
 
               <p className="text-ink-faint mt-5 text-xs leading-relaxed">
                 {fr(
