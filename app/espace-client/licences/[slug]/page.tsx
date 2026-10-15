@@ -12,9 +12,9 @@ import type { IconKey } from "@/lib/catalog/types";
 
 /**
  * Téléchargements complémentaires du pack licence — liens externes officiels (Microsoft,
- * Google Drive partagé par L'Expert du Numérique) ou fichiers publics hébergés sur
- * expertdunumerique.com (voir middleware.ts de ce fournisseur : exemptés du mot de passe
- * quotidien car sans donnée client). Rien n'est dupliqué ici.
+ * Google Drive) pour Windows/Office, et fichiers hébergés ici même (public/antivirus/) pour
+ * les antivirus : volontairement une copie locale plutôt qu'un lien vers
+ * expertdunumerique.com, pour que cette page ne dépende d'aucun autre site.
  */
 const DOWNLOADS: {
   icon: IconKey;
@@ -44,13 +44,13 @@ const DOWNLOADS: {
     icon: "bouclier",
     label: "360 Total Security",
     description: "Antivirus gratuit — installation en 2 minutes",
-    href: "https://expertdunumerique.com/fichiers-proteges/360-total-security.exe",
+    href: "/antivirus/360-total-security.exe",
   },
   {
     icon: "bouclier",
     label: "Avast One Free",
     description: "Antivirus gratuit — alternative à 360 Total Security",
-    href: "https://expertdunumerique.com/fichiers-proteges/avast-one-free.exe",
+    href: "/antivirus/avast-one-free.exe",
   },
   {
     icon: "telecharger",
