@@ -21,7 +21,7 @@ export function PaymentConfirmationEmail({
   delivery?: DeliveryMode;
   /** Référence courte de la commande, à citer au support. */
   orderRef?: string;
-  /** Lien direct vers l'achat dans l'espace client. */
+  /** Lien personnel de la commande : ouvre l'achat sans mot de passe. */
   ctaUrl: string;
   /** Renseigné uniquement pour une livraison "licence-edn" — change le libellé du bouton,
    *  la licence elle-même et les liens de téléchargement restent sur la page dédiée. */
@@ -39,8 +39,17 @@ export function PaymentConfirmationEmail({
         <strong>{label}</strong> a bien été reçu. {paidSentence(delivery)}
       </Text>
       <Button href={ctaUrl} style={emailButtonStyle}>
-        {licenceKey ? "Accéder à ma licence" : "Accéder à mon espace"}
+        {licenceKey
+          ? "Accéder à ma licence"
+          : delivery === "cle-physique"
+            ? "Suivre ma commande"
+            : "Accéder à mon achat"}
       </Button>
+      <Text style={{ ...emailTextStyle, marginTop: 14, fontSize: 13 }}>
+        {delivery === "cle-physique"
+          ? "Ce lien est personnel : il vous permet de suivre la livraison de votre clé, sans compte ni mot de passe. Ne le transmettez pas."
+          : "Ce lien est personnel : il ouvre votre achat sans mot de passe, depuis n'importe quel appareil. Ne le transmettez pas. Vous pourrez aussi vous reconnecter à tout moment avec votre seule adresse email."}
+      </Text>
       {licenceKey ? (
         <Text style={{ ...emailTextStyle, marginTop: 10, fontSize: 13 }}>
           Votre licence, l&rsquo;application d&rsquo;activation, Windows, Office

@@ -3,7 +3,9 @@ import type { Faq, Product } from "./types";
 
 /**
  * Les clés de formations — le produit historique de Référence Informatique :
- * une clé USB HP livrée chez le client, avec l'accès à la plateforme en ligne.
+ * une clé USB HP livrée chez le client. L'acheteur d'une clé n'a pas d'espace à activer
+ * sur le site : on lui livre la clé ; s'il se connecte ensuite, il retrouve sa commande
+ * et nos recommandations dans « Mon espace ».
  *
  * Elles ne sont proposées qu'au Burkina Faso (livraison physique, support
  * local) : `restrictedTo: ["BF"]`. Hors Burkina, ni la liste, ni les fiches,
@@ -36,7 +38,7 @@ const faqSupport: Faq = {
 const faqPerte: Faq = {
   question: "Que se passe-t-il si je perds ma clé ?",
   answer:
-    "Votre accès à la plateforme en ligne reste actif : vous retrouvez vos formations. Écrivez-nous sur WhatsApp, nous cherchons une solution ensemble.",
+    "Écrivez-nous sur WhatsApp avec votre nom et la référence de votre commande : nous cherchons une solution ensemble.",
 };
 
 export const KEYS: Product[] = [
@@ -60,20 +62,19 @@ export const KEYS: Product[] = [
     delivery: "cle-physique",
     facts: [
       { icon: "cle-usb", label: "Clé USB 64 Go" },
-      { icon: "plateforme", label: "Accès plateforme inclus" },
+      { icon: "formation", label: "Tous les contenus sur la clé" },
       { icon: "hors-ligne", label: "Fonctionne sans internet" },
       { icon: "livraison", label: "Livraison gratuite" },
     ],
     story: [
       "Excel, Word, PowerPoint : on les retrouve dans la plupart des métiers de bureau, et on ne les apprend presque jamais vraiment. Résultat, on perd des heures sur des tâches qui devraient prendre dix minutes.",
       "La Clé de Formations Complètes rassemble au même endroit les formations qui servent tout de suite : la bureautique de A à Z, l'intelligence artificielle et ChatGPT, le marketing digital, l'anglais, la création visuelle avec Canva et le montage vidéo avec CapCut. À cela s'ajoutent plus de 100 livres PDF pour entreprendre.",
-      "Vous branchez la clé à votre ordinateur et vous apprenez, même sans connexion internet. L'accès à la plateforme en ligne est inclus : vous pouvez aussi suivre vos formations depuis votre téléphone, où que vous soyez.",
+      "Vous branchez la clé à votre ordinateur et vous apprenez, même sans connexion internet.",
     ],
     highlights: [
       "11 modules, du niveau débutant au niveau avancé",
       "Vidéos HD et manuels PDF",
       "Fonctionne sans internet : vous branchez, vous apprenez",
-      "Accès à la plateforme en ligne 24 h/24 inclus",
       "Accès à vie : la clé est à vous, pour toujours",
       "Une attestation de formation après chaque module terminé",
       "Contenus mis à jour sans frais supplémentaires",
@@ -159,7 +160,7 @@ export const KEYS: Product[] = [
       {
         question: "Combien de temps ai-je accès au contenu ?",
         answer:
-          "À vie. La clé USB est à vous pour toujours et l'accès à la plateforme est inclus, sans limite de durée.",
+          "À vie. La clé USB est à vous pour toujours, sans abonnement ni limite de durée.",
       },
       faqLivraison,
       faqPaiement,
@@ -190,7 +191,7 @@ export const KEYS: Product[] = [
       title:
         "Clé de Formations Complètes — clé USB 64 Go, livraison gratuite au Burkina Faso",
       description:
-        "11 modules : Excel, Word, PowerPoint, IA, ChatGPT, marketing digital, anglais, Canva, CapCut. Clé USB 64 Go + accès plateforme à vie. 12 000 F, livrée chez vous.",
+        "11 modules : Excel, Word, PowerPoint, IA, ChatGPT, marketing digital, anglais, Canva, CapCut. Clé USB 64 Go, sans abonnement. 12 000 F, livrée chez vous.",
     },
     order: 1,
   },
@@ -215,7 +216,7 @@ export const KEYS: Product[] = [
     delivery: "cle-physique",
     facts: [
       { icon: "cle-usb", label: "Clé USB 32 Go" },
-      { icon: "plateforme", label: "Accès plateforme inclus" },
+      { icon: "formation", label: "Tous les contenus sur la clé" },
       { icon: "hors-ligne", label: "Fonctionne sans internet" },
       { icon: "livraison", label: "Livraison gratuite" },
     ],
@@ -231,7 +232,6 @@ export const KEYS: Product[] = [
       "Plus de 5 500 diapositives PowerPoint professionnelles, modifiables",
       "Modèles pour bilans, réunions, soutenances et présentations",
       "Fonctionne sans internet",
-      "Accès à la plateforme en ligne à vie, inclus",
       "Livraison gratuite partout au Burkina Faso",
       "Assistance WhatsApp après l'achat",
     ],
@@ -284,7 +284,7 @@ export const KEYS: Product[] = [
       {
         question: "Combien de temps ai-je accès au contenu ?",
         answer:
-          "À vie. La clé USB est à vous pour toujours et l'accès à la plateforme est inclus, sans limite de durée.",
+          "À vie. La clé USB est à vous pour toujours, sans abonnement ni limite de durée.",
       },
       {
         question: "Les 150 logiciels Excel sont-ils vraiment inclus ?",
@@ -462,7 +462,7 @@ export const KEYS: Product[] = [
     facts: [
       { icon: "cle-usb", label: "Clé USB 64 Go" },
       { icon: "pack", label: "13 modules" },
-      { icon: "plateforme", label: "Accès plateforme inclus" },
+      { icon: "formation", label: "Tous les contenus sur la clé" },
       { icon: "livraison", label: "Livraison gratuite" },
     ],
     story: [
@@ -475,7 +475,6 @@ export const KEYS: Product[] = [
       "10 000 F d'économie par rapport aux deux clés achetées séparément",
       "Bonus : antivirus Avast gratuit",
       "Fonctionne sans internet : vous branchez, vous apprenez",
-      "Accès à la plateforme en ligne à vie, inclus",
       "Livraison gratuite partout au Burkina Faso",
       "Assistance WhatsApp après l'achat",
     ],
@@ -572,7 +571,7 @@ export const KEYS: Product[] = [
       {
         question: "Combien de temps ai-je accès au contenu ?",
         answer:
-          "À vie. La clé USB est à vous pour toujours et l'accès à la plateforme est inclus, sans limite de durée.",
+          "À vie. La clé USB est à vous pour toujours, sans abonnement ni limite de durée.",
       },
       faqLivraison,
       faqPaiement,

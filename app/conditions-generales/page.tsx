@@ -38,7 +38,7 @@ const SECTIONS: { title: string; body: Paragraph[] }[] = [
   {
     title: "3. Produits de la boutique : livraison et accès",
     body: [
-      "Produits numériques : votre accès s'active dans votre espace client dès que votre paiement est confirmé. Vous recevez un email de confirmation.",
+      "Produits numériques : dès que votre paiement est confirmé, vous recevez un email avec un lien personnel qui ouvre votre achat, et votre accès s'active dans votre espace client. Aucun compte n'est à créer pour commander.",
       "Produits à prestation manuelle (formation en direct, outil remis par notre équipe) : après confirmation du paiement, notre équipe vous contacte par WhatsApp pour vous remettre votre accès.",
       {
         // Offre réservée au Burkina Faso : ce paragraphe n'est affiché

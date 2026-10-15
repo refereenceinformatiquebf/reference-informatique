@@ -27,11 +27,11 @@ const COMMANDER: Faq[] = [
   {
     question: "Dois-je créer un compte pour commander ?",
     answer:
-      "Oui, un compte gratuit est nécessaire : c'est lui qui vous donne accès à vos achats, à tout moment, dans votre espace client. La création prend une minute.",
+      "Non. Il suffit d'indiquer votre nom, votre email et votre téléphone, puis de payer. Dès que le paiement est confirmé, vous recevez par email un lien personnel : un clic ouvre votre achat, sans mot de passe. Pour retrouver vos achats plus tard, votre adresse email suffit : un lien de connexion vous est envoyé.",
   },
   {
-    question: "J'ai payé mais je ne vois rien dans mon espace. Que faire ?",
-    answer: `Patientez quelques minutes et actualisez la page : la confirmation de paiement peut prendre un instant. Si rien n'apparaît, écrivez-nous sur WhatsApp au ${SITE.phoneDisplay} avec votre nom et le produit commandé : nous vérifions tout de suite.`,
+    question: "J'ai payé mais je n'ai rien reçu. Que faire ?",
+    answer: `Patientez quelques minutes : la confirmation de paiement peut prendre un instant, et la page de votre commande se met à jour toute seule. Regardez aussi dans vos courriers indésirables. Vous pouvez renvoyer vos liens depuis la page « Retrouver ma commande » en indiquant l'email utilisé pour payer. Si rien n'arrive, écrivez-nous sur WhatsApp au ${SITE.phoneDisplay} avec votre nom et le produit commandé : nous vérifions tout de suite.`,
   },
   {
     question: "Puis-je acheter depuis l'étranger ?",
@@ -44,7 +44,7 @@ const ACCES: Faq[] = [
   {
     question: "Comment vais-je recevoir un produit numérique ?",
     answer:
-      "Dès que votre paiement est confirmé, votre accès s'active dans votre espace client, rubrique « Mes formations », et vous recevez un email de confirmation. Il n'y a pas de livraison à attendre.",
+      "Dès que votre paiement est confirmé, vous recevez un email avec un lien personnel qui ouvre votre achat, et votre accès s'active dans votre espace client, rubrique « Mes formations ». Il n'y a pas de livraison à attendre.",
   },
   {
     question: "Pendant combien de temps ai-je accès à mes achats ?",
@@ -66,12 +66,12 @@ const CLES: Faq[] = [
   {
     question: "La clé fonctionne-t-elle sans internet ?",
     answer:
-      "Oui. Vous la branchez sur un ordinateur Windows ou Mac et vous apprenez, même sans connexion. L'accès à la plateforme en ligne est en plus inclus.",
+      "Oui. Vous la branchez sur un ordinateur Windows ou Mac et vous apprenez, même sans connexion.",
   },
   {
     question: "Que se passe-t-il si je perds ma clé ?",
     answer:
-      "Votre accès à la plateforme en ligne reste actif : vous retrouvez vos formations. Écrivez-nous sur WhatsApp, nous cherchons une solution ensemble.",
+      "Écrivez-nous sur WhatsApp avec votre nom et la référence de votre commande : nous cherchons une solution ensemble.",
   },
 ];
 

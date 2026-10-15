@@ -15,6 +15,8 @@ import { DeliveryUpdateEmail } from "@/lib/email/templates/delivery-update";
 import { RefundNoticeEmail } from "@/lib/email/templates/refund-notice";
 import { AdminReplyEmail } from "@/lib/email/templates/admin-reply";
 import { AuthLinkEmail } from "@/lib/email/templates/auth-link";
+import { OrderLinksEmail } from "@/lib/email/templates/order-links";
+import { PaymentReminderEmail } from "@/lib/email/templates/payment-reminder";
 
 /**
  * Aperçu visuel de chaque gabarit d'email, sans envoi réel — pour itérer
@@ -60,6 +62,7 @@ export default function EmailPreviewPage() {
           amount={12000}
           delivery="cle-physique"
           shipping={shipping}
+          trackUrl="http://localhost:3000/commande/suivi/exemple"
         />
       </Preview>
       <Preview title="Commande reçue : produit numérique (WhatsApp)">
@@ -69,6 +72,34 @@ export default function EmailPreviewPage() {
           amount={6000}
           delivery="numerique"
           channel="WHATSAPP"
+          trackUrl="http://localhost:3000/commande/suivi/exemple"
+        />
+      </Preview>
+      <Preview title="Relance : paiement non terminé">
+        <PaymentReminderEmail
+          clientName="Awa Compaoré"
+          productName="Le Chercheur Augmenté"
+          amount={6000}
+          trackUrl="http://localhost:3000/commande/suivi/exemple"
+        />
+      </Preview>
+      <Preview title="Retrouver ma commande : liens des commandes récentes">
+        <OrderLinksEmail
+          name="Awa"
+          items={[
+            {
+              productName: "Le Chercheur Augmenté",
+              amount: 6000,
+              paid: true,
+              url: "http://localhost:3000/commande/suivi/exemple",
+            },
+            {
+              productName: "Performance PC",
+              amount: 10000,
+              paid: false,
+              url: "http://localhost:3000/commande/suivi/exemple2",
+            },
+          ]}
         />
       </Preview>
       <Preview title="Paiement confirmé : clé USB">
@@ -78,7 +109,7 @@ export default function EmailPreviewPage() {
           amount={12000}
           delivery="cle-physique"
           orderRef="3F9A2C71"
-          ctaUrl="http://localhost:3000/espace-client"
+          ctaUrl="http://localhost:3000/commande/suivi/exemple"
         />
       </Preview>
       <Preview title="Paiement confirmé : produit numérique">
@@ -88,7 +119,7 @@ export default function EmailPreviewPage() {
           amount={6000}
           delivery="numerique"
           orderRef="3F9A2C71"
-          ctaUrl="http://localhost:3000/espace-client/formations/le-chercheur-augmente"
+          ctaUrl="http://localhost:3000/commande/suivi/exemple"
         />
       </Preview>
       <Preview title="Accès accordé par l'équipe">

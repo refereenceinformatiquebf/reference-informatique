@@ -2,7 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { requireProfile } from "@/lib/auth/dal";
+import { getCurrentProfile } from "@/lib/auth/dal";
+import { phoneRequired } from "@/lib/checkout/rules";
 import { PRODUCT_KINDS } from "@/lib/catalog";
 import { getVisibleProduct } from "@/lib/catalog/live";
 import { getVisitorCountry } from "@/lib/geo";
@@ -19,13 +20,13 @@ export const metadata: Metadata = {
 
 const DELIVERY_LINE = {
   "cle-physique":
-    "Clé USB livrée gratuitement chez vous sous 24 à 48 h après la confirmation du paiement, avec l'accès à la plateforme.",
+    "Clé USB livrée gratuitement chez vous sous 24 à 48 h après la confirmation du paiement. Nous vous contactons pour convenir de la remise.",
   numerique:
-    "Accès activé dans votre espace client dès que le paiement est confirmé.",
+    "Dès que le paiement est confirmé, un lien personnel vous est envoyé par email : un clic ouvre votre achat, sans mot de passe.",
   manuel:
     "Après la confirmation du paiement, notre équipe vous contacte sur WhatsApp pour vous remettre votre accès.",
   "licence-edn":
-    "Votre licence d'activation est générée automatiquement et vous attend dans votre espace client dès que le paiement est confirmé.",
+    "Votre licence d'activation est générée automatiquement dès que le paiement est confirmé : un lien personnel vous est envoyé par email pour la retrouver, sans mot de passe.",
 } as const;
 
 export default async function CommandePage({
@@ -33,9 +34,9 @@ export default async function CommandePage({
 }: PageProps<"/commande/[slug]">) {
   const { slug } = await params;
 
-  // Protège aussi la page elle-même (pas seulement le proxy optimiste) —
-  // c'est la vérification qui compte réellement, voir lib/auth/dal.ts.
-  const profile = await requireProfile();
+  // Pas de compte exigé : un visiteur connecté retrouve ses informations déjà
+  // remplies, les autres commandent avec leur nom, leur email et leur téléphone.
+  const profile = await getCurrentProfile();
 
   // Même règle que la fiche produit : un produit réservé à un autre pays
   // n'existe pas pour ce visiteur.
@@ -97,15 +98,33 @@ export default async function CommandePage({
           <OrderForm
             productSlug={product.slug}
             needsShipping={product.delivery === "cle-physique"}
-            defaultPhone={profile.phone ?? undefined}
+            phoneRequired={phoneRequired(product.delivery)}
+            buyer={
+              profile
+                ? {
+                    email: profile.email ?? undefined,
+                    name: profile.name,
+                    phone: profile.phone ?? undefined,
+                  }
+                : {}
+            }
             unitPrice={product.price}
           />
           <p className="text-ink-faint mt-6 flex items-start gap-2 text-xs leading-relaxed">
             <IconBouclier size={16} className="mt-px shrink-0" />
-            Le paiement en ligne se fait sur une page sécurisée, par carte
-            bancaire ou Mobile Money. Nous ne voyons jamais vos codes. Si vous
-            préférez, la commande par WhatsApp vous met en relation directe avec
-            notre équipe.
+            <span>
+              Le paiement en ligne se fait sur une page sécurisée, par carte
+              bancaire ou Mobile Money. Nous ne voyons jamais vos codes. Si vous
+              préférez, la commande par WhatsApp vous met en relation directe
+              avec notre équipe. Une question après l&apos;achat ?{" "}
+              <Link
+                href="/commande/suivi"
+                className="text-brand-text underline underline-offset-4"
+              >
+                Retrouver ma commande
+              </Link>
+              .
+            </span>
           </p>
         </div>
       </Container>

@@ -99,7 +99,7 @@ const FAQ = [
   {
     question: "Puis-je acheter dans la boutique depuis l'étranger ?",
     answer:
-      "Oui. Les formations, livres numériques, modèles et outils sont accessibles partout : l'accès s'active dans votre espace client dès que le paiement est confirmé.",
+      "Oui. Les formations, livres numériques, modèles et outils sont accessibles partout : vous recevez votre lien d'accès par email dès que le paiement est confirmé, sans compte à créer.",
   },
   {
     question: "Comment vous contacter le plus vite ?",

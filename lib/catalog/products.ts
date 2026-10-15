@@ -22,7 +22,7 @@ import type { Faq, Product } from "./types";
 const faqLivraisonNumerique: Faq = {
   question: "Comment vais-je recevoir mon achat ?",
   answer:
-    "Dès que votre paiement est confirmé, votre accès s'active dans votre espace client, rubrique « Mes formations », et vous recevez un email de confirmation. Aucune attente de livraison.",
+    "Dès que votre paiement est confirmé, vous recevez un email avec un lien personnel : un clic ouvre votre achat, sans mot de passe ni compte à créer. Vous le retrouvez ensuite dans votre espace client, rubrique « Mes formations ». Aucune attente de livraison.",
 };
 
 const faqPaiementNumerique: Faq = {

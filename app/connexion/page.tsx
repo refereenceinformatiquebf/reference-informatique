@@ -18,7 +18,7 @@ export default async function ConnexionPage({
   return (
     <AuthShell
       title="Connexion"
-      lead="Accédez à votre espace client : vos formations, vos commandes, vos devis."
+      lead="Accédez à votre espace client : vos formations, vos commandes, vos devis. Vous avez déjà commandé sans créer de compte ? Votre adresse email suffit : un lien de connexion vous est envoyé."
       footer={
         <>
           Pas encore de compte ?{" "}

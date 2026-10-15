@@ -10,6 +10,7 @@ import {
 } from "@/components/admin/ui";
 import { AdminAction } from "@/components/admin/admin-action";
 import { NoteForm } from "@/components/admin/note-form";
+import { EmailForm } from "@/components/admin/email-form";
 import { prisma } from "@/lib/prisma/client";
 import { getProduct } from "@/lib/catalog/live";
 import { formatDateTime, formatPrice } from "@/lib/format";
@@ -17,7 +18,9 @@ import { ORDER_STATUS_LABELS } from "@/lib/status-labels";
 import { whatsappLinkTo } from "@/lib/site";
 import {
   cancelOrderAction,
+  correctClientEmailAction,
   refundOrderAction,
+  remindPaymentAction,
   resendPaymentEmailAction,
   saveOrderNoteAction,
   setDeliveryStatusAction,
@@ -107,6 +110,24 @@ export default async function AdminOrderDetailPage({
                       reasonRequired: true,
                     }}
                   />
+                  {order.paymentProvider === "SASPAY" ? (
+                    <AdminAction
+                      action={remindPaymentAction}
+                      hidden={{ orderId: order.id }}
+                      label={
+                        order.reminderSentAt
+                          ? "Relancer à nouveau le paiement"
+                          : "Relancer le paiement"
+                      }
+                      variant="outline"
+                      confirm={{
+                        title: "Relancer le client ?",
+                        description:
+                          "Le client reçoit un email avec un lien pour reprendre son paiement en un clic. Si le paiement avait en réalité abouti, la commande passe simplement à « payée ».",
+                        confirmLabel: "Envoyer la relance",
+                      }}
+                    />
+                  ) : null}
                   <AdminAction
                     action={cancelOrderAction}
                     hidden={{ orderId: order.id }}
@@ -128,7 +149,7 @@ export default async function AdminOrderDetailPage({
                   <AdminAction
                     action={resendPaymentEmailAction}
                     hidden={{ orderId: order.id }}
-                    label="Renvoyer l'email de confirmation"
+                    label="Renvoyer le lien d'accès au client"
                   />
                   <AdminAction
                     action={refundOrderAction}
@@ -382,6 +403,18 @@ export default async function AdminOrderDetailPage({
               </a>
             ) : null}
           </Panel>
+
+          {order.profile.role !== "ADMIN" ? (
+            <Panel title="Corriger l'email du client">
+              <EmailForm
+                action={correctClientEmailAction}
+                hidden={{ orderId: order.id }}
+                label="Nouvelle adresse email"
+                help="À utiliser quand le client s'est trompé en saisissant son adresse (lien d'accès jamais reçu). L'ancien lien est invalidé et le nouveau part vers la bonne adresse."
+                buttonLabel="Corriger et renvoyer le lien"
+              />
+            </Panel>
+          ) : null}
 
           <Panel title="Note interne">
             <NoteForm

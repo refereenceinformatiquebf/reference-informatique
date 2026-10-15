@@ -216,6 +216,12 @@ model Order {
   deliveredAt       DateTime?       @map("delivered_at")
   paidAt            DateTime?       @map("paid_at")
   refundedAt        DateTime?       @map("refunded_at")
+  // Lien personnel de suivi et d'accès, envoyé au client par email (voir
+  // lib/checkout/access.ts). Créé à la demande ; ne jamais l'afficher à
+  // l'écran à qui n'a pas prouvé qu'il lit la boîte de l'acheteur.
+  accessToken       String?         @unique @map("access_token")
+  // Date de l'unique relance d'une commande jamais payée.
+  reminderSentAt    DateTime?       @map("reminder_sent_at")
   // Commande créée par l'équipe (client mal localisé, paiement hors site…).
   manual            Boolean         @default(false)
   internalNote      String?         @map("internal_note") @db.Text
@@ -257,16 +263,16 @@ model Payment {
 }
 
 model Access {
-  id        String   @id @default(uuid()) @db.Uuid
-  profileId String   @map("profile_id") @db.Uuid
-  profile   Profile  @relation(fields: [profileId], references: [id])
-  productId String   @map("product_id") @db.Uuid
-  product   Product  @relation(fields: [productId], references: [id])
-  grantedAt DateTime @default(now()) @map("granted_at")
+  id           String   @id @default(uuid()) @db.Uuid
+  profileId    String   @map("profile_id") @db.Uuid
+  profile      Profile  @relation(fields: [profileId], references: [id])
+  productId    String   @map("product_id") @db.Uuid
+  product      Product  @relation(fields: [productId], references: [id])
+  grantedAt    DateTime @default(now()) @map("granted_at")
   // Renseignes uniquement pour un produit a livraison "licence-edn" (voir lib/edn-license/) : la
   // licence Windows + Office recuperee automatiquement aupres de L'Expert du Numerique.
-  licenseKey   String? @map("license_key")
-  installerUrl String? @map("installer_url")
+  licenseKey   String?  @map("license_key")
+  installerUrl String?  @map("installer_url")
 
   @@unique([profileId, productId])
   @@map("access")

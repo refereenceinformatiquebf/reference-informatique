@@ -16,7 +16,7 @@ const STEPS: Record<DeliveryMode, { title: string; text: string }[]> = {
     },
     {
       title: "Nous confirmons et préparons votre clé",
-      text: "Dès que votre paiement est confirmé, votre accès à la plateforme s'active dans votre espace.",
+      text: "Dès que votre paiement est confirmé, nous préparons votre clé et nous vous contactons pour convenir de la remise.",
     },
     {
       title: "Nous vous livrons gratuitement",
@@ -34,11 +34,11 @@ const STEPS: Record<DeliveryMode, { title: string; text: string }[]> = {
     },
     {
       title: "Votre paiement est confirmé",
-      text: "Votre accès s'active automatiquement et vous recevez un email de confirmation.",
+      text: "Votre accès s'active automatiquement et vous recevez un email avec votre lien personnel.",
     },
     {
       title: "Vous accédez à votre achat",
-      text: "Il est dans votre espace client, rubrique « Mes formations », à tout moment.",
+      text: "Un clic sur le lien reçu, sans mot de passe. Vous le retrouvez ensuite dans votre espace client, rubrique « Mes formations ».",
     },
     {
       title: "Vous êtes accompagné",

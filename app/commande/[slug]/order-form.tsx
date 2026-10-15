@@ -10,9 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { formatPrice } from "@/lib/format";
 import { MAX_KEY_QUANTITY } from "@/lib/validations/order";
+import { suggestEmail } from "@/lib/checkout/rules";
 import { FieldError } from "@/components/ui/field-error";
 import { IconPaiement, IconWhatsapp } from "@/components/icons";
 import { Form } from "@/components/ui/form";
+import { Honeypot } from "@/components/ui/honeypot";
 
 function Actions() {
   const { pending, data } = useFormStatus();
@@ -50,20 +52,30 @@ function Actions() {
   );
 }
 
+type Buyer = {
+  /** Visiteur connecté : son email n'est pas modifiable ici. */
+  email?: string;
+  name?: string;
+  phone?: string;
+};
+
 /**
- * Formulaire de commande. Pour un produit à livraison physique (clé USB), il
- * demande l'adresse de livraison ; pour un produit numérique, il se réduit
- * aux deux boutons de paiement.
+ * Formulaire de commande, SANS compte obligatoire : nom, email (où part le
+ * lien d'accès) et téléphone. Un visiteur connecté voit ses informations
+ * déjà remplies. Pour une clé USB, il demande en plus l'adresse de livraison.
  */
 export function OrderForm({
   productSlug,
   needsShipping,
-  defaultPhone,
+  phoneRequired,
+  buyer,
   unitPrice,
 }: {
   productSlug: string;
   needsShipping: boolean;
-  defaultPhone?: string;
+  /** Le téléphone est indispensable (clé, remise manuelle) ou facultatif. */
+  phoneRequired: boolean;
+  buyer: Buyer;
   /** Prix d'une unité, pour l'affichage du total (le serveur recalcule). */
   unitPrice: number;
 }) {
@@ -72,10 +84,108 @@ export function OrderForm({
     undefined,
   );
   const [quantity, setQuantity] = useState(1);
+  const [email, setEmail] = useState("");
+  const signedIn = Boolean(buyer.email);
+  const hint = signedIn ? null : suggestEmail(email);
+  const errors = state?.fieldErrors;
 
   return (
     <Form action={action} className="flex flex-col gap-6">
       <input type="hidden" name="productSlug" value={productSlug} />
+      <Honeypot />
+
+      <fieldset className="flex flex-col gap-5">
+        <legend className="font-display text-ink mb-1 text-[1.25rem] leading-tight">
+          Vos coordonnées
+        </legend>
+        <p className="text-ink-soft text-sm leading-relaxed">
+          {signedIn ? (
+            <>
+              Vous commandez avec votre compte{" "}
+              <strong className="text-ink">{buyer.email}</strong>.
+            </>
+          ) : (
+            <>
+              <strong className="text-ink">Aucun compte à créer.</strong> Votre
+              lien d&apos;accès est envoyé à l&apos;email indiqué ci-dessous,
+              dès que le paiement est confirmé.
+            </>
+          )}
+        </p>
+
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="name">Nom complet</Label>
+            <Input
+              id="name"
+              name="name"
+              autoComplete="name"
+              defaultValue={buyer.name}
+              required
+              aria-invalid={Boolean(errors?.name)}
+            />
+            <FieldError message={errors?.name?.[0]} />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="phone">
+              Téléphone (WhatsApp)
+              {phoneRequired ? "" : " — facultatif"}
+            </Label>
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              defaultValue={buyer.phone}
+              placeholder="+226 XX XX XX XX"
+              required={phoneRequired}
+              aria-invalid={Boolean(errors?.phone)}
+            />
+            <FieldError message={errors?.phone?.[0]} />
+          </div>
+        </div>
+
+        {signedIn ? null : (
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="email">Adresse email</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              autoCapitalize="none"
+              spellCheck={false}
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="vous@exemple.com"
+              required
+              aria-invalid={Boolean(errors?.email)}
+              aria-describedby="email-help"
+            />
+            <FieldError message={errors?.email?.[0]} />
+            {hint ? (
+              <p role="status" className="text-warning-text text-sm">
+                Vouliez-vous écrire{" "}
+                <button
+                  type="button"
+                  onClick={() => setEmail(hint)}
+                  className="font-semibold underline underline-offset-4"
+                >
+                  {hint}
+                </button>{" "}
+                ?
+              </p>
+            ) : null}
+            <p id="email-help" className="text-ink-faint text-xs">
+              Vérifiez-la bien : c&apos;est là que vous recevez votre accès et
+              votre reçu.
+            </p>
+          </div>
+        )}
+      </fieldset>
 
       {needsShipping ? (
         <fieldset className="flex flex-col gap-5">
@@ -87,34 +197,16 @@ export function OrderForm({
             vous remettre votre clé.
           </p>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="city">Ville</Label>
-              <Input
-                id="city"
-                name="city"
-                autoComplete="address-level2"
-                required
-                aria-invalid={Boolean(state?.fieldErrors?.city)}
-              />
-              <FieldError message={state?.fieldErrors?.city?.[0]} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="phone">
-                Téléphone joignable (WhatsApp si possible)
-              </Label>
-              <Input
-                id="phone"
-                name="phone"
-                type="tel"
-                autoComplete="tel"
-                defaultValue={defaultPhone}
-                placeholder="+226 XX XX XX XX"
-                required
-                aria-invalid={Boolean(state?.fieldErrors?.phone)}
-              />
-              <FieldError message={state?.fieldErrors?.phone?.[0]} />
-            </div>
+          <div className="flex flex-col gap-1.5 sm:max-w-xs">
+            <Label htmlFor="city">Ville</Label>
+            <Input
+              id="city"
+              name="city"
+              autoComplete="address-level2"
+              required
+              aria-invalid={Boolean(errors?.city)}
+            />
+            <FieldError message={errors?.city?.[0]} />
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -125,9 +217,9 @@ export function OrderForm({
               rows={3}
               required
               placeholder="Quartier, rue, un repère connu (station, école, marché…) ou « au bureau, à tel endroit »."
-              aria-invalid={Boolean(state?.fieldErrors?.address)}
+              aria-invalid={Boolean(errors?.address)}
             />
-            <FieldError message={state?.fieldErrors?.address?.[0]} />
+            <FieldError message={errors?.address?.[0]} />
           </div>
 
           <div className="flex flex-col gap-1.5 sm:max-w-xs">
@@ -137,7 +229,7 @@ export function OrderForm({
               name="quantity"
               value={quantity}
               onChange={(event) => setQuantity(Number(event.target.value))}
-              aria-invalid={Boolean(state?.fieldErrors?.quantity)}
+              aria-invalid={Boolean(errors?.quantity)}
             >
               {Array.from({ length: MAX_KEY_QUANTITY }, (_, index) => (
                 <option key={index + 1} value={index + 1}>
@@ -145,7 +237,7 @@ export function OrderForm({
                 </option>
               ))}
             </Select>
-            <FieldError message={state?.fieldErrors?.quantity?.[0]} />
+            <FieldError message={errors?.quantity?.[0]} />
             <p className="text-ink-soft text-sm">
               Total à payer :{" "}
               <strong className="text-ink tabular">

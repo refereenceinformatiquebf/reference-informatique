@@ -7,7 +7,10 @@ import { createServerClient } from "@supabase/ssr";
 // ("Proxy") mais le rôle est identique. Un `middleware.ts` n'aurait
 // simplement jamais été exécuté.
 
-const CLIENT_PREFIXES = ["/espace-client", "/commande"];
+const CLIENT_PREFIXES = ["/espace-client"];
+// La commande est ouverte à tous (aucun compte exigé) : on y rafraîchit
+// seulement la session d'un visiteur déjà connecté, sans jamais le rediriger.
+const REFRESH_ONLY_PREFIXES = ["/commande"];
 const ADMIN_PREFIX = "/admin";
 
 export async function proxy(request: NextRequest) {
@@ -16,13 +19,20 @@ export async function proxy(request: NextRequest) {
     CLIENT_PREFIXES.some((prefix) => path.startsWith(prefix)) ||
     path.startsWith(ADMIN_PREFIX);
 
+  const refreshOnly =
+    !isProtected &&
+    REFRESH_ONLY_PREFIXES.some((prefix) => path.startsWith(prefix));
+  const hasSessionCookie = request.cookies
+    .getAll()
+    .some((cookie) => cookie.name.startsWith("sb-"));
+
   // Trouvé en testant réellement le projet (pas seulement en le compilant) :
   // interroger Supabase pour CHAQUE page, y compris les pages publiques,
   // rendait tout le site indisponible dès que Supabase était injoignable ou
   // mal configuré — une panne d'un service tiers ne doit jamais faire
   // tomber les pages qui n'en ont pas besoin. On ne touche donc à Supabase
   // que pour les routes qui en ont réellement besoin.
-  if (!isProtected) {
+  if (!isProtected && !(refreshOnly && hasSessionCookie)) {
     return NextResponse.next();
   }
 
@@ -58,6 +68,8 @@ export async function proxy(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
+    if (refreshOnly) return response;
+
     if (!user) {
       const url = new URL("/connexion", request.url);
       url.searchParams.set("next", path);
@@ -83,6 +95,8 @@ export async function proxy(request: NextRequest) {
     // ne peut pas vérifier la session redirige vers la connexion, elle ne
     // renvoie jamais une erreur 500 à l'utilisateur.
     console.error("[proxy] Vérification de session impossible :", error);
+    // Pages ouvertes à tous : un souci de session ne doit jamais les bloquer.
+    if (refreshOnly) return NextResponse.next();
     const url = new URL("/connexion", request.url);
     url.searchParams.set("next", path);
     return NextResponse.redirect(url);

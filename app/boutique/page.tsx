@@ -205,9 +205,9 @@ function CleExplainer() {
       text: "Vous branchez la clé et vous apprenez, même sans connexion.",
     },
     {
-      icon: "plateforme" as const,
-      title: "L'accès en ligne est inclus",
-      text: "Vous retrouvez aussi vos formations depuis votre téléphone, à vie.",
+      icon: "formation" as const,
+      title: "Tout est déjà sur la clé",
+      text: "Les formations, les modèles et les livres sont sur la clé : à vous pour toujours, sans abonnement.",
     },
   ];
   return (

@@ -60,7 +60,7 @@ export function ManualOrderForm({
     <Form action={action} className="flex flex-col gap-5">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="clientEmail">
-          Email du client (il doit avoir un compte)
+          Email du client (un compte est créé s&apos;il n&apos;en a pas)
         </Label>
         <Input
           id="clientEmail"

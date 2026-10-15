@@ -10,7 +10,7 @@ export const PRODUCT_KINDS: Record<
     label: "Clé de formations",
     plural: "Clés de formations",
     description:
-      "Une clé USB livrée chez vous, avec l'accès à la plateforme en ligne. Elle fonctionne sans internet.",
+      "Une clé USB livrée chez vous, avec les formations déjà dessus. Elle fonctionne sans internet.",
     icon: "cle-usb",
   },
   formation: {

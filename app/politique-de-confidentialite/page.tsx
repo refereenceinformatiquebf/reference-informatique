@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 const SECTIONS = [
   {
     title: "Quelles données nous collectons",
-    body: "Lorsque vous créez un compte, passez commande ou demandez un devis, nous collectons votre nom, votre numéro de téléphone, votre adresse email et, selon le cas, le contenu de votre message. Pour un produit livré physiquement, nous collectons aussi votre ville, votre adresse de livraison et un numéro joignable. Lorsque vous consultez une formation, nous enregistrons quelles leçons vous avez ouvertes, pour afficher votre progression.",
+    body: "Lorsque vous créez un compte, passez commande ou demandez un devis, nous collectons votre nom, votre numéro de téléphone, votre adresse email et, selon le cas, le contenu de votre message. Si vous commandez sans créer de compte, nous préparons pour vous un compte sans mot de passe à partir de votre adresse email : il vous permet de retrouver vos achats avec un simple lien reçu par email. Pour un produit livré physiquement, nous collectons aussi votre ville, votre adresse de livraison et un numéro joignable. Lorsque vous consultez une formation, nous enregistrons quelles leçons vous avez ouvertes, pour afficher votre progression.",
   },
   {
     title: "Pourquoi nous les collectons",
@@ -28,7 +28,7 @@ const SECTIONS = [
   },
   {
     title: "Emails",
-    body: "Nous vous écrivons pour confirmer vos commandes, vos paiements et vos accès, et pour répondre à vos demandes. Nous n'envoyons pas de publicité sans que vous l'ayez demandée.",
+    body: "Nous vous écrivons pour confirmer vos commandes, vos paiements et vos accès, et pour répondre à vos demandes. Si vous ne terminez pas un paiement, nous pouvons vous envoyer un seul rappel pour le reprendre. Nous n'envoyons pas de publicité sans que vous l'ayez demandée.",
   },
   {
     title: "Conservation",

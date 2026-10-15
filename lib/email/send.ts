@@ -25,6 +25,8 @@ import { RefundNoticeEmail } from "./templates/refund-notice";
 import { AdminReplyEmail } from "./templates/admin-reply";
 import { AuthLinkEmail, type AuthLinkKind } from "./templates/auth-link";
 import { LicenceStockAlertEmail } from "./templates/licence-stock-alert";
+import { OrderLinksEmail, type OrderLinkItem } from "./templates/order-links";
+import { PaymentReminderEmail } from "./templates/payment-reminder";
 
 const SENDER = {
   name: SITE.name,
@@ -161,6 +163,8 @@ export async function sendOrderConfirmation(params: {
   channel?: "BOUTIQUE" | "WHATSAPP";
   shipping?: { city: string; address: string } | null;
   orderId?: string;
+  /** Lien personnel de la commande (suivi, reprise du paiement, accès). */
+  trackUrl?: string;
 }) {
   await sendEmail({
     to: { email: params.to, name: params.clientName },
@@ -179,7 +183,9 @@ export async function sendPaymentConfirmation(params: {
   quantity?: number;
   delivery?: DeliveryMode;
   orderId: string;
-  /** Lien direct vers l'achat (fiche du produit dans l'espace client). */
+  /** Lien personnel de la commande : ouvre l'achat sans mot de passe. */
+  ctaUrl?: string;
+  /** Repli : chemin dans l'espace client (à n'utiliser que sans lien personnel). */
   ctaPath?: string;
   /** Renseignés uniquement pour une livraison "licence-edn". */
   licenceKey?: string | null;
@@ -191,10 +197,45 @@ export async function sendPaymentConfirmation(params: {
     react: PaymentConfirmationEmail({
       ...params,
       orderRef: params.orderId.slice(0, 8).toUpperCase(),
-      ctaUrl: `${SITE.url}${params.ctaPath ?? "/espace-client"}`,
+      ctaUrl:
+        params.ctaUrl ?? `${SITE.url}${params.ctaPath ?? "/espace-client"}`,
     }),
     template: "payment-confirmation",
     relatedOrderId: params.orderId,
+  });
+}
+
+/** Relance unique d'une commande dont le paiement n'a pas été terminé. */
+export async function sendPaymentReminder(params: {
+  to: string;
+  clientName: string;
+  productName: string;
+  amount: number;
+  quantity?: number;
+  orderId: string;
+  trackUrl: string;
+}) {
+  await sendEmail({
+    to: { email: params.to, name: params.clientName },
+    subject: `Votre commande vous attend — ${params.productName}`,
+    react: PaymentReminderEmail(params),
+    template: "payment-reminder",
+    relatedOrderId: params.orderId,
+    replyTo: ADMIN_REPLY_TO,
+  });
+}
+
+/** « Retrouver ma commande » : les liens personnels des commandes récentes. */
+export async function sendOrderLinks(params: {
+  to: Recipient;
+  items: OrderLinkItem[];
+}) {
+  await sendEmail({
+    to: params.to,
+    subject: "Vos commandes — Référence Informatique",
+    react: OrderLinksEmail({ name: params.to.name, items: params.items }),
+    template: "order-links",
+    replyTo: ADMIN_REPLY_TO,
   });
 }
 

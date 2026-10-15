@@ -68,6 +68,9 @@ export async function findAuthUser(email: string) {
 
 export type GeneratedLink = {
   url: string;
+  /** Jeton brut du lien : sert à ouvrir une session directement (voir
+   * lib/checkout/access.ts), sans passer par un email. */
+  tokenHash: string;
   userId: string;
   /** Type réellement émis par Supabase (un lien de connexion vers une adresse
    * inconnue crée le compte et devient un lien « signup »). */
@@ -111,6 +114,7 @@ export async function generateAuthLink(params: {
       data.properties.verification_type,
       params.next,
     ),
+    tokenHash: data.properties.hashed_token,
     userId: data.user.id,
     verificationType: data.properties.verification_type,
   };

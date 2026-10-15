@@ -16,7 +16,7 @@ npm run dev              # http://localhost:3000
 
 Vérifications : `npm run typecheck` · `npm run lint` · `npm test` · `npm run build`. Un modèle d'intégration continue GitHub est prêt dans [docs/ci-github-actions.yml](docs/ci-github-actions.yml) : il rejoue ces vérifications à chaque envoi et cherche les clés oubliées dans le code. Il n'est **pas encore actif** : GitHub refuse qu'un jeton sans la portée `workflow` publie un fichier de workflow. Pour l'activer : `gh auth refresh -h github.com -s workflow`, puis copier le fichier vers `.github/workflows/ci.yml` et pousser.
 
-Variables d'environnement : voir [.env.example](.env.example). En production (Vercel) : `SASPAY_SECRET_KEY`, `SASPAY_WEBHOOK_SECRET`, `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `ADMIN_NOTIFICATION_EMAIL`, plus les clés Supabase et les deux adresses de base de données. Aucune autre n'est nécessaire.
+Variables d'environnement : voir [.env.example](.env.example). En production (Vercel) : `SASPAY_SECRET_KEY`, `SASPAY_WEBHOOK_SECRET`, `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `ADMIN_NOTIFICATION_EMAIL`, plus les clés Supabase et les deux adresses de base de données. `CRON_SECRET` (facultative) active les relances automatiques des paiements non terminés. Aucune autre n'est nécessaire.
 
 ## Le catalogue : le code d'abord, l'administration ensuite
 
@@ -60,6 +60,17 @@ Les clés de formations ne sont **visibles et achetables qu'au Burkina Faso** (`
 - En local, il n'y a pas d'en-tête : le site simule le Burkina Faso. `DEV_VISITOR_COUNTRY=FR` dans `.env` simule un visiteur étranger.
 - Tout nouveau produit réservé à un pays se déclare avec `restrictedTo` ; les tests ([tests/catalog.test.ts](tests/catalog.test.ts)) vérifient la règle.
 
+## Commander sans compte
+
+Aucun compte n'est exigé pour payer (comme sur Expert du Numérique). Le client indique son nom, son email et son téléphone (facultatif pour un produit 100 % automatique, obligatoire pour une clé ou une remise manuelle) :
+
+1. **Un compte sans mot de passe est préparé en coulisse** à partir de son email (retrouvé s'il existe déjà) — [lib/checkout/buyer.ts](lib/checkout/buyer.ts). Ce compte n'ouvre **aucune session** à ce moment-là.
+2. **Chaque commande a un lien personnel secret** (`Order.accessToken`, 32 octets aléatoires), envoyé **uniquement par email**. Le présenter prouve qu'on lit la boîte de l'acheteur. Il ouvre `/commande/suivi/<jeton>` : suivi de la commande, reprise du paiement, et — après paiement — un clic « Accéder à mon achat » qui ouvre la session **sans mot de passe** et emmène sur le contenu ([lib/checkout/access.ts](lib/checkout/access.ts)). Il est valable 90 jours après le paiement ; ensuite le client en demande un nouveau (envoyé à l'adresse du compte).
+3. **Sécurité** : le jeton n'est jamais affiché à l'écran (sinon taper l'email d'un autre, payer, puis entrer dans son compte serait possible). La page de retour de paiement ne montre que l'état de la commande et l'adresse **masquée**. Commander avec l'email d'un compte existant n'ouvre aucune session et n'écrase rien.
+4. **Retrouver ma commande** (`/commande/suivi`) : l'email suffit, la réponse est toujours la même (personne ne sait quelles adresses ont déjà commandé). La connexion par lien (page Connexion) fonctionne aussi pour qui a commandé sans compte.
+5. **Une clé USB se livre, rien à activer** : aucun accès en ligne n'est créé pour une clé. Le client suit la livraison ; s'il se connecte ensuite, il voit sa commande et des **recommandations** ([lib/catalog/recommendations.ts](lib/catalog/recommendations.ts)).
+6. **Aides** : faute de domaine d'email signalée (« gmial.com »), email masqué à l'écran, relance **unique** d'une commande jamais payée (manuelle depuis l'administration, ou automatique par la tâche planifiée `/api/cron/relances`, 1 fois par jour, **active seulement si la variable `CRON_SECRET` est définie** sur Vercel), correction d'une adresse fausse par l'équipe (l'ancien lien est invalidé).
+
 ## Comptes clients : les emails passent par Brevo
 
 Supabase n'envoie **aucun** email. Inscription, connexion par lien, mot de passe oublié : le serveur demande à Supabase un lien (`auth.admin.generateLink`) et l'envoie lui-même par Brevo, en français, aux couleurs du site ([lib/auth/email-links.ts](lib/auth/email-links.ts), [lib/actions/auth.ts](lib/actions/auth.ts)).
@@ -84,7 +95,7 @@ Un produit numérique est livré par l'espace client : `Access` + module/leçon 
 
 Autre voie, pour un lot de livres : `DELIVERABLES_DIR="C:/chemin/vers/les/pdf" npx prisma db seed`.
 
-Tant qu'aucun contenu n'est déposé, la page du produit affiche un message d'attente avec un lien WhatsApp. Pour les produits à remise manuelle (clés USB, outil, formation en direct), l'équipe suit l'état dans la commande : préparation, expédition, remise.
+Tant qu'aucun contenu n'est déposé, la page du produit affiche un message d'attente avec un lien WhatsApp. Pour les produits à remise manuelle (clés USB, outil, formation en direct), l'équipe suit l'état dans la commande : préparation, expédition, remise. Une clé USB n'ouvre aucun accès en ligne.
 
 ## Administration
 

@@ -80,7 +80,7 @@ export const DELIVERY_MODES = [
   "licence-edn",
 ] as const;
 /**
- * - cle-physique : clé USB livrée chez le client + accès plateforme
+ * - cle-physique : clé USB livrée chez le client (aucun accès en ligne à activer)
  * - numerique    : accès par l'espace client (guide PDF, liens, fichiers)
  * - manuel       : l'équipe contacte le client sur WhatsApp après paiement
  * - licence-edn  : licence d'activation récupérée automatiquement auprès d'un fournisseur externe

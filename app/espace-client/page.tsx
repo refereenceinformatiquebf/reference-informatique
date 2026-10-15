@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma/client";
 import { requireProfile } from "@/lib/auth/dal";
-import { getProduct } from "@/lib/catalog/live";
+import { getProduct, getVisibleProducts } from "@/lib/catalog/live";
+import { getVisitorCountry } from "@/lib/geo";
+import { rankRecommendations } from "@/lib/catalog/recommendations";
+import { ProductCard } from "@/components/shop/product-card";
 import { Container, Eyebrow } from "@/components/ui/section";
 import { fr } from "@/lib/typography";
 import { EspaceClientTabs } from "./espace-client-tabs";
@@ -18,11 +21,13 @@ export default async function EspaceClientPage({
   const profile = await requireProfile();
   const { bienvenue, onglet } = await searchParams;
   const isWelcome = bienvenue === "1";
-  const defaultTab = isWelcome
-    ? "profil"
-    : onglet === "commandes" || onglet === "devis" || onglet === "profil"
+  const requestedTab =
+    onglet === "commandes" ||
+    onglet === "devis" ||
+    onglet === "profil" ||
+    onglet === "formations"
       ? onglet
-      : "formations";
+      : null;
 
   const [accessRows, orders, quotes] = await Promise.all([
     prisma.access.findMany({
@@ -51,6 +56,29 @@ export default async function EspaceClientPage({
         (await getProduct(item.product.slug))?.delivery === "licence-edn",
     })),
   );
+
+  // Qui n'a acheté qu'une clé USB n'a aucune formation en ligne : on l'accueille
+  // sur ses commandes (état de la livraison) plutôt que sur un onglet vide.
+  const defaultTab = isWelcome
+    ? "profil"
+    : (requestedTab ??
+      (access.length === 0 && orders.length > 0 ? "commandes" : "formations"));
+
+  // Recommandations : ce que le client ne possède pas encore (achats payés et
+  // accès), restreint aux offres visibles depuis son pays.
+  const ownedSlugs = new Set<string>([
+    ...accessRows.map((item) => item.product.slug),
+    ...orders
+      .filter((order) => order.status === "PAYE" && order.product)
+      .map((order) => order.product!.slug),
+  ]);
+  const visible = await getVisibleProducts(await getVisitorCountry());
+  const owned = (
+    await Promise.all([...ownedSlugs].map((slug) => getProduct(slug)))
+  ).filter((product): product is NonNullable<typeof product> =>
+    Boolean(product),
+  );
+  const recommendations = rankRecommendations(owned, visible, 3);
 
   return (
     <div className="py-10 sm:py-14">
@@ -81,6 +109,27 @@ export default async function EspaceClientPage({
           orders={orders}
           quotes={quotes}
         />
+
+        {recommendations.length > 0 ? (
+          <section aria-labelledby="recommandations" className="mt-16">
+            <Eyebrow>Pour aller plus loin</Eyebrow>
+            <h2
+              id="recommandations"
+              className="text-ink mt-3 text-[1.5rem] leading-tight sm:text-[1.875rem]"
+            >
+              Recommandé pour vous
+            </h2>
+            <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {recommendations.map((product, index) => (
+                <ProductCard
+                  key={product.slug}
+                  product={product}
+                  index={index}
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
       </Container>
     </div>
   );

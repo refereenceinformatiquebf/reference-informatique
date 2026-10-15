@@ -23,6 +23,7 @@ import {
   checkLowStock,
 } from "@/lib/licences/stock";
 import { audit } from "@/lib/admin/audit";
+import { trackingUrlFor } from "@/lib/checkout/access";
 
 /* ----------------------------- Historique ----------------------------- */
 
@@ -169,7 +170,10 @@ export async function markOrderPaid(params: MarkOrderPaidParams) {
               : {}),
           },
         });
-        if (current.productId) {
+        // Une clé USB se LIVRE : l'acheteur n'a rien à activer sur le site. Pas
+        // d'accès créé ; s'il se connecte plus tard, il retrouve sa commande
+        // (« Mes commandes ») et nos recommandations.
+        if (current.productId && !needsDelivery) {
           // Stock local d'abord (même transaction, zéro appel réseau) : si vide, l'Access est
           // quand même créé SANS licence — ensureLicenceFulfilled() (appelée après la
           // transaction, voir notifyPaymentConfirmed) tente alors le repli direct auprès d'EDN.
@@ -353,6 +357,7 @@ async function notifyPaymentConfirmed(orderId: string) {
     order.profile.name,
     email,
   );
+  const trackUrl = await trackingUrlFor(order.id);
 
   const tasks: Promise<unknown>[] = [
     sendOrderAlert({
@@ -378,12 +383,9 @@ async function notifyPaymentConfirmed(orderId: string) {
         quantity: order.quantity,
         delivery,
         orderId: order.id,
-        ctaPath:
-          delivery === "numerique"
-            ? `/espace-client/formations/${product.slug}`
-            : delivery === "licence-edn"
-              ? `/espace-client/licences/${product.slug}`
-              : "/espace-client",
+        // Lien personnel : ouvre l'achat sans mot de passe (et sans compte
+        // préalable). La page de suivi redirige ensuite vers la bonne rubrique.
+        ctaUrl: trackUrl,
         licenceKey: licence?.licenseKey,
         installerUrl: licence?.installerUrl,
       }),
@@ -429,6 +431,7 @@ export async function notifyOrderCreated(orderId: string) {
         channel: order.channel,
         shipping,
         orderId: order.id,
+        trackUrl: await trackingUrlFor(order.id),
       }),
     );
   }

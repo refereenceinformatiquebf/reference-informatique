@@ -18,10 +18,11 @@ export function AccessGrantedEmail({
       <Text style={emailTextStyle}>Bonjour {clientName},</Text>
       <Text style={emailTextStyle}>
         Votre accès à <strong>{productName}</strong> est activé. Connectez-vous
-        à votre espace client pour commencer.
+        à votre espace client avec votre adresse email pour commencer : un lien
+        de connexion vous y est envoyé, sans mot de passe à retenir.
       </Text>
-      <Button href={`${siteUrl}/espace-client`} style={emailButtonStyle}>
-        Accéder à mon espace
+      <Button href={`${siteUrl}/connexion`} style={emailButtonStyle}>
+        Me connecter
       </Button>
     </EmailLayout>
   );

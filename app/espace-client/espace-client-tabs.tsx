@@ -66,7 +66,7 @@ export function EspaceClientTabs({
           <EmptyState
             icon="formation"
             title="Aucune formation pour le moment"
-            message="Vos achats apparaissent ici dès que le paiement est confirmé."
+            message="Vos formations en ligne apparaissent ici dès que le paiement est confirmé. Une clé USB commandée se retrouve dans « Mes commandes »."
             ctaHref="/boutique"
             ctaLabel="Découvrir la boutique"
           />

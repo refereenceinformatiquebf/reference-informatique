@@ -23,6 +23,13 @@ import {
 } from "@/lib/payments/saspay";
 import { syncSaspayOrder } from "@/lib/payments/saspay-sync";
 import { sendPaymentConfirmation } from "@/lib/email/send";
+import { newAccessToken, trackingUrlFor } from "@/lib/checkout/access";
+import { remindOrder } from "@/lib/checkout/reminders";
+import { sendLinksForOrder } from "@/lib/checkout/links";
+import { findAuthUser, normalizeEmail } from "@/lib/auth/email-links";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { ensureAccount } from "@/lib/checkout/buyer";
+import { loginLinkSchema } from "@/lib/validations/auth";
 
 function refresh(orderId?: string) {
   revalidatePath("/admin/commandes");
@@ -244,10 +251,8 @@ export async function resendPaymentEmailAction(
       quantity: order.quantity,
       delivery,
       orderId: order.id,
-      ctaPath:
-        delivery === "numerique"
-          ? `/espace-client/formations/${order.product.slug}`
-          : "/espace-client",
+      // Lien personnel de la commande : ouvre l'achat sans mot de passe.
+      ctaUrl: await trackingUrlFor(order.id),
     });
   } catch {
     return fail(
@@ -257,7 +262,7 @@ export async function resendPaymentEmailAction(
   await addOrderEvent(
     order.id,
     "EMAIL",
-    "Email de confirmation renvoyé au client.",
+    "Email de confirmation et lien d'accès renvoyés au client.",
     actorLabel(admin),
   );
   await audit(
@@ -269,6 +274,133 @@ export async function resendPaymentEmailAction(
   );
   refresh(order.id);
   return done("Email renvoyé au client.");
+}
+
+/** Relance (une fois) un client qui n'a pas terminé son paiement en ligne. */
+export async function remindPaymentAction(
+  _state: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const orderId = orderIdFrom(formData);
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order) return fail("Commande introuvable.");
+  if (order.status !== "EN_ATTENTE")
+    return fail("Seule une commande en attente de paiement se relance.");
+  if (order.paymentProvider !== "SASPAY")
+    return fail(
+      "Cette commande se règle par WhatsApp : relancez le client directement sur WhatsApp.",
+    );
+
+  try {
+    const outcome = await remindOrder(order.id, {
+      actorLabel: actorLabel(admin),
+      force: true,
+    });
+    if (outcome === "paid") {
+      refresh(order.id);
+      return done(
+        "Bonne nouvelle : le paiement avait abouti, la commande est maintenant payée.",
+      );
+    }
+    if (outcome === "skipped_no_email")
+      return fail("Ce client n'a pas d'adresse email connue.");
+    if (outcome === "skipped_other_order_paid")
+      return fail("Ce client a déjà payé ce produit par une autre commande.");
+    if (outcome !== "sent") return fail("Aucune relance n'a été envoyée.");
+  } catch {
+    return fail(
+      "L'envoi a échoué. Consultez « Emails envoyés » pour le détail.",
+    );
+  }
+  await audit(
+    admin,
+    "order.remind",
+    "order",
+    order.id,
+    "Relance de paiement envoyée",
+  );
+  refresh(order.id);
+  return done(
+    "Relance envoyée : le client peut reprendre son paiement en un clic.",
+  );
+}
+
+/**
+ * Corrige l'adresse email d'un client qui s'est trompé en la saisissant (le
+ * lien d'accès est parti vers une adresse fausse). L'ancien lien est
+ * invalidé, puis le nouveau part vers la bonne adresse.
+ */
+export async function correctClientEmailAction(
+  _state: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const orderId = orderIdFrom(formData);
+  const parsed = loginLinkSchema.safeParse({ email: formData.get("email") });
+  if (!parsed.success) return fail("Cette adresse email semble incorrecte.");
+  const email = normalizeEmail(parsed.data.email);
+
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { profile: true },
+  });
+  if (!order) return fail("Commande introuvable.");
+  if (order.profile.role === "ADMIN")
+    return fail("Le compte d'un administrateur ne se modifie pas ici.");
+  if (order.profile.email === email)
+    return fail("Le client a déjà cette adresse.");
+  if (await findAuthUser(email))
+    return fail(
+      "Cette adresse est déjà utilisée par un autre compte. Écrivez au client pour trouver la bonne solution.",
+    );
+
+  const { error } = await createAdminClient().auth.admin.updateUserById(
+    order.profileId,
+    { email, email_confirm: true },
+  );
+  if (error) {
+    console.error("[correctClientEmail]", error.message);
+    return fail("Le changement d'adresse a échoué. Réessayez dans un instant.");
+  }
+  // Le déclencheur copie déjà l'adresse dans le profil ; on s'en assure.
+  await prisma.profile.update({
+    where: { id: order.profileId },
+    data: { email },
+  });
+  // Les anciens liens sont partis vers la mauvaise boîte : on les invalide
+  // pour TOUTES les commandes de ce client (de nouveaux sont créés à la demande).
+  await prisma.order.updateMany({
+    where: { profileId: order.profileId },
+    data: { accessToken: null },
+  });
+  await addOrderEvent(
+    order.id,
+    "EMAIL_CORRECTED",
+    `Adresse email du client corrigée (${order.profile.email ?? "inconnue"} → ${email}).`,
+    actorLabel(admin),
+  );
+  await audit(
+    admin,
+    "client.correct_email",
+    "order",
+    order.id,
+    `Email corrigé : ${order.profile.email ?? "inconnue"} → ${email}`,
+  );
+
+  let sent = false;
+  try {
+    sent = await sendLinksForOrder(order.id);
+  } catch {
+    // L'adresse est corrigée même si l'envoi échoue : on le dit ci-dessous.
+  }
+  refresh(order.id);
+  revalidatePath(`/admin/clients/${order.profileId}`);
+  return done(
+    sent
+      ? "Adresse corrigée. Le nouveau lien d'accès vient d'être envoyé au client."
+      : "Adresse corrigée, mais l'email n'est pas parti : utilisez « Renvoyer l'email de confirmation ».",
+  );
 }
 
 /* ----------------------------- Commande manuelle ----------------------------- */
@@ -325,17 +457,11 @@ export async function createManualOrderAction(
     };
   }
 
-  const profile = await prisma.profile.findUnique({
-    where: { email: data.clientEmail.trim().toLowerCase() },
+  // Aucun compte à créer d'avance : un client qui n'a jamais commandé reçoit
+  // un compte sans mot de passe (il se connecte ensuite avec son seul email).
+  const { profile, createdAccount } = await ensureAccount({
+    email: data.clientEmail,
   });
-  if (!profile) {
-    return {
-      ok: false,
-      message:
-        "Aucun compte avec cette adresse. Demandez au client de se connecter une première fois avec son email (un lien lui est envoyé), puis recommencez.",
-      errors: { clientEmail: ["Aucun compte pour cette adresse."] },
-    };
-  }
 
   const product = await getProduct(data.productSlug);
   if (!product)
@@ -378,6 +504,7 @@ export async function createManualOrderAction(
       paymentProvider: "WHATSAPP_MANUAL",
       status: "EN_ATTENTE",
       manual: true,
+      accessToken: newAccessToken(),
       shippingCity: shipping?.city,
       shippingAddress: shipping?.address,
       shippingPhone: shipping?.phone,
@@ -386,7 +513,7 @@ export async function createManualOrderAction(
   await addOrderEvent(
     order.id,
     "CREATED",
-    `Commande créée par l'équipe${data.reason ? ` : ${data.reason}` : "."}`,
+    `Commande créée par l'équipe${data.reason ? ` : ${data.reason}` : "."}${createdAccount ? " Compte client créé (sans mot de passe)." : ""}`,
     actorLabel(admin),
   );
 

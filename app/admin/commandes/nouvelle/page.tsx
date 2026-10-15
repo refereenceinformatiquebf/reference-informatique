@@ -17,7 +17,7 @@ export default async function NewManualOrderPage({
       <AdminHeader
         back={{ href: "/admin/commandes", label: "Commandes" }}
         title="Créer une commande"
-        subtitle="Pour un client qui a déjà un compte : paiement reçu en direct, client qui ne voit pas les clés depuis sa connexion, geste commercial."
+        subtitle="Paiement reçu en direct, client qui ne voit pas les clés depuis sa connexion, geste commercial. Si le client n'a pas encore de compte, il en reçoit un sans mot de passe."
       />
       <Panel className="max-w-3xl">
         <ManualOrderForm

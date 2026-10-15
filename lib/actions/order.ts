@@ -2,40 +2,43 @@
 
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma/client";
-import { requireProfile } from "@/lib/auth/dal";
+import { getCurrentProfile } from "@/lib/auth/dal";
 import { isProductAvailable, type Product } from "@/lib/catalog";
 import { getProduct } from "@/lib/catalog/live";
 import { ensureProductRow } from "@/lib/catalog/db-sync";
-import { getVisitorCountry, isHomeCountry } from "@/lib/geo";
+import { getVisitorCountry } from "@/lib/geo";
 import {
   MAX_KEY_QUANTITY,
+  buyerSchema,
   shippingSchema,
+  type BuyerInput,
   type ShippingInput,
 } from "@/lib/validations/order";
 import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
-import { SITE, whatsappLink } from "@/lib/site";
+import { isHoneypotFilled } from "@/lib/honeypot";
+import { whatsappLink } from "@/lib/site";
 import { formatPrice } from "@/lib/format";
-import {
-  cancelSaspaySession,
-  createSaspayCheckoutSession,
-} from "@/lib/payments/saspay";
-import { syncSaspayOrder } from "@/lib/payments/saspay-sync";
-import {
-  addOrderEvent,
-  getClientEmail,
-  notifyOrderCreated,
-} from "@/lib/orders";
+import { addOrderEvent, notifyOrderCreated } from "@/lib/orders";
 import { runAfterResponse } from "@/lib/after-response";
+import { resolveBuyer } from "@/lib/checkout/buyer";
+import { ensureAccessToken, newAccessToken } from "@/lib/checkout/access";
+import { CheckoutError, openOnlinePayment } from "@/lib/checkout/pay";
+import { sendLinksForOrder } from "@/lib/checkout/links";
+import { phoneRequired } from "@/lib/checkout/rules";
 
 export type OrderFormState =
   | {
       error?: string;
-      fieldErrors?: Partial<Record<keyof ShippingInput | "quantity", string[]>>;
+      fieldErrors?: Partial<
+        Record<keyof ShippingInput | keyof BuyerInput | "quantity", string[]>
+      >;
     }
   | undefined;
 
+type Buyer = Awaited<ReturnType<typeof resolveBuyer>>;
+
 type OrderContext = {
-  profile: Awaited<ReturnType<typeof requireProfile>>;
+  profile: Buyer["profile"];
   catalogProduct: Product;
   productRow: NonNullable<Awaited<ReturnType<typeof ensureProductRow>>>;
   shipping: ShippingInput | null;
@@ -43,13 +46,22 @@ type OrderContext = {
   visitorCountry: Awaited<ReturnType<typeof getVisitorCountry>>;
 };
 
-class OrderError extends Error {}
+const UNAVAILABLE =
+  "Ce produit n'est pas disponible. Retournez à la boutique pour en choisir un autre.";
+
+/** Page qui suit la commande ; elle se rafraîchit seule tant que le paiement n'est pas confirmé. */
+function followUpUrl(orderId: string) {
+  return `/commande/retour?order=${orderId}`;
+}
 
 /**
- * Prépare une commande : vérifie le produit, le pays du visiteur, la
- * livraison, la quantité. Toute la logique de refus est ici, pour que le
- * paiement en ligne et la commande WhatsApp appliquent EXACTEMENT les mêmes
- * règles.
+ * Prépare une commande : vérifie le produit, le pays du visiteur, les
+ * coordonnées de l'acheteur, la livraison, la quantité. Toute la logique de
+ * refus est ici, pour que le paiement en ligne et la commande WhatsApp
+ * appliquent EXACTEMENT les mêmes règles.
+ *
+ * Aucun compte n'est exigé : un visiteur non connecté commande avec son nom,
+ * son email et son téléphone (voir lib/checkout/buyer.ts).
  *
  * Règle d'accès par pays : un produit réservé à un pays (les clés de
  * formations) ne peut pas être commandé depuis un autre pays, même en
@@ -69,11 +81,34 @@ async function prepareOrder(
   // Même message pour « inconnu » et « réservé à un autre pays » : on ne
   // révèle pas l'existence d'un produit invisible pour ce visiteur.
   if (!catalogProduct || !isProductAvailable(catalogProduct, visitorCountry)) {
+    return { ok: false, state: { error: UNAVAILABLE } };
+  }
+
+  // Connecté : son compte fait foi (son email n'est pas modifiable ici).
+  // Sinon : l'email saisi.
+  const signedIn = await getCurrentProfile();
+  const signedInEmail = signedIn?.email ?? null;
+  const parsedBuyer = buyerSchema.safeParse({
+    name: formData.get("name") ?? signedIn?.name,
+    email: signedInEmail ?? formData.get("email"),
+    phone: formData.get("phone"),
+  });
+  if (!parsedBuyer.success) {
+    return {
+      ok: false,
+      state: { fieldErrors: parsedBuyer.error.flatten().fieldErrors },
+    };
+  }
+  const buyer = parsedBuyer.data;
+  if (phoneRequired(catalogProduct.delivery) && buyer.phone === "") {
     return {
       ok: false,
       state: {
-        error:
-          "Ce produit n'est pas disponible. Retournez à la boutique pour en choisir un autre.",
+        fieldErrors: {
+          phone: [
+            "Indiquez un numéro joignable (WhatsApp si possible) : notre équipe vous contacte pour la remise.",
+          ],
+        },
       },
     };
   }
@@ -84,7 +119,7 @@ async function prepareOrder(
     const parsed = shippingSchema.safeParse({
       city: formData.get("city"),
       address: formData.get("address"),
-      phone: formData.get("phone"),
+      phone: buyer.phone,
     });
     if (!parsed.success) {
       return {
@@ -113,11 +148,16 @@ async function prepareOrder(
     quantity = rawQuantity;
   }
 
-  const profile = await requireProfile();
+  // Une même adresse ne peut pas déclencher une avalanche de commandes (donc
+  // d'emails) vers la boîte de quelqu'un d'autre.
+  await enforceRateLimit("order-buyer", 10, 60 * 60, buyer.email);
+
   const productRow = await ensureProductRow(catalogProduct.slug);
   if (!productRow) {
     return { ok: false, state: { error: "Ce produit n'est plus disponible." } };
   }
+
+  const { profile } = await resolveBuyer(buyer, signedIn);
 
   return {
     ok: true,
@@ -168,6 +208,7 @@ async function getOrCreatePendingOrder(
   });
 
   if (pending) {
+    await ensureAccessToken(pending.id);
     const updated = await prisma.order.update({
       where: { id: pending.id },
       data: {
@@ -203,6 +244,8 @@ async function getOrCreatePendingOrder(
       channel,
       paymentProvider: provider,
       status: "EN_ATTENTE",
+      // Lien personnel de suivi : prêt dès la création (envoyé par email, jamais affiché).
+      accessToken: newAccessToken(),
       ...shippingData,
     },
   });
@@ -226,14 +269,21 @@ export async function submitOrder(
   _state: OrderFormState,
   formData: FormData,
 ): Promise<OrderFormState> {
+  // Champ piège rempli = robot : on fait semblant, sans rien enregistrer.
+  if (isHoneypotFilled(formData)) redirect("/boutique");
+
+  let prepared: Awaited<ReturnType<typeof prepareOrder>>;
   try {
     await enforceRateLimit("order", 12, 60);
+    prepared = await prepareOrder(formData);
   } catch (error) {
     if (error instanceof RateLimitError) return { error: error.message };
-    throw error;
+    console.error("[submitOrder] préparation impossible", error);
+    return {
+      error:
+        "Nous n'avons pas pu enregistrer votre commande. Réessayez dans un instant, ou commandez par WhatsApp : nous vous aiderons tout de suite.",
+    };
   }
-
-  const prepared = await prepareOrder(formData);
   if (!prepared.ok) return prepared.state;
 
   const intent = formData.get("intent") === "whatsapp" ? "whatsapp" : "online";
@@ -244,9 +294,9 @@ export async function submitOrder(
     target =
       intent === "whatsapp"
         ? await startWhatsappOrder(prepared.context)
-        : await startSaspayCheckout(prepared.context);
+        : await startOnlineCheckout(prepared.context);
   } catch (error) {
-    if (error instanceof OrderError) return { error: error.message };
+    if (error instanceof CheckoutError) return { error: error.message };
     console.error("[submitOrder]", error);
     return {
       error:
@@ -260,83 +310,41 @@ export async function submitOrder(
 }
 
 /** Paiement en ligne : ouvre une session SasPay et renvoie son adresse. */
-async function startSaspayCheckout(context: OrderContext): Promise<string> {
+async function startOnlineCheckout(context: OrderContext): Promise<string> {
   const { profile, catalogProduct, visitorCountry } = context;
 
   const { order, isNew } = await getOrCreatePendingOrder(context, "BOUTIQUE");
 
-  if (order.status === "PAYE") return "/espace-client";
-
-  // Le client relance un paiement : si sa session précédente a en réalité
-  // été payée (webhook en retard), on le constate ici plutôt que de lui
-  // ouvrir une seconde page de paiement et de risquer un double débit.
-  if (order.providerSessionId) {
-    const alreadyPaid = await syncSaspayOrder(order).catch((error) => {
-      console.error("[startSaspayCheckout] revérification impossible", error);
-      return false;
-    });
-    if (alreadyPaid) return "/espace-client";
-  }
-
-  const email = await getClientEmail(profile);
-  if (!email) {
-    throw new OrderError(
-      "Votre compte n'a pas d'adresse email : impossible de lancer le paiement en ligne. Commandez par WhatsApp, nous vous aiderons.",
-    );
+  // Déjà payée (produit numérique commandé une seconde fois, ou paiement
+  // précédent confirmé en retard) : on renvoie le lien d'accès à l'adresse du
+  // client plutôt que de lui faire payer deux fois.
+  const payment = await openOnlinePayment({
+    order,
+    profile,
+    productName: catalogProduct.name,
+    visitorCountry,
+  });
+  if (payment.paid) {
+    runAfterResponse(() => sendLinksForOrder(order.id));
+    return `${followUpUrl(order.id)}&deja=1`;
   }
 
   if (isNew) {
     runAfterResponse(() => notifyOrderCreated(order.id));
   }
-
-  const label =
-    order.quantity > 1
-      ? `${order.quantity} × ${catalogProduct.name}`
-      : catalogProduct.name;
-  const session = await createSaspayCheckoutSession({
-    description: `${label} — ${SITE.name}`,
-    amount: order.amount,
-    orderId: order.id,
-    returnUrl: `${SITE.url}/commande/retour?order=${order.id}`,
-    // Burkina Faso : présélectionné sur la page de paiement. Ailleurs, on
-    // laisse le client choisir son pays plutôt que d'en deviner un.
-    country: isHomeCountry(visitorCountry) ? "BF" : undefined,
-    customer: {
-      email,
-      name: profile.name,
-      phone: order.shippingPhone ?? profile.phone ?? undefined,
-    },
-  });
-
-  // La session est enregistrée AVANT la redirection : c'est elle qui permet
-  // de relier le paiement à cette commande quand SasPay nous notifie.
-  const previousSessionId = order.providerSessionId;
-  await prisma.order.update({
-    where: { id: order.id },
-    data: { providerSessionId: session.id },
-  });
-  await addOrderEvent(
-    order.id,
-    "SESSION_OPENED",
-    `Page de paiement SasPay ouverte (${formatPrice(order.amount)}).`,
-    email,
-  );
-
-  // L'ancienne page de paiement ne doit plus rester utilisable.
-  if (previousSessionId) {
-    await cancelSaspaySession(previousSessionId);
-  }
-
-  return session.checkoutUrl;
+  return payment.checkoutUrl;
 }
 
 /** Commande par WhatsApp : enregistre la commande puis ouvre la conversation. */
 async function startWhatsappOrder(context: OrderContext): Promise<string> {
-  const { catalogProduct, shipping } = context;
+  const { catalogProduct, shipping, profile } = context;
 
   const { order, isNew } = await getOrCreatePendingOrder(context, "WHATSAPP");
 
-  if (order.status === "PAYE") return "/espace-client";
+  if (order.status === "PAYE") {
+    runAfterResponse(() => sendLinksForOrder(order.id));
+    return `${followUpUrl(order.id)}&deja=1`;
+  }
 
   if (isNew) {
     runAfterResponse(() => notifyOrderCreated(order.id));
@@ -345,6 +353,7 @@ async function startWhatsappOrder(context: OrderContext): Promise<string> {
   const lines = [
     "Bonjour, je souhaite commander :",
     `${order.quantity > 1 ? `${order.quantity} × ` : ""}${catalogProduct.name} — ${formatPrice(order.amount)}`,
+    `Mon nom : ${profile.name}`,
     `Référence de commande : ${order.id}`,
   ];
   if (shipping) {

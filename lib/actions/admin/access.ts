@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma/client";
 import { requireAdmin } from "@/lib/auth/dal";
 import { actorLabel, audit } from "@/lib/admin/audit";
@@ -10,6 +11,7 @@ import { ensureProductRow } from "@/lib/catalog/db-sync";
 import { getClientEmail } from "@/lib/orders";
 import { runAfterResponse } from "@/lib/after-response";
 import { sendAccessGranted } from "@/lib/email/send";
+import { ensureAccount } from "@/lib/checkout/buyer";
 
 const UUID = /^[0-9a-f-]{36}$/i;
 
@@ -39,15 +41,21 @@ export async function grantAccessAction(
   if (reason.length < 5)
     return fail("Indiquez un motif (5 caractères minimum).");
 
-  const profile = UUID.test(profileIdRaw)
+  let profile = UUID.test(profileIdRaw)
     ? await prisma.profile.findUnique({ where: { id: profileIdRaw } })
     : email
       ? await prisma.profile.findUnique({ where: { email } })
       : null;
+  let createdAccount = false;
   if (!profile) {
-    return fail(
-      "Aucun compte pour cette adresse. Le client doit d'abord se connecter une fois avec son email (un lien lui est envoyé).",
-    );
+    // Une adresse inconnue n'est plus un obstacle : le client reçoit un compte
+    // sans mot de passe et se connecte avec son seul email.
+    if (!email || !z.email().safeParse(email).success) {
+      return fail("Indiquez l'adresse email du client.");
+    }
+    const created = await ensureAccount({ email });
+    profile = created.profile;
+    createdAccount = created.createdAccount;
   }
 
   // Tous les produits, y compris masqués (ancien produit, produit en préparation).
@@ -72,7 +80,7 @@ export async function grantAccessAction(
     "access.grant",
     "access",
     `${profile.id}:${row.id}`,
-    `Accès « ${product.name} » donné à ${profile.email ?? profile.name} : ${reason}`,
+    `Accès « ${product.name} » donné à ${profile.email ?? profile.name} : ${reason}${createdAccount ? " (compte créé)" : ""}`,
     { by: actorLabel(admin), reason },
   );
 
