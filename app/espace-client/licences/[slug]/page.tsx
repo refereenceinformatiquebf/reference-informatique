@@ -114,12 +114,25 @@ export default async function LicencePage({
 
         {access.licenseKey ? (
           <>
-            <div className="border-line bg-paper shadow-card mt-8 rounded-xl border p-6 sm:p-8">
+            <div className="border-brand-200 bg-brand-50/40 mt-8 rounded-xl border-2 p-6 sm:p-8">
+              <div className="mb-4 flex items-center gap-3">
+                <IconChip name="acces-a-vie" size={36} tone="solid" />
+                <div>
+                  <p className="font-display text-ink text-sm font-bold">
+                    Espace Activation
+                  </p>
+                  <p className="text-ink-soft text-xs">
+                    Votre licence, l&rsquo;application et le guide pour activer
+                    à vie
+                  </p>
+                </div>
+              </div>
+
               <p className="text-ink-soft text-sm font-medium">
                 Votre licence Expert — elle active Microsoft Office 365 et
                 Windows 11 :
               </p>
-              <div className="bg-paper-raised border-line mt-2 rounded-lg border px-4 py-3">
+              <div className="bg-paper border-line mt-2 rounded-lg border px-4 py-3">
                 <p className="text-ink font-mono text-[1.0625rem] font-bold tracking-wide break-all">
                   {access.licenseKey}
                 </p>
@@ -133,6 +146,18 @@ export default async function LicencePage({
                 </Button>
               ) : null}
 
+              <p className="text-ink-soft mt-3 text-xs leading-relaxed">
+                {fr(
+                  "Installez l'application, collez votre licence ci-dessus dans l'application, puis activez Windows et Office en un clic.",
+                )}
+              </p>
+              <p className="text-warning-text mt-2 text-xs leading-relaxed font-medium">
+                ⚠{" "}
+                {fr(
+                  "Ne saisissez ce code nulle part ailleurs — jamais dans l'assistant d'installation de Windows ou d'Office.",
+                )}
+              </p>
+
               <p className="text-ink-faint mt-5 text-xs leading-relaxed">
                 {fr(
                   "Cette licence est personnelle : ne la partagez pas. Elle active 2 appareils maximum.",
@@ -142,11 +167,12 @@ export default async function LicencePage({
 
             <div className="border-line bg-paper shadow-card mt-6 rounded-xl border p-6 sm:p-8">
               <p className="text-ink font-display text-lg">
-                Vos téléchargements
+                Fichiers Windows &amp; Office
               </p>
               <p className="text-ink-soft mt-1 text-[0.9375rem] leading-relaxed">
-                Windows, Office et vos bonus — tout ce qu&rsquo;il vous faut
-                pour installer votre pack.
+                À installer normalement, sans licence à saisir —
+                l&rsquo;activation se fait ensuite avec l&rsquo;application
+                ci-dessus.
               </p>
               <ul className="border-line mt-5 divide-y rounded-lg border">
                 {DOWNLOADS.map((d) => (

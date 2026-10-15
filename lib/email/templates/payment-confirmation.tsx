@@ -41,6 +41,12 @@ export function PaymentConfirmationEmail({
       <Button href={ctaUrl} style={emailButtonStyle}>
         {licenceKey ? "Accéder à ma licence" : "Accéder à mon espace"}
       </Button>
+      {licenceKey ? (
+        <Text style={{ ...emailTextStyle, marginTop: 10, fontSize: 13 }}>
+          Votre licence, l&rsquo;application d&rsquo;activation, Windows, Office
+          et le guide complet vous y attendent.
+        </Text>
+      ) : null}
       {orderRef ? (
         <Text style={{ ...emailTextStyle, marginTop: 18, fontSize: 13 }}>
           Référence de commande : {orderRef}
