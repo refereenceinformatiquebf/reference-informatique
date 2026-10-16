@@ -7,13 +7,6 @@ import type { Faq, Product } from "./types";
  * entièrement réécrits : présentation à la charte, rédaction à la manière
  * de 360 Digital (vouvoiement, phrases courtes, promesses vérifiables).
  *
- * Règles de rédaction appliquées ici :
- *  - aucune statistique ni note client qu'on ne peut pas sourcer (les fiches
- *    d'origine en contenaient — supprimées) ;
- *  - les chiffres de contenu (nombre de vidéos, de modèles…) sont ceux des
- *    fiches du propriétaire, repris tels quels ;
- *  - aucune promesse de diplôme, de résultat ou de revenu.
- *
  * Non repris volontairement : le « Pack Windows + Office, activation à vie »
  * (repose sur un outil de contournement de licence) et les huit logiciels
  * Sage 100 i7 vendus 4 900 F (aucune licence légale possible à ce prix).
