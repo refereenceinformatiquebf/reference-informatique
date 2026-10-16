@@ -21,7 +21,7 @@ import { getVisitorCountry } from "@/lib/geo";
 import { SITE, whatsappLink } from "@/lib/site";
 import { fr } from "@/lib/typography";
 
-const SLUG = "activation-windows11et10-et-office365-a-vie";
+const SLUG = "pack-activation-windows11et10-et-office365-a-vie";
 
 export async function generateMetadata(): Promise<Metadata> {
   const country = await getVisitorCountry();

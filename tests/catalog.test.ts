@@ -24,7 +24,11 @@ import {
   relatedProducts,
   visibleProducts,
 } from "../lib/catalog";
-import { ROOT_PATH_PRODUCT_SLUGS, productPath } from "../lib/catalog/paths";
+import {
+  ROOT_PATH_PRODUCT_SLUGS,
+  canonicalProductRedirect,
+  productPath,
+} from "../lib/catalog/paths";
 import sitemap from "../app/sitemap";
 import { fr } from "../lib/typography";
 
@@ -130,6 +134,48 @@ describe("intégrité du catalogue", () => {
         slug,
       );
       assert.ok(!urls.some((u) => u.endsWith(`/boutique/${slug}`)), slug);
+    }
+  });
+
+  it("les anciennes écritures de l'adresse redirigent vers l'adresse officielle, sans boucle", () => {
+    const slug = "pack-activation-windows11et10-et-office365-a-vie";
+    const official = `/${slug}`;
+    const redirected = [
+      "/licence-expert-office-365-windows-11",
+      "/activation-windows11et10-et-office365-a-vie",
+      "/pack-activation-windows11&10-et-office365-a-vie",
+      "/pack-activation-windows11%2610-et-office365-a-vie",
+      "/Pack-Activation-Windows11et10-et-Office365-a-Vie",
+      "/boutique/licence-expert-office-365-windows-11",
+      `/boutique/${slug}`,
+    ];
+    for (const from of redirected) {
+      assert.equal(canonicalProductRedirect(from), official, from);
+    }
+    assert.equal(
+      canonicalProductRedirect(
+        "/commande/licence-expert-office-365-windows-11",
+      ),
+      `/commande/${slug}`,
+    );
+    assert.equal(
+      canonicalProductRedirect(`/commande/${slug.toUpperCase()}`),
+      `/commande/${slug}`,
+    );
+
+    // L'adresse officielle et tout ce qui n'a rien à voir : aucune redirection.
+    for (const same of [
+      official,
+      `/commande/${slug}`,
+      "/boutique",
+      "/boutique/le-chercheur-augmente",
+      "/boutique/constructor",
+      "/constructor",
+      "/espace-client/licences/x",
+      "/%E0%A4%A",
+      "/",
+    ]) {
+      assert.equal(canonicalProductRedirect(same), null, same);
     }
   });
 
