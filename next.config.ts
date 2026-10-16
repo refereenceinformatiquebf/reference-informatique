@@ -21,6 +21,24 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  // Anciennes adresses du produit « Activation Windows 11 et 10 + Office 365
+  // à vie » (voir lib/catalog/paths.ts) : redirigées pour que les liens déjà
+  // partagés ou indexés continuent de mener à la fiche.
+  async redirects() {
+    return [
+      {
+        source: "/boutique/licence-expert-office-365-windows-11",
+        destination: "/activation-windows11et10-et-office365-a-vie",
+        permanent: true,
+      },
+      {
+        source: "/commande/licence-expert-office-365-windows-11",
+        destination: "/commande/activation-windows11et10-et-office365-a-vie",
+        permanent: true,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {

@@ -6,6 +6,7 @@ import { getCurrentProfile } from "@/lib/auth/dal";
 import { phoneRequired } from "@/lib/checkout/rules";
 import { PRODUCT_KINDS } from "@/lib/catalog";
 import { getVisibleProduct } from "@/lib/catalog/live";
+import { productPath } from "@/lib/catalog/paths";
 import { getVisitorCountry } from "@/lib/geo";
 import { Container } from "@/components/ui/section";
 import { Price } from "@/components/shop/price";
@@ -50,7 +51,7 @@ export default async function CommandePage({
     <div className="py-10 sm:py-16">
       <Container className="max-w-3xl">
         <Link
-          href={`/boutique/${product.slug}`}
+          href={productPath(product.slug)}
           className="text-ink-faint hover:text-brand-text text-sm transition-colors"
         >
           ← Retour à la fiche

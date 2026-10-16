@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { discountPercent, type Product } from "@/lib/catalog";
+import { productPath } from "@/lib/catalog/paths";
 import { Badge } from "@/components/ui/badge";
 import { IconFleche } from "@/components/icons";
 import { ProductCover, coverTitle } from "./product-cover";
@@ -31,7 +32,7 @@ export function ProductCard({
 
   return (
     <Link
-      href={`/boutique/${product.slug}`}
+      href={productPath(product.slug)}
       className={cn(
         "rise-in group border-line bg-paper hover:border-line-strong hover:shadow-lift flex h-full flex-col overflow-hidden rounded-lg border transition-[transform,box-shadow,border-color] duration-200 ease-[var(--ease-standard)] hover:-translate-y-1 focus-visible:shadow-[var(--focus-halo)] focus-visible:outline-none",
         className,

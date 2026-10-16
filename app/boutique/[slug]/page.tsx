@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
@@ -22,6 +22,7 @@ import { IconBouclier, IconWhatsapp } from "@/components/icons";
 import { formatPrice } from "@/lib/format";
 import { PRODUCT_KINDS, discountPercent } from "@/lib/catalog";
 import { getRelatedProducts, getVisibleProduct } from "@/lib/catalog/live";
+import { ROOT_PATH_PRODUCT_SLUGS, productPath } from "@/lib/catalog/paths";
 import { getVisitorCountry } from "@/lib/geo";
 import { getTestimonialForProduct } from "@/lib/testimonials";
 import { SITE, whatsappLink } from "@/lib/site";
@@ -42,7 +43,7 @@ export async function generateMetadata({
   return {
     title: product.seo.title,
     description: product.seo.description,
-    alternates: { canonical: `/boutique/${product.slug}` },
+    alternates: { canonical: productPath(product.slug) },
     openGraph: {
       title: product.seo.title,
       description: product.seo.description,
@@ -67,6 +68,8 @@ export default async function ProductPage({
   params,
 }: PageProps<"/boutique/[slug]">) {
   const { slug } = await params;
+  // Fiche à adresse courte : /boutique/<slug> n'en est plus que l'ancien chemin.
+  if (ROOT_PATH_PRODUCT_SLUGS.has(slug)) permanentRedirect(productPath(slug));
   const country = await getVisitorCountry();
   // Un produit réservé à un autre pays est INVISIBLE : 404, comme s'il
   // n'existait pas. On ne révèle ni son existence ni son contenu.
@@ -90,7 +93,7 @@ export default async function ProductPage({
     ...(product.poster ? { image: `${SITE.url}${product.poster.src}` } : {}),
     offers: {
       "@type": "Offer",
-      url: `${SITE.url}/boutique/${product.slug}`,
+      url: `${SITE.url}${productPath(product.slug)}`,
       priceCurrency: "XOF",
       price: product.price,
       availability: "https://schema.org/InStock",

@@ -16,11 +16,12 @@ import { IconBouclier, IconWhatsapp } from "@/components/icons";
 import { formatPrice } from "@/lib/format";
 import { PRODUCT_KINDS } from "@/lib/catalog";
 import { getRelatedProducts, getVisibleProduct } from "@/lib/catalog/live";
+import { productPath } from "@/lib/catalog/paths";
 import { getVisitorCountry } from "@/lib/geo";
 import { SITE, whatsappLink } from "@/lib/site";
 import { fr } from "@/lib/typography";
 
-const SLUG = "licence-expert-office-365-windows-11";
+const SLUG = "activation-windows11et10-et-office365-a-vie";
 
 export async function generateMetadata(): Promise<Metadata> {
   const country = await getVisitorCountry();
@@ -34,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: product.seo.title,
     description: product.seo.description,
-    alternates: { canonical: `/boutique/${product.slug}` },
+    alternates: { canonical: productPath(product.slug) },
     openGraph: {
       title: product.seo.title,
       description: product.seo.description,
@@ -75,7 +76,7 @@ export default async function LicenceExpertPage() {
     ...(product.poster ? { image: `${SITE.url}${product.poster.src}` } : {}),
     offers: {
       "@type": "Offer",
-      url: `${SITE.url}/boutique/${product.slug}`,
+      url: `${SITE.url}${productPath(product.slug)}`,
       priceCurrency: "XOF",
       price: product.price,
       availability: "https://schema.org/InStock",

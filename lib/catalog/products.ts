@@ -913,7 +913,7 @@ export const PRODUCTS: Product[] = [
 
   /* ------------------------ Licence Expert — Office 365 & Windows 11 ------------------------ */
   {
-    slug: "licence-expert-office-365-windows-11",
+    slug: "activation-windows11et10-et-office365-a-vie",
     name: "Licence Expert — Office 365 & Windows 11",
     tagline:
       "Word, Excel, PowerPoint et Windows 11 sur votre ordinateur : une installation simple, prête en quelques minutes, à vous pour la vie.",

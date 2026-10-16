@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { ROOT_PATH_PRODUCT_SLUGS } from "@/lib/catalog/paths";
 
 // Décision d'architecture (voir PLAYBOOK-CONSTRUCTION.md, Étape 3) :
 // depuis Next.js 16, ce fichier remplace `middleware.ts` — le nom a changé
@@ -15,6 +16,21 @@ const ADMIN_PREFIX = "/admin";
 
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
+
+  // Les adresses sont sensibles à la casse : « /activation-Windows11… » est
+  // renvoyé vers « /activation-windows11… ». À faire ici et non dans
+  // next.config (redirects), dont la comparaison ignore la casse et ferait
+  // boucler l'adresse correcte sur elle-même.
+  const lowerPath = path.toLowerCase();
+  if (
+    lowerPath !== path &&
+    ROOT_PATH_PRODUCT_SLUGS.has(lowerPath.replace(/^\//, ""))
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = lowerPath;
+    return NextResponse.redirect(url, 308);
+  }
+
   const isProtected =
     CLIENT_PREFIXES.some((prefix) => path.startsWith(prefix)) ||
     path.startsWith(ADMIN_PREFIX);

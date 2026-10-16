@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { ALL_SERVICE_FAMILIES } from "@/lib/catalog";
 import { getAllProducts, getAllServices } from "@/lib/catalog/live";
+import { productPath } from "@/lib/catalog/paths";
 import { getLegalSettings, isLegalComplete } from "@/lib/settings";
 import { SITE } from "@/lib/site";
 
@@ -44,7 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       (product) => !product.restrictedTo || product.restrictedTo.length === 0,
     )
     .map((product) => ({
-      url: url(`/boutique/${product.slug}`),
+      url: url(productPath(product.slug)),
       changeFrequency: "monthly",
       priority: 0.8,
     }));

@@ -24,6 +24,7 @@ import {
   relatedProducts,
   visibleProducts,
 } from "../lib/catalog";
+import { ROOT_PATH_PRODUCT_SLUGS, productPath } from "../lib/catalog/paths";
 import sitemap from "../app/sitemap";
 import { fr } from "../lib/typography";
 
@@ -104,6 +105,32 @@ describe("intégrité du catalogue", () => {
   it("les slugs de produits sont uniques", () => {
     const slugs = ALL_PRODUCTS.map((p) => p.slug);
     assert.equal(new Set(slugs).size, slugs.length);
+  });
+
+  it("chaque produit à adresse courte existe au catalogue et a sa propre page", () => {
+    for (const slug of ROOT_PATH_PRODUCT_SLUGS) {
+      assert.ok(findProduct(slug), `${slug} : absent du catalogue`);
+      assert.ok(
+        fs.existsSync(path.join(process.cwd(), "app", slug, "page.tsx")),
+        `${slug} : page app/${slug}/page.tsx manquante`,
+      );
+      assert.equal(productPath(slug), `/${slug}`);
+    }
+    assert.equal(
+      productPath("le-chercheur-augmente"),
+      "/boutique/le-chercheur-augmente",
+    );
+  });
+
+  it("le plan du site publie l'adresse courte, jamais /boutique/<slug> pour ces produits", async () => {
+    const urls = (await sitemap()).map((entry) => entry.url);
+    for (const slug of ROOT_PATH_PRODUCT_SLUGS) {
+      assert.ok(
+        urls.some((u) => u.endsWith(`/${slug}`)),
+        slug,
+      );
+      assert.ok(!urls.some((u) => u.endsWith(`/boutique/${slug}`)), slug);
+    }
   });
 
   it("les slugs de services sont uniques et rattachés à une famille existante", () => {

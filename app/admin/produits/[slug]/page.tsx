@@ -9,6 +9,7 @@ import { LessonUpload } from "./lesson-upload";
 import { prisma } from "@/lib/prisma/client";
 import { ALL_PRODUCTS } from "@/lib/catalog";
 import { getAdminProduct } from "@/lib/catalog/live";
+import { productPath } from "@/lib/catalog/paths";
 import { productToForm } from "@/lib/catalog/form";
 import { deleteLessonAction } from "@/lib/actions/admin/lessons";
 import {
@@ -77,7 +78,7 @@ export default async function AdminProductPage({
         actions={
           active ? (
             <Button asChild variant="outline" size="sm">
-              <Link href={`/boutique/${product.slug}`} target="_blank">
+              <Link href={productPath(product.slug)} target="_blank">
                 Voir la fiche
               </Link>
             </Button>
