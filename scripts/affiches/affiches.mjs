@@ -84,7 +84,7 @@ const KIND_ICON = {
 const KIND_LABEL = {
   formation: "Formation",
   ebook: "Livre numérique",
-  pack: "Pack d'outils",
+  pack: "Logiciel",
   modele: "Modèles",
   outil: "Outil",
 };

@@ -28,10 +28,10 @@ export const PRODUCT_KINDS: Record<
     icon: "ebook",
   },
   pack: {
-    label: "Pack d'outils",
-    plural: "Packs d'outils",
+    label: "Logiciel",
+    plural: "Logiciels",
     description:
-      "Des outils prêts à l'emploi, regroupés pour gagner du temps dès le premier jour.",
+      "Des logiciels prêts à l'emploi, installés en quelques minutes pour gagner du temps dès le premier jour.",
     icon: "pack",
   },
   modele: {

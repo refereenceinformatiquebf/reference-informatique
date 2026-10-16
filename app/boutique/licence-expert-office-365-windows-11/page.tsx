@@ -177,57 +177,48 @@ export default async function LicenceExpertPage() {
               <div className="flex flex-col gap-5">
                 <p className="font-display text-ink text-[1.375rem] leading-snug">
                   {fr(
-                    "Windows qui réclame son activation, Office qui refuse d'enregistrer un document : ça arrive au pire moment, en plein rapport ou en pleine présentation.",
+                    "Un rapport à rédiger, un budget à calculer, une présentation à préparer pour demain : il vous faut Word, Excel et PowerPoint qui répondent présents, sur un Windows moderne.",
                   )}
                 </p>
                 <p className="text-ink-soft text-[1.0625rem] leading-relaxed">
                   {fr(
-                    "Cette licence Expert règle les deux à la fois : elle active Microsoft Office 365 et Windows 11 sur votre ordinateur, via une seule petite application à installer. Vous payez, votre licence personnelle est générée automatiquement en quelques minutes, vous l'installez : c'est fait. Pas d'abonnement à renouveler, pas de compte tiers à créer — une licence à vie, à vous.",
+                    "Ce pack réunit Microsoft Office 365 et Windows 11 en un seul achat, avec une seule petite application à installer, guidée pas à pas. En quelques minutes, vous êtes prêt à travailler. Et c'est pour la vie : un seul paiement, aucun abonnement à renouveler, aucun compte tiers à créer.",
                   )}
                 </p>
 
                 <h2 className="font-display text-ink mt-4 text-[1.5rem] leading-tight">
-                  Ce que contient la licence
+                  Ce que contient le pack
                 </h2>
                 <div className="flex flex-col gap-4">
                   <div>
                     <h3 className="text-ink text-[1.0625rem] font-semibold">
-                      1. Licence Expert
+                      1. Microsoft Office 365
                     </h3>
                     <p className="text-ink-soft mt-1 text-[0.9375rem] leading-relaxed">
-                      {fr(
-                        "Une clé d'activation personnelle — pas une simple licence Windows : c'est elle qui active à la fois Office 365 ET Windows 11 sur votre ordinateur, via l'application d'activation incluse.",
-                      )}
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className="text-ink text-[1.0625rem] font-semibold">
-                      2. Microsoft Office 365
-                    </h3>
-                    <p className="text-ink-soft mt-1 text-[0.9375rem] leading-relaxed">
-                      Retrouvez les principaux outils bureautiques Microsoft :
+                      Tout ce qu&rsquo;il faut pour écrire, calculer, présenter
+                      et vous organiser :
                     </p>
                     <ul className="mt-2 flex flex-col gap-1.5">
                       {[
                         [
                           "Word",
-                          "rédiger vos documents, rapports et courriers.",
+                          "rédigez rapports, courriers, CV et mémoires.",
                         ],
                         [
                           "Excel",
-                          "effectuer vos calculs, créer des tableaux et gérer vos données.",
+                          "faites vos calculs, vos tableaux et vos budgets, et gérez vos données facilement.",
                         ],
                         [
                           "PowerPoint",
-                          "concevoir des présentations professionnelles.",
+                          "concevez des présentations professionnelles qui font bonne impression.",
                         ],
                         [
                           "Outlook",
-                          "organiser vos e-mails et vos communications.",
+                          "gardez vos e-mails et votre agenda bien organisés.",
                         ],
                         [
                           "OneNote",
-                          "prendre des notes et organiser vos idées.",
+                          "prenez vos notes et rangez vos idées au même endroit.",
                         ],
                       ].map(([name, detail]) => (
                         <li
@@ -242,26 +233,36 @@ export default async function LicenceExpertPage() {
                   </div>
                   <div>
                     <h3 className="text-ink text-[1.0625rem] font-semibold">
-                      3. Windows 11 activé
+                      2. Windows 11
                     </h3>
                     <p className="text-ink-soft mt-1 text-[0.9375rem] leading-relaxed">
                       {fr(
-                        "Profitez de Windows 11 et de son interface moderne pour travailler, étudier et utiliser vos applications au quotidien, sous réserve de la compatibilité de votre ordinateur.",
+                        "Profitez de Windows 11 et de son interface moderne, claire et agréable pour travailler, étudier et utiliser vos applications au quotidien, sous réserve de la compatibilité de votre ordinateur.",
+                      )}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-ink text-[1.0625rem] font-semibold">
+                      3. Application d&rsquo;installation et clé personnelle
+                    </h3>
+                    <p className="text-ink-soft mt-1 text-[0.9375rem] leading-relaxed">
+                      {fr(
+                        "Une seule petite application met tout en place pour vous, avec votre clé personnelle et un guide pas à pas. Ce n'est pas une simple licence Windows : Office 365 et Windows 11 sont inclus dans le même achat.",
                       )}
                     </p>
                   </div>
                 </div>
 
                 <h2 className="font-display text-ink mt-4 text-[1.5rem] leading-tight">
-                  Pourquoi choisir cette licence
+                  Pourquoi choisir ce pack
                 </h2>
                 <ul className="flex flex-col gap-2.5">
                   {[
-                    "Trois éléments en un seul achat : licence Expert, Office 365 et Windows 11 — pas juste une licence Windows seule.",
-                    "Livraison automatique et instantanée : votre licence arrive dès la confirmation du paiement, aucune attente.",
-                    "Installation guidée : un guide complet vous accompagne étape par étape.",
-                    "Licence à vie : aucun abonnement à renouveler.",
-                    "Assistance sur WhatsApp si une étape bloque.",
+                    "Tout en un : Word, Excel, PowerPoint, Outlook, OneNote et Windows 11 réunis dans un seul achat.",
+                    "À vie : un seul paiement, aucun abonnement à renouveler.",
+                    "Simple : une seule installation, guidée pas à pas, sans compte tiers à créer.",
+                    "Rapide : accès immédiat dès la confirmation du paiement, prêt en quelques minutes.",
+                    "Accompagné : un guide complet et une assistance sur WhatsApp si une étape bloque.",
                   ].map((item) => (
                     <li
                       key={item}
@@ -277,11 +278,11 @@ export default async function LicenceExpertPage() {
                 </ul>
 
                 <h2 className="font-display text-ink mt-4 text-[1.5rem] leading-tight">
-                  À qui s&rsquo;adresse cette licence
+                  À qui s&rsquo;adresse ce pack
                 </h2>
                 <p className="text-ink-soft text-[0.9375rem] leading-relaxed">
                   {fr(
-                    "À toute personne dont Windows ou Office n'est plus activé, aux étudiants, entrepreneurs et salariés qui ont besoin d'Office pour travailler, à qui vient d'installer ou de réinitialiser son PC, et à qui préfère une licence à vie plutôt qu'un abonnement à renouveler. Cette licence est conçue pour Windows : elle ne fonctionne pas sur Mac.",
+                    "Aux étudiants, entrepreneurs et salariés qui ont besoin de Word, Excel et PowerPoint pour travailler, à toute personne qui veut un Windows 11 et un Office complets sans abonnement, à qui vient d'acheter, d'installer ou de réinitialiser son PC, et à qui préfère payer une fois et garder son accès à vie. Ce pack est conçu pour Windows : il ne fonctionne pas sur Mac.",
                   )}
                 </p>
 
@@ -290,7 +291,7 @@ export default async function LicenceExpertPage() {
                 </h2>
                 <p className="text-ink-soft text-[0.9375rem] leading-relaxed">
                   {fr(
-                    `La licence complète (Expert + Office 365 + Windows 11) à ${formatPrice(product.price)}, en un paiement unique.`,
+                    `Le pack complet (Office 365 + Windows 11) à ${formatPrice(product.price)}, en un paiement unique, pour la vie.`,
                   )}
                 </p>
               </div>
