@@ -248,7 +248,7 @@ export default async function PackActivationPage() {
       <section className="illus-zone on-navy">
         <Container className="grid grid-cols-1 gap-10 pt-8 pb-20 sm:pt-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-14 lg:pb-24">
           <div className="rise-in flex flex-col items-start gap-6">
-            <p className="rounded-full bg-white/12 px-3.5 py-1.5 text-[0.75rem] font-medium tracking-[0.04em] text-white ring-1 ring-white/25">
+            <p className="rounded-2xl bg-white/12 px-3.5 py-1.5 text-[0.75rem] leading-snug font-medium tracking-[0.04em] text-white ring-1 ring-white/25">
               {fr("Windows 10 et 11 + Office 365 · Activation à vie")}
             </p>
             <h1 className="text-[2.125rem] leading-[1.08] tracking-[-0.02em] sm:text-[3rem]">
@@ -279,7 +279,7 @@ export default async function PackActivationPage() {
             </ul>
 
             <div id="hero-cta" className="flex w-full flex-col gap-3 sm:w-auto">
-              <p className="flex items-baseline gap-3">
+              <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <span className="font-display tabular text-[2.5rem] leading-none">
                   {price}
                 </span>
@@ -331,10 +331,10 @@ export default async function PackActivationPage() {
           {REASSURANCE.map((item) => (
             <li
               key={item.label}
-              className="bg-paper flex items-center gap-3 p-4 sm:p-5"
+              className="bg-paper flex min-w-0 flex-col items-start gap-2.5 p-4 sm:flex-row sm:items-center sm:gap-3 sm:p-5"
             >
               <IconChip name={item.icon} size={40} />
-              <span className="text-ink text-[0.8125rem] leading-snug font-medium sm:text-sm">
+              <span className="text-ink min-w-0 text-[0.8125rem] leading-snug font-medium [overflow-wrap:anywhere] sm:text-sm">
                 {fr(item.label)}
               </span>
             </li>

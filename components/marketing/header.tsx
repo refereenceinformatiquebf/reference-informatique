@@ -31,12 +31,17 @@ function LockedHeader() {
   return (
     <header className="border-line bg-paper border-b">
       <div className="mx-auto flex h-[4.25rem] max-w-6xl items-center justify-between gap-4 px-4">
-        <span role="img" aria-label="Référence Informatique">
+        <span
+          role="img"
+          aria-label="Référence Informatique"
+          className="min-w-0"
+        >
           <Brand size={40} />
         </span>
-        <p className="text-ink-soft flex items-center gap-2 text-[0.8125rem] font-medium">
+        <p className="text-ink-soft flex shrink-0 items-center gap-2 text-[0.8125rem] font-medium whitespace-nowrap">
           <IconCadenas size={16} className="text-brand-text" />
-          Paiement sécurisé
+          <span className="sm:hidden">Sécurisé</span>
+          <span className="hidden sm:inline">Paiement sécurisé</span>
         </p>
       </div>
     </header>
