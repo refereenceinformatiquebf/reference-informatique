@@ -12,14 +12,7 @@ import {
 } from "@/components/ui/section";
 import { JsonLd } from "@/components/json-ld";
 import { StickyBuyBar } from "@/components/shop/sticky-buy-bar";
-import {
-  IconAlerte,
-  IconCadenas,
-  IconFleche,
-  IconLogiciel,
-  IconOrdinateur,
-  IconPaiement,
-} from "@/components/icons";
+import { IconCadenas, IconFleche } from "@/components/icons";
 import { formatPrice } from "@/lib/format";
 import { getVisibleProduct } from "@/lib/catalog/live";
 import { productPath } from "@/lib/catalog/paths";
@@ -77,28 +70,20 @@ const REASSURANCE: { icon: IconKey; label: string }[] = [
   { icon: "verifie", label: "Plus de 160 clients nous font confiance" },
 ];
 
-const PROBLEMS: {
-  icon: typeof IconAlerte;
-  title: string;
-  text: string;
-}[] = [
+const PROBLEMS: { title: string; text: string }[] = [
   {
-    icon: IconLogiciel,
     title: "Votre document refuse de s'enregistrer",
     text: "Quand Office n'est pas activé, il passe en mode réduit : vous pouvez lire, mais plus modifier. Rapport, mémoire, CV, dossier de candidature… tout s'arrête au moment où vous en avez le plus besoin.",
   },
   {
-    icon: IconOrdinateur,
     title: "« Activer Windows » reste collé à l'écran",
     text: "Le filigrane ne part pas, la personnalisation est bloquée, les rappels reviennent. Devant un client, un patron ou un jury, votre ordinateur donne une image bricolée.",
   },
   {
-    icon: IconAlerte,
     title: "L'activation « trouvée sur internet » qui lâche",
     text: "Un lien, un crack, une activation faite par quelqu'un sur Facebook : ça tient quelques semaines, puis ça saute. Vous recommencez, vous repayez — et ces fichiers douteux peuvent cacher des virus.",
   },
   {
-    icon: IconPaiement,
     title: "L'abonnement qui ne s'arrête jamais",
     text: "Avec un abonnement, vous gardez vos outils tant que vous payez. Le jour où vous arrêtez, ou que l'argent manque, vous perdez l'accès à vos propres documents de travail.",
   },
@@ -137,20 +122,20 @@ const BENEFITS: { icon: IconKey; title: string; text: string }[] = [
   },
 ];
 
-const PILLARS: { icon: IconKey; title: string; text: string }[] = [
+const PILLARS: { keyword: string; title: string; text: string }[] = [
   {
-    icon: "acces-a-vie",
-    title: "À vie : vous payez une fois",
+    keyword: "À vie",
+    title: "Vous payez une seule fois",
     text: "Pas d'échéance, pas de renouvellement, pas de mauvaise surprise dans six mois. Un seul paiement, et c'est réglé pour de bon.",
   },
   {
-    icon: "service",
-    title: "Simple : aucun niveau technique requis",
+    keyword: "Simple",
+    title: "Aucun niveau technique requis",
     text: "Une seule petite application et un guide pas à pas. Si vous savez installer une application, vous saurez le faire.",
   },
   {
-    icon: "eclair",
-    title: "Rapide : prêt en quelques minutes",
+    keyword: "Rapide",
+    title: "Prêt en quelques minutes",
     text: "Votre accès est généré automatiquement dès la confirmation du paiement : pas d'attente, pas de rendez-vous à prendre.",
   },
 ];
@@ -353,14 +338,11 @@ export default async function PackActivationPage() {
             )}
           />
           <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2">
-            {PROBLEMS.map(({ icon: ProblemIcon, title, text }) => (
+            {PROBLEMS.map(({ title, text }) => (
               <div
                 key={title}
-                className="border-line bg-paper shadow-card flex flex-col gap-3 rounded-xl border p-6"
+                className="border-line bg-paper shadow-card border-l-danger flex flex-col gap-3 rounded-xl border border-l-4 p-6"
               >
-                <span className="bg-danger-bg text-danger-text inline-flex h-11 w-11 items-center justify-center rounded-[12px]">
-                  <ProblemIcon size={22} />
-                </span>
                 <h3 className="text-ink text-[1.1875rem] leading-snug font-semibold">
                   {fr(title)}
                 </h3>
@@ -395,10 +377,12 @@ export default async function PackActivationPage() {
                 key={item.title}
                 className="border-line bg-paper shadow-card flex flex-col gap-3 rounded-xl border p-6"
               >
-                <IconChip name={item.icon} size={44} />
-                <h3 className="text-ink text-[1.1875rem] leading-snug font-semibold">
-                  {fr(item.title)}
-                </h3>
+                <div className="flex items-center gap-3">
+                  <IconChip name={item.icon} size={40} />
+                  <h3 className="text-ink min-w-0 text-[1.1875rem] leading-snug font-semibold">
+                    {fr(item.title)}
+                  </h3>
+                </div>
                 <p className="text-ink-soft text-[0.9375rem] leading-relaxed">
                   {fr(item.text)}
                 </p>
@@ -423,11 +407,16 @@ export default async function PackActivationPage() {
             eyebrow="Pourquoi c'est le bon choix"
             title={fr("Trois raisons de ne plus jamais y repenser")}
           />
-          <div className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-3">
+          <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
             {PILLARS.map((item) => (
-              <div key={item.title} className="flex flex-col gap-3">
-                <IconChip name={item.icon} size={48} />
-                <h3 className="font-display text-ink text-[1.375rem] leading-tight">
+              <div
+                key={item.keyword}
+                className="border-line bg-paper shadow-card border-l-brand flex flex-col gap-2 rounded-xl border border-l-4 p-6"
+              >
+                <p className="font-display text-brand-text text-[2.25rem] leading-none">
+                  {fr(item.keyword)}
+                </p>
+                <h3 className="text-ink text-[1.0625rem] leading-snug font-semibold">
                   {fr(item.title)}
                 </h3>
                 <p className="text-ink-soft text-[0.9375rem] leading-relaxed">
@@ -489,10 +478,12 @@ export default async function PackActivationPage() {
                 key={item.title}
                 className="border-line bg-paper shadow-card flex flex-col gap-3 rounded-xl border p-5"
               >
-                <IconChip name={item.icon} size={40} />
-                <h3 className="text-ink text-base leading-snug font-semibold">
-                  {fr(item.title)}
-                </h3>
+                <div className="flex items-center gap-3">
+                  <IconChip name={item.icon} size={40} />
+                  <h3 className="text-ink min-w-0 text-base leading-snug font-semibold">
+                    {fr(item.title)}
+                  </h3>
+                </div>
                 <p className="text-ink-soft text-[0.875rem] leading-relaxed">
                   {fr(item.text)}
                 </p>
