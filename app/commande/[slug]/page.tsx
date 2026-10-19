@@ -46,6 +46,8 @@ export default async function CommandePage({
   if (!product) notFound();
 
   const kind = PRODUCT_KINDS[product.kind];
+  // Un accès livré automatiquement se commande et se paie en ligne : pas d'échappatoire WhatsApp.
+  const allowWhatsapp = product.delivery !== "licence-edn";
 
   return (
     <div className="py-10 sm:py-16">
@@ -110,14 +112,17 @@ export default async function CommandePage({
                 : {}
             }
             unitPrice={product.price}
+            allowWhatsapp={allowWhatsapp}
           />
           <p className="text-ink-faint mt-6 flex items-start gap-2 text-xs leading-relaxed">
             <IconBouclier size={16} className="mt-px shrink-0" />
             <span>
               Le paiement en ligne se fait sur une page sécurisée, par carte
-              bancaire ou Mobile Money. Nous ne voyons jamais vos codes. Si vous
-              préférez, la commande par WhatsApp vous met en relation directe
-              avec notre équipe. Une question après l&apos;achat ?{" "}
+              bancaire ou Mobile Money. Nous ne voyons jamais vos codes.
+              {allowWhatsapp
+                ? " Si vous préférez, la commande par WhatsApp vous met en relation directe avec notre équipe."
+                : ""}{" "}
+              Une question après l&apos;achat ?{" "}
               <Link
                 href="/commande/suivi"
                 className="text-brand-text underline underline-offset-4"

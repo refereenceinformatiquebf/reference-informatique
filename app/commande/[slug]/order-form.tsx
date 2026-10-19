@@ -16,7 +16,7 @@ import { IconPaiement, IconWhatsapp } from "@/components/icons";
 import { Form } from "@/components/ui/form";
 import { Honeypot } from "@/components/ui/honeypot";
 
-function Actions() {
+function Actions({ allowWhatsapp }: { allowWhatsapp: boolean }) {
   const { pending, data } = useFormStatus();
   const intent = data?.get("intent");
   return (
@@ -34,20 +34,22 @@ function Actions() {
           ? "Ouverture du paiement…"
           : "Payer en ligne maintenant"}
       </Button>
-      <Button
-        type="submit"
-        name="intent"
-        value="whatsapp"
-        size="lg"
-        variant="whatsapp"
-        disabled={pending}
-        className="w-full"
-      >
-        <IconWhatsapp size={18} />
-        {pending && intent === "whatsapp"
-          ? "Ouverture de WhatsApp…"
-          : "Commander par WhatsApp"}
-      </Button>
+      {allowWhatsapp ? (
+        <Button
+          type="submit"
+          name="intent"
+          value="whatsapp"
+          size="lg"
+          variant="whatsapp"
+          disabled={pending}
+          className="w-full"
+        >
+          <IconWhatsapp size={18} />
+          {pending && intent === "whatsapp"
+            ? "Ouverture de WhatsApp…"
+            : "Commander par WhatsApp"}
+        </Button>
+      ) : null}
     </div>
   );
 }
@@ -70,6 +72,7 @@ export function OrderForm({
   phoneRequired,
   buyer,
   unitPrice,
+  allowWhatsapp = true,
 }: {
   productSlug: string;
   needsShipping: boolean;
@@ -78,6 +81,8 @@ export function OrderForm({
   buyer: Buyer;
   /** Prix d'une unité, pour l'affichage du total (le serveur recalcule). */
   unitPrice: number;
+  /** Faux : la commande se fait uniquement en ligne (accès livré automatiquement). */
+  allowWhatsapp?: boolean;
 }) {
   const [state, action] = useActionState<OrderFormState, FormData>(
     submitOrder,
@@ -258,7 +263,7 @@ export function OrderForm({
         </p>
       ) : null}
 
-      <Actions />
+      <Actions allowWhatsapp={allowWhatsapp} />
     </Form>
   );
 }

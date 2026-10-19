@@ -195,18 +195,8 @@ const TRUST: { icon: IconKey; title: string; text: string }[] = [
 
 const FAQ: { question: string; answer: string }[] = [
   {
-    question: "Que contient exactement ce pack ?",
-    answer: `Microsoft Office 365 et Office 2024 (Word, Excel, PowerPoint, Outlook, OneNote) et Windows, avec l'application d'installation, votre clé personnelle, un guide pas à pas et 2 antivirus gratuits. Tout est réuni dans un seul achat.`,
-  },
-  {
     question: "Je ne suis pas à l'aise en informatique : vais-je y arriver ?",
-    answer:
-      "Oui. Il suffit d'installer une seule petite application et de suivre le guide, étape par étape. Comptez quelques minutes. Si une étape vous bloque, notre équipe vous aide.",
-  },
-  {
-    question: "Combien de temps pour recevoir mon pack ?",
-    answer:
-      "Dès que votre paiement est confirmé, votre accès est généré automatiquement et un lien personnel vous est envoyé par e-mail : vous n'attendez personne.",
+    answer: `Oui. Il suffit d'installer une seule petite application et de suivre le guide, étape par étape : comptez quelques minutes. Et si une étape vous bloque, appelez ou écrivez-nous au ${SITE.phoneDisplay} : nous vous guidons.`,
   },
   {
     question: "Est-ce que ça expire ? Dois-je payer chaque année ?",
@@ -214,22 +204,9 @@ const FAQ: { question: string; answer: string }[] = [
       "Non. C'est un accès à vie : un seul paiement, aucun abonnement, aucun renouvellement à prévoir.",
   },
   {
-    question: "Sur combien d'ordinateurs puis-je l'utiliser ?",
-    answer: `Votre licence active le pack sur 2 appareils. Pour un appareil supplémentaire, contactez-nous au ${SITE.phoneDisplay} : une nouvelle licence est disponible à l'achat.`,
-  },
-  {
-    question: "Est-ce que ça fonctionne sur Mac ?",
+    question: "Combien de temps pour recevoir mon pack ?",
     answer:
-      "Non, ce pack est conçu pour les ordinateurs Windows. Vérifiez que votre PC fonctionne sous Windows avant de commander.",
-  },
-  {
-    question: "Comment puis-je payer ?",
-    answer:
-      "Par carte bancaire ou Mobile Money, sur une page de paiement sécurisée. Nous ne voyons jamais vos codes.",
-  },
-  {
-    question: "J'ai un souci après l'achat, que faire ?",
-    answer: `Vous retrouvez votre accès à tout moment grâce au lien reçu par e-mail. Si une étape de l'installation vous bloque, appelez ou écrivez-nous au ${SITE.phoneDisplay} : nous vous guidons.`,
+      "Dès que votre paiement est confirmé, votre accès est généré automatiquement et un lien personnel vous est envoyé par e-mail : vous n'attendez personne.",
   },
 ];
 
@@ -488,6 +465,11 @@ export default async function PackActivationPage() {
               </li>
             ))}
           </ol>
+          <p className="text-ink-soft mx-auto mt-8 max-w-2xl text-center text-[0.875rem] leading-relaxed">
+            {fr(
+              `Bon à savoir : ce pack est conçu pour les ordinateurs Windows (pas pour Mac), et votre licence l'active sur 2 appareils. Besoin d'un appareil de plus ? Appelez-nous au ${SITE.phoneDisplay}.`,
+            )}
+          </p>
         </Container>
       </section>
 
