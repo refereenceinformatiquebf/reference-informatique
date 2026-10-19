@@ -8,7 +8,7 @@
  * qui l'utilise). Il vient de la variable NEXT_PUBLIC_META_PIXEL_ID si elle est
  * définie, sinon de la valeur ci-dessous.
  */
-const DEFAULT_META_PIXEL_ID = "";
+const DEFAULT_META_PIXEL_ID = "1578070934336417";
 
 export const META_PIXEL_ID =
   process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim() || DEFAULT_META_PIXEL_ID;
