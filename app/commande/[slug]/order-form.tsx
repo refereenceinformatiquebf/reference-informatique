@@ -16,7 +16,7 @@ import { IconPaiement, IconWhatsapp } from "@/components/icons";
 import { Form } from "@/components/ui/form";
 import { Honeypot } from "@/components/ui/honeypot";
 
-function Actions({ allowWhatsapp }: { allowWhatsapp: boolean }) {
+function Actions() {
   const { pending, data } = useFormStatus();
   const intent = data?.get("intent");
   return (
@@ -34,22 +34,20 @@ function Actions({ allowWhatsapp }: { allowWhatsapp: boolean }) {
           ? "Ouverture du paiement…"
           : "Payer en ligne maintenant"}
       </Button>
-      {allowWhatsapp ? (
-        <Button
-          type="submit"
-          name="intent"
-          value="whatsapp"
-          size="lg"
-          variant="whatsapp"
-          disabled={pending}
-          className="w-full"
-        >
-          <IconWhatsapp size={18} />
-          {pending && intent === "whatsapp"
-            ? "Ouverture de WhatsApp…"
-            : "Commander par WhatsApp"}
-        </Button>
-      ) : null}
+      <Button
+        type="submit"
+        name="intent"
+        value="whatsapp"
+        size="lg"
+        variant="whatsapp"
+        disabled={pending}
+        className="w-full"
+      >
+        <IconWhatsapp size={18} />
+        {pending && intent === "whatsapp"
+          ? "Ouverture de WhatsApp…"
+          : "Commander par WhatsApp"}
+      </Button>
     </div>
   );
 }
@@ -72,7 +70,6 @@ export function OrderForm({
   phoneRequired,
   buyer,
   unitPrice,
-  allowWhatsapp = true,
 }: {
   productSlug: string;
   needsShipping: boolean;
@@ -81,8 +78,6 @@ export function OrderForm({
   buyer: Buyer;
   /** Prix d'une unité, pour l'affichage du total (le serveur recalcule). */
   unitPrice: number;
-  /** Faux : la commande se fait uniquement en ligne (accès livré automatiquement). */
-  allowWhatsapp?: boolean;
 }) {
   const [state, action] = useActionState<OrderFormState, FormData>(
     submitOrder,
@@ -99,7 +94,7 @@ export function OrderForm({
       <input type="hidden" name="productSlug" value={productSlug} />
       <Honeypot />
 
-      <fieldset className="flex flex-col gap-5">
+      <fieldset className="flex min-w-0 flex-col gap-5">
         <legend className="font-display text-ink mb-1 text-[1.25rem] leading-tight">
           Vos coordonnées
         </legend>
@@ -107,7 +102,7 @@ export function OrderForm({
           {signedIn ? (
             <>
               Vous commandez avec votre compte{" "}
-              <strong className="text-ink">{buyer.email}</strong>.
+              <strong className="text-ink break-all">{buyer.email}</strong>.
             </>
           ) : (
             <>
@@ -193,7 +188,7 @@ export function OrderForm({
       </fieldset>
 
       {needsShipping ? (
-        <fieldset className="flex flex-col gap-5">
+        <fieldset className="flex min-w-0 flex-col gap-5">
           <legend className="font-display text-ink mb-1 text-[1.25rem] leading-tight">
             Où devons-nous vous livrer ?
           </legend>
@@ -263,7 +258,7 @@ export function OrderForm({
         </p>
       ) : null}
 
-      <Actions allowWhatsapp={allowWhatsapp} />
+      <Actions />
     </Form>
   );
 }

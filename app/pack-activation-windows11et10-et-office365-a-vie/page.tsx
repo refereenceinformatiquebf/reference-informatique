@@ -181,7 +181,8 @@ const TRUST: { icon: IconKey; title: string; text: string }[] = [
 const FAQ: { question: string; answer: string }[] = [
   {
     question: "Je ne suis pas à l'aise en informatique : vais-je y arriver ?",
-    answer: `Oui. Il suffit d'installer une seule petite application et de suivre le guide, étape par étape : comptez quelques minutes. Et si une étape vous bloque, appelez ou écrivez-nous au ${SITE.phoneDisplay} : nous vous guidons.`,
+    answer:
+      "Oui. Il suffit d'installer une seule petite application et de suivre le guide, étape par étape : comptez quelques minutes. Et si une étape vous bloque, notre équipe vous aide pas à pas.",
   },
   {
     question: "Est-ce que ça expire ? Dois-je payer chaque année ?",
@@ -231,7 +232,7 @@ export default async function PackActivationPage() {
 
       {/* ============================== Héros ============================== */}
       <section className="illus-zone on-navy">
-        <Container className="grid grid-cols-1 gap-10 pt-8 pb-20 sm:pt-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-14 lg:pb-24">
+        <Container className="grid grid-cols-1 gap-8 pt-8 pb-20 sm:pt-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-14 lg:pb-24">
           <div className="rise-in flex flex-col items-start gap-6">
             <p className="rounded-2xl bg-white/12 px-3.5 py-1.5 text-[0.75rem] leading-snug font-medium tracking-[0.04em] text-white ring-1 ring-white/25">
               {fr("Windows 10 et 11 + Office 365 · Activation à vie")}
@@ -290,7 +291,7 @@ export default async function PackActivationPage() {
               className="rise-in mx-auto w-full max-w-[26rem]"
               style={{ "--i": 2 } as React.CSSProperties}
             >
-              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-white shadow-[0_24px_60px_rgba(0,0,0,0.35)]">
+              <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-white shadow-[0_24px_60px_rgba(0,0,0,0.35)]">
                 <Image
                   src={product.poster.src}
                   alt={product.poster.alt}
@@ -328,7 +329,7 @@ export default async function PackActivationPage() {
       </Container>
 
       {/* ============================== Problème ============================== */}
-      <section className="py-20 sm:py-24">
+      <section className="py-12 sm:py-20">
         <Container>
           <SectionHeading
             eyebrow="Vous connaissez sûrement ça"
@@ -337,11 +338,11 @@ export default async function PackActivationPage() {
               "Ce n'est jamais un jour tranquille : c'est la veille d'un rendu, d'une candidature, d'une réunion. Et c'est toujours à ce moment-là que ça bloque.",
             )}
           />
-          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div className="mt-7 grid grid-cols-1 gap-3 sm:mt-10 sm:grid-cols-2 sm:gap-5">
             {PROBLEMS.map(({ title, text }) => (
               <div
                 key={title}
-                className="border-line bg-paper shadow-card border-l-danger flex flex-col gap-3 rounded-xl border border-l-4 p-6"
+                className="border-line bg-paper shadow-card border-l-danger flex flex-col gap-3 rounded-xl border border-l-4 p-5 sm:p-6"
               >
                 <h3 className="text-ink text-[1.1875rem] leading-snug font-semibold">
                   {fr(title)}
@@ -352,7 +353,7 @@ export default async function PackActivationPage() {
               </div>
             ))}
           </div>
-          <p className="font-display text-ink mx-auto mt-10 max-w-2xl text-center text-[1.375rem] leading-snug sm:text-[1.625rem]">
+          <p className="font-display text-ink mx-auto mt-7 max-w-2xl text-center text-[1.375rem] leading-snug sm:mt-10 sm:text-[1.625rem]">
             {fr(
               "Chaque blocage vous coûte du temps, du stress et parfois une occasion. Il existe une solution simple, une fois pour toutes.",
             )}
@@ -361,7 +362,7 @@ export default async function PackActivationPage() {
       </section>
 
       {/* ============================== Solution ============================== */}
-      <section className="bg-paper-raised border-line border-y py-20 sm:py-24">
+      <section className="bg-paper-raised border-line border-y py-12 sm:py-20">
         <Container>
           <SectionHeading
             align="center"
@@ -371,11 +372,11 @@ export default async function PackActivationPage() {
               "Windows et Office, activés ensemble, à vie. Vous payez une fois, vous installez en quelques minutes, et vous n'y pensez plus.",
             )}
           />
-          <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 gap-3 sm:mt-12 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
             {BENEFITS.map((item) => (
               <div
                 key={item.title}
-                className="border-line bg-paper shadow-card flex flex-col gap-3 rounded-xl border p-6"
+                className="border-line bg-paper shadow-card flex flex-col gap-3 rounded-xl border p-5 sm:p-6"
               >
                 <div className="flex items-center gap-3">
                   <IconChip name={item.icon} size={40} />
@@ -389,7 +390,7 @@ export default async function PackActivationPage() {
               </div>
             ))}
           </div>
-          <div className="mx-auto mt-10 flex max-w-md flex-col gap-3">
+          <div className="mx-auto mt-7 flex max-w-md flex-col gap-3 sm:mt-10">
             <Button asChild size="lg" className="w-full">
               <Link href={orderHref}>
                 {fr(`Je veux mon pack — ${price}`)}
@@ -401,17 +402,17 @@ export default async function PackActivationPage() {
       </section>
 
       {/* ============================== Piliers ============================== */}
-      <section className="py-20 sm:py-24">
+      <section className="py-12 sm:py-20">
         <Container>
           <SectionHeading
             eyebrow="Pourquoi c'est le bon choix"
             title={fr("Trois raisons de ne plus jamais y repenser")}
           />
-          <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
+          <div className="mt-7 grid grid-cols-1 gap-3 sm:mt-10 sm:gap-5 md:grid-cols-3">
             {PILLARS.map((item) => (
               <div
                 key={item.keyword}
-                className="border-line bg-paper shadow-card border-l-brand flex flex-col gap-2 rounded-xl border border-l-4 p-6"
+                className="border-line bg-paper shadow-card border-l-brand flex flex-col gap-2 rounded-xl border border-l-4 p-5 sm:p-6"
               >
                 <p className="font-display text-brand-text text-[2.25rem] leading-none">
                   {fr(item.keyword)}
@@ -429,18 +430,18 @@ export default async function PackActivationPage() {
       </section>
 
       {/* ============================== Étapes ============================== */}
-      <section className="bg-paper-raised border-line border-y py-20 sm:py-24">
+      <section className="bg-paper-raised border-line border-y py-12 sm:py-20">
         <Container>
           <SectionHeading
             align="center"
             eyebrow="Comment ça se passe"
             title={fr("Trois étapes, et c'est terminé")}
           />
-          <ol className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
+          <ol className="mt-8 grid grid-cols-1 gap-3 sm:mt-12 sm:gap-5 md:grid-cols-3">
             {STEPS.map((step, index) => (
               <li
                 key={step.title}
-                className="border-line bg-paper shadow-card flex flex-col gap-3 rounded-xl border p-6"
+                className="border-line bg-paper shadow-card flex flex-col gap-3 rounded-xl border p-5 sm:p-6"
               >
                 <span className="bg-brand text-brand-contrast font-display flex h-10 w-10 items-center justify-center rounded-full text-[1.25rem]">
                   {index + 1}
@@ -454,16 +455,11 @@ export default async function PackActivationPage() {
               </li>
             ))}
           </ol>
-          <p className="text-ink-soft mx-auto mt-8 max-w-2xl text-center text-[0.875rem] leading-relaxed">
-            {fr(
-              `Bon à savoir : ce pack est conçu pour les ordinateurs Windows (pas pour Mac), et votre licence l'active sur 2 appareils. Besoin d'un appareil de plus ? Appelez-nous au ${SITE.phoneDisplay}.`,
-            )}
-          </p>
         </Container>
       </section>
 
       {/* ============================== Confiance ============================== */}
-      <section className="py-20 sm:py-24">
+      <section className="py-12 sm:py-20">
         <Container>
           <SectionHeading
             eyebrow="Votre tranquillité"
@@ -472,7 +468,7 @@ export default async function PackActivationPage() {
               "On sait que vous avez peut-être déjà été déçu. Voilà ce qui rend cet achat sûr.",
             )}
           />
-          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-7 grid grid-cols-1 gap-3 sm:mt-10 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
             {TRUST.map((item) => (
               <div
                 key={item.title}
@@ -494,7 +490,7 @@ export default async function PackActivationPage() {
       </section>
 
       {/* ============================== Questions ============================== */}
-      <section className="bg-paper-raised border-line border-y py-20 sm:py-24">
+      <section className="bg-paper-raised border-line border-y py-12 sm:py-20">
         <Container className="max-w-3xl">
           <Eyebrow>Questions fréquentes</Eyebrow>
           <h2 className="font-display text-ink mt-2 mb-6 text-[1.625rem] leading-tight sm:text-[2rem]">
@@ -506,7 +502,7 @@ export default async function PackActivationPage() {
 
       {/* ============================== Appel final ============================== */}
       <section className="illus-zone on-navy">
-        <Container className="flex flex-col items-center gap-6 py-16 text-center sm:py-20">
+        <Container className="flex flex-col items-center gap-6 py-12 text-center sm:py-20">
           <h2 className="max-w-2xl text-[1.875rem] leading-[1.1] tracking-[-0.01em] sm:text-[2.75rem]">
             {fr("Reprenez la main sur votre ordinateur, dès aujourd'hui.")}
           </h2>

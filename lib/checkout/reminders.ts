@@ -7,9 +7,9 @@ import { trackingUrlFor } from "./access";
 
 const HOUR_MS = 60 * 60 * 1000;
 
-/** Une commande abandonnée est relancée entre 2 h et 3 jours après sa création :
+/** Une commande abandonnée est relancée entre 1 h et 3 jours après sa création :
  * ni trop tôt (le client est peut-être encore en train de payer), ni trop tard. */
-const MIN_AGE_HOURS = 2;
+const MIN_AGE_HOURS = 1;
 const MAX_AGE_HOURS = 72;
 const MAX_PER_RUN = 25;
 
@@ -58,15 +58,36 @@ export async function remindOrder(
   const email = await getClientEmail(order.profile);
   if (!email) return "skipped_no_email";
 
-  await sendPaymentReminder({
-    to: email,
-    clientName: order.profile.name,
-    productName: order.product.name,
-    amount: order.amount,
-    quantity: order.quantity,
-    orderId: order.id,
-    trackUrl: await trackingUrlFor(order.id),
-  });
+  // Réservation atomique : si deux exécutions se chevauchent (tâche Vercel et
+  // planificateur externe), une seule envoie — jamais deux relances au client.
+  if (!options.force) {
+    const claimed = await prisma.order.updateMany({
+      where: { id: order.id, status: "EN_ATTENTE", reminderSentAt: null },
+      data: { reminderSentAt: new Date() },
+    });
+    if (claimed.count === 0) return "skipped_already_reminded";
+  }
+
+  try {
+    await sendPaymentReminder({
+      to: email,
+      clientName: order.profile.name,
+      productName: order.product.name,
+      amount: order.amount,
+      quantity: order.quantity,
+      orderId: order.id,
+      trackUrl: await trackingUrlFor(order.id),
+    });
+  } catch (error) {
+    // Envoi échoué : on libère la réservation pour que la prochaine exécution réessaie.
+    if (!options.force) {
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { reminderSentAt: null },
+      });
+    }
+    throw error;
+  }
   await prisma.order.update({
     where: { id: order.id },
     data: { reminderSentAt: new Date() },

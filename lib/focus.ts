@@ -2,7 +2,7 @@ import { ROOT_PATH_PRODUCT_SLUGS } from "@/lib/catalog/paths";
 
 /**
  * Pages « sans distraction » : l'en-tête n'a plus de liens, le bandeau
- * d'annonce et le grand pied de page disparaissent. Le client ne doit voir
+ * d'annonce et le pied de page disparaissent. Le client ne doit voir
  * que la décision d'achat — pas une porte de sortie.
  *
  *  - les pages de vente à adresse courte (voir lib/catalog/paths.ts) ;

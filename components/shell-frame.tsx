@@ -10,20 +10,18 @@ import { isFocusPath } from "@/lib/focus";
  * l'en-tête ni le pied de page du site.
  *
  * Pages sans distraction (lib/focus.ts : pages de vente et formulaire de
- * commande) : pas de bandeau d'annonce, et un pied de page réduit aux
- * mentions légales. L'en-tête, lui, se verrouille tout seul (voir Header).
+ * commande) : ni bandeau d'annonce ni pied de page. L'en-tête, lui, se
+ * verrouille tout seul (voir Header).
  */
 export function ShellFrame({
   announcement,
   header,
   footer,
-  focusFooter,
   children,
 }: {
   announcement: ReactNode;
   header: ReactNode;
   footer: ReactNode;
-  focusFooter: ReactNode;
   children: ReactNode;
 }) {
   const pathname = usePathname();
@@ -47,7 +45,7 @@ export function ShellFrame({
       <main id="main-content" className="flex-1">
         {children}
       </main>
-      {focus ? focusFooter : footer}
+      {focus ? null : footer}
     </div>
   );
 }

@@ -13,7 +13,6 @@ import {
   sendDeliveryUpdate,
   sendLicenceStockAlert,
   sendOrderAlert,
-  sendOrderConfirmation,
   sendPaymentConfirmation,
   sendRefundNotice,
 } from "@/lib/email/send";
@@ -395,50 +394,6 @@ async function notifyPaymentConfirmed(orderId: string) {
   for (const result of results) {
     if (result.status === "rejected") {
       console.error("[notifyPaymentConfirmed]", result.reason);
-    }
-  }
-}
-
-/** Alerte « nouvelle commande » (création), client + équipe. */
-export async function notifyOrderCreated(orderId: string) {
-  const data = await loadOrderForEmail(orderId);
-  if (!data) return;
-  const { order, product, catalogProduct, email, shipping } = data;
-
-  const tasks: Promise<unknown>[] = [
-    sendOrderAlert({
-      event: "created",
-      orderId: order.id,
-      clientName: order.profile.name,
-      clientPhone: order.profile.phone ?? shipping?.phone ?? "",
-      clientEmail: email ?? undefined,
-      productName: product.name,
-      amount: order.amount,
-      quantity: order.quantity,
-      channel: order.channel,
-      shipping,
-    }),
-  ];
-  if (email) {
-    tasks.push(
-      sendOrderConfirmation({
-        to: email,
-        clientName: order.profile.name,
-        productName: product.name,
-        amount: order.amount,
-        quantity: order.quantity,
-        delivery: catalogProduct?.delivery ?? "numerique",
-        channel: order.channel,
-        shipping,
-        orderId: order.id,
-        trackUrl: await trackingUrlFor(order.id),
-      }),
-    );
-  }
-  const results = await Promise.allSettled(tasks);
-  for (const result of results) {
-    if (result.status === "rejected") {
-      console.error("[notifyOrderCreated]", result.reason);
     }
   }
 }

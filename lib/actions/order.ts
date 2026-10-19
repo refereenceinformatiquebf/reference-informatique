@@ -18,7 +18,7 @@ import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
 import { isHoneypotFilled } from "@/lib/honeypot";
 import { whatsappLink } from "@/lib/site";
 import { formatPrice } from "@/lib/format";
-import { addOrderEvent, notifyOrderCreated } from "@/lib/orders";
+import { addOrderEvent } from "@/lib/orders";
 import { runAfterResponse } from "@/lib/after-response";
 import { resolveBuyer } from "@/lib/checkout/buyer";
 import { ensureAccessToken, newAccessToken } from "@/lib/checkout/access";
@@ -313,7 +313,7 @@ export async function submitOrder(
 async function startOnlineCheckout(context: OrderContext): Promise<string> {
   const { profile, catalogProduct, visitorCountry } = context;
 
-  const { order, isNew } = await getOrCreatePendingOrder(context, "BOUTIQUE");
+  const { order } = await getOrCreatePendingOrder(context, "BOUTIQUE");
 
   // Déjà payée (produit numérique commandé une seconde fois, ou paiement
   // précédent confirmé en retard) : on renvoie le lien d'accès à l'adresse du
@@ -329,9 +329,9 @@ async function startOnlineCheckout(context: OrderContext): Promise<string> {
     return `${followUpUrl(order.id)}&deja=1`;
   }
 
-  if (isNew) {
-    runAfterResponse(() => notifyOrderCreated(order.id));
-  }
+  // Aucun e-mail à la création : le client et l'équipe ne sont écrits qu'à la
+  // confirmation du paiement (notifyPaymentConfirmed) ; un client qui ne paie
+  // pas reçoit une relance (lib/checkout/reminders.ts).
   return payment.checkoutUrl;
 }
 
@@ -339,15 +339,11 @@ async function startOnlineCheckout(context: OrderContext): Promise<string> {
 async function startWhatsappOrder(context: OrderContext): Promise<string> {
   const { catalogProduct, shipping, profile } = context;
 
-  const { order, isNew } = await getOrCreatePendingOrder(context, "WHATSAPP");
+  const { order } = await getOrCreatePendingOrder(context, "WHATSAPP");
 
   if (order.status === "PAYE") {
     runAfterResponse(() => sendLinksForOrder(order.id));
     return `${followUpUrl(order.id)}&deja=1`;
-  }
-
-  if (isNew) {
-    runAfterResponse(() => notifyOrderCreated(order.id));
   }
 
   const lines = [
