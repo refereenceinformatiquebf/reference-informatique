@@ -5,12 +5,45 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { NAV_LINKS } from "./nav-links";
-import { IconCroix, IconMenu, IconUtilisateur } from "@/components/icons";
+import {
+  IconCadenas,
+  IconCroix,
+  IconMenu,
+  IconUtilisateur,
+} from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { useCurrentProfile } from "./use-current-profile";
 import { Brand } from "./logo";
+import { isFocusPath } from "@/lib/focus";
 
+/**
+ * Sur les pages sans distraction (lib/focus.ts : pages de vente, formulaire de
+ * commande), l'en-tête n'offre plus aucun lien : le client ne voit que la
+ * marque et la mention de paiement sécurisé, et ne peut pas quitter la page
+ * par le haut. Le reste du site garde l'en-tête complet.
+ */
 export function Header() {
+  const pathname = usePathname();
+  return isFocusPath(pathname) ? <LockedHeader /> : <FullHeader />;
+}
+
+function LockedHeader() {
+  return (
+    <header className="border-line bg-paper border-b">
+      <div className="mx-auto flex h-[4.25rem] max-w-6xl items-center justify-between gap-4 px-4">
+        <span role="img" aria-label="Référence Informatique">
+          <Brand size={40} />
+        </span>
+        <p className="text-ink-soft flex items-center gap-2 text-[0.8125rem] font-medium">
+          <IconCadenas size={16} className="text-brand-text" />
+          Paiement sécurisé
+        </p>
+      </div>
+    </header>
+  );
+}
+
+function FullHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { profile, loading } = useCurrentProfile();

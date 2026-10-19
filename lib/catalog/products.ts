@@ -911,20 +911,20 @@ export const PRODUCTS: Product[] = [
     order: 19,
   },
 
-  /* ------------------------ Licence Expert — Office 365 & Windows 11 ------------------------ */
+  /* ------------------------ Pack Activation Windows 10/11 + Office 365 à vie ------------------------ */
   {
     slug: "pack-activation-windows11et10-et-office365-a-vie",
-    name: "Licence Expert — Office 365 & Windows 11",
+    name: "Pack Activation Windows 10/11 + Office 365 à vie",
     tagline:
-      "Word, Excel, PowerPoint et Windows 11 sur votre ordinateur : une installation simple, prête en quelques minutes, à vous pour la vie.",
+      "Word, Excel, PowerPoint et Windows activés à vie : un seul paiement, une installation guidée de quelques minutes, et plus aucun blocage.",
     summary:
-      "Word, Excel, PowerPoint et Windows 11 : installation simple, prête en quelques minutes, accès à vie sans abonnement.",
+      "Windows 10/11 et Office 365 activés à vie : un seul paiement, installation guidée en quelques minutes, 2 antivirus offerts.",
     kind: "pack",
     price: 4000,
     cover: { tone: "navy", motif: "logiciel" },
     poster: {
       src: "/produits/affiches/licence-expert-office-365-windows-11.webp",
-      alt: "Licence Expert — Office 365 et Windows 11 : une licence générée automatiquement après paiement, pour activer les deux en quelques minutes.",
+      alt: "Offre spéciale : activation de Windows 10 et 11 et de Microsoft Office (Office 2024, Office 365), antivirus offert, installation facile, guide inclus, licence à vie.",
     },
     delivery: "licence-edn",
     facts: [
@@ -1016,9 +1016,10 @@ export const PRODUCTS: Product[] = [
       faqAcces,
     ],
     seo: {
-      title: "Office 365 & Windows 11 à vie — Word, Excel, PowerPoint",
+      title:
+        "Activation Windows 10/11 + Office 365 à vie — Word, Excel, PowerPoint",
       description:
-        "Word, Excel, PowerPoint et Windows 11 sur votre PC : installation simple et rapide, accès à vie sans abonnement. Prêt en quelques minutes. 4 000 F.",
+        "Fini « Activer Windows » et les documents bloqués : Windows et Office 365 activés à vie, installation guidée en quelques minutes, 2 antivirus offerts. 4 000 F, paiement unique.",
     },
     order: 20,
   },

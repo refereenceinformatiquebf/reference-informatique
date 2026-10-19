@@ -29,6 +29,7 @@ import {
   canonicalProductRedirect,
   productPath,
 } from "../lib/catalog/paths";
+import { isFocusPath } from "../lib/focus";
 import sitemap from "../app/sitemap";
 import { fr } from "../lib/typography";
 
@@ -176,6 +177,30 @@ describe("intégrité du catalogue", () => {
       "/",
     ]) {
       assert.equal(canonicalProductRedirect(same), null, same);
+    }
+  });
+
+  it("le mode sans distraction couvre la page de vente et le formulaire de commande, pas le reste", () => {
+    for (const focus of [
+      "/pack-activation-windows11et10-et-office365-a-vie",
+      "/pack-activation-windows11et10-et-office365-a-vie/",
+      "/commande/le-chercheur-augmente",
+      "/commande/pack-activation-windows11et10-et-office365-a-vie",
+    ]) {
+      assert.equal(isFocusPath(focus), true, focus);
+    }
+    for (const normal of [
+      "/",
+      "/boutique",
+      "/boutique/le-chercheur-augmente",
+      "/commande/retour",
+      "/commande/suivi",
+      "/commande/suivi/un-jeton",
+      "/espace-client",
+      "/espace-client/licences/pack-activation-windows11et10-et-office365-a-vie",
+      "/guide-activation",
+    ]) {
+      assert.equal(isFocusPath(normal), false, normal);
     }
   });
 

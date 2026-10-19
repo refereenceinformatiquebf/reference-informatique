@@ -48,9 +48,7 @@ export async function Footer() {
             Livres numériques
           </FooterLink>
           <FooterLink href="/boutique?famille=modele">Modèles</FooterLink>
-          <FooterLink href="/boutique?famille=pack">
-            Packs d&rsquo;outils
-          </FooterLink>
+          <FooterLink href="/boutique?famille=pack">Logiciels</FooterLink>
         </FooterColumn>
 
         <FooterColumn title="Entreprise">

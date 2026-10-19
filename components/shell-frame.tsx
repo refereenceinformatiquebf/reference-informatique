@@ -2,22 +2,32 @@
 
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import { isFocusPath } from "@/lib/focus";
 
 /**
  * Cadre des pages : en-tête public, contenu, pied de page — sauf dans
  * l'administration, qui a son propre cadre (menu latéral) et ne montre ni
  * l'en-tête ni le pied de page du site.
+ *
+ * Pages sans distraction (lib/focus.ts : pages de vente et formulaire de
+ * commande) : pas de bandeau d'annonce, et un pied de page réduit aux
+ * mentions légales. L'en-tête, lui, se verrouille tout seul (voir Header).
  */
 export function ShellFrame({
+  announcement,
   header,
   footer,
+  focusFooter,
   children,
 }: {
+  announcement: ReactNode;
   header: ReactNode;
   footer: ReactNode;
+  focusFooter: ReactNode;
   children: ReactNode;
 }) {
   const pathname = usePathname();
+  const focus = isFocusPath(pathname);
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     return <>{children}</>;
   }
@@ -32,11 +42,12 @@ export function ShellFrame({
       >
         Aller au contenu principal
       </a>
+      {focus ? null : announcement}
       {header}
       <main id="main-content" className="flex-1">
         {children}
       </main>
-      {footer}
+      {focus ? focusFooter : footer}
     </div>
   );
 }
