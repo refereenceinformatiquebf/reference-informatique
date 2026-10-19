@@ -105,9 +105,7 @@ async function prepareOrder(
       ok: false,
       state: {
         fieldErrors: {
-          phone: [
-            "Indiquez un numéro joignable (WhatsApp si possible) : notre équipe vous contacte pour la remise.",
-          ],
+          phone: ["Indiquez un numéro joignable (WhatsApp si possible)."],
         },
       },
     };

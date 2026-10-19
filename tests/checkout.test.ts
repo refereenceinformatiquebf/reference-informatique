@@ -114,14 +114,14 @@ describe("destination après « Accéder à mon achat »", () => {
 });
 
 describe("téléphone", () => {
-  it("est obligatoire quand l'équipe doit joindre le client", () => {
+  it("est obligatoire quand l'équipe doit joindre ou assister le client", () => {
     assert.equal(phoneRequired("cle-physique"), true);
     assert.equal(phoneRequired("manuel"), true);
+    assert.equal(phoneRequired("licence-edn"), true);
   });
 
-  it("est facultatif pour un accès 100 % automatique", () => {
+  it("reste facultatif pour une formation en ligne", () => {
     assert.equal(phoneRequired("numerique"), false);
-    assert.equal(phoneRequired("licence-edn"), false);
   });
 });
 

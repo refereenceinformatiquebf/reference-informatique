@@ -39,7 +39,7 @@ function ProductRow({
   priceLabel: string;
 }) {
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <div className="flex min-w-0 items-start gap-3">
       <div className="border-line bg-paper-raised relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border">
         {posterSrc ? (
           <Image
@@ -51,12 +51,14 @@ function ProductRow({
           />
         ) : null}
       </div>
-      <p className="text-ink min-w-0 flex-1 text-sm leading-snug font-medium [overflow-wrap:anywhere]">
-        {name}
-      </p>
-      <p className="font-display text-ink tabular shrink-0 text-[1.125rem]">
-        {priceLabel}
-      </p>
+      <div className="min-w-0 flex-1">
+        <p className="text-ink text-sm leading-snug font-medium break-words">
+          {name}
+        </p>
+        <p className="font-display text-ink tabular mt-1 text-[1.125rem] leading-none">
+          {priceLabel}
+        </p>
+      </div>
     </div>
   );
 }
@@ -101,12 +103,19 @@ export function LicenceOrderForm({
   // suite, sans aller-retour réseau.
   const goNext = () => {
     const parsed = buyerSchema.safeParse({ name, email, phone });
-    if (!parsed.success) {
-      const fields = parsed.error.flatten().fieldErrors;
+    const fields: Partial<Record<Field, string[]>> = parsed.success
+      ? {}
+      : parsed.error.flatten().fieldErrors;
+    // Le numéro est obligatoire ici (assistance WhatsApp) ; buyerSchema le laisse
+    // facultatif, il ne contrôle que son format.
+    const phoneError =
+      fields.phone?.[0] ??
+      (phone.trim() === "" ? "Indiquez votre numéro WhatsApp." : undefined);
+    if (!parsed.success || phoneError) {
       setErrors({
         name: fields.name?.[0],
         email: fields.email?.[0],
-        phone: fields.phone?.[0],
+        phone: phoneError,
       });
       return;
     }
@@ -216,7 +225,7 @@ export function LicenceOrderForm({
               </div>
 
               <div className="flex min-w-0 flex-col gap-1.5">
-                <Label htmlFor="co-phone">Téléphone — facultatif</Label>
+                <Label htmlFor="co-phone">Téléphone (WhatsApp)</Label>
                 <Input
                   id="co-phone"
                   type="tel"
@@ -225,6 +234,7 @@ export function LicenceOrderForm({
                   placeholder="+226 XX XX XX XX"
                   value={phone}
                   onChange={(event) => setPhone(event.target.value)}
+                  required
                   aria-invalid={Boolean(errors.phone)}
                 />
                 <FieldError message={errors.phone} />
@@ -293,30 +303,30 @@ export function LicenceOrderForm({
           </div>
 
           <dl className="border-line mt-5 flex flex-col gap-2 border-t pt-4 text-sm">
-            <div className="flex items-baseline justify-between gap-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
               <dt className="text-ink-soft shrink-0">Nom</dt>
-              <dd className="text-ink min-w-0 text-right font-medium [overflow-wrap:anywhere]">
+              <dd className="text-ink ml-auto min-w-0 text-right font-medium [overflow-wrap:anywhere]">
                 {name}
               </dd>
             </div>
-            <div className="flex items-baseline justify-between gap-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
               <dt className="text-ink-soft shrink-0">Email</dt>
-              <dd className="text-ink min-w-0 text-right font-medium [overflow-wrap:anywhere]">
+              <dd className="text-ink ml-auto min-w-0 text-right font-medium [overflow-wrap:anywhere]">
                 {email}
               </dd>
             </div>
-            {phone.trim() ? (
-              <div className="flex items-baseline justify-between gap-4">
-                <dt className="text-ink-soft shrink-0">Téléphone</dt>
-                <dd className="text-ink min-w-0 text-right font-medium [overflow-wrap:anywhere]">
-                  {phone}
-                </dd>
-              </div>
-            ) : null}
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
+              <dt className="text-ink-soft shrink-0">WhatsApp</dt>
+              <dd className="text-ink ml-auto min-w-0 text-right font-medium [overflow-wrap:anywhere]">
+                {phone}
+              </dd>
+            </div>
           </dl>
 
-          <div className="bg-brand-50 mt-5 flex items-center justify-between gap-4 rounded-lg px-4 py-3">
-            <span className="text-ink font-semibold">Total à payer</span>
+          <div className="bg-brand-50 mt-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-lg px-4 py-3">
+            <span className="text-ink font-semibold whitespace-nowrap">
+              Total à payer
+            </span>
             <span className="font-display text-brand-700 tabular text-[1.5rem] leading-none">
               {priceLabel}
             </span>

@@ -56,10 +56,10 @@ export function accessDestination(
 }
 
 /** Un téléphone est indispensable quand l'équipe doit joindre le client
- * (livraison d'une clé, remise manuelle) ; il reste facultatif pour un accès
- * 100 % automatique. */
+ * (livraison d'une clé, remise manuelle) ou l'assister sur WhatsApp pendant
+ * l'activation d'une licence ; il reste facultatif pour une formation en ligne. */
 export function phoneRequired(delivery: DeliveryMode | undefined) {
-  return delivery !== "numerique" && delivery !== "licence-edn";
+  return delivery !== "numerique";
 }
 
 /* --------------------------- Aides à la saisie --------------------------- */
