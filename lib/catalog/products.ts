@@ -918,7 +918,7 @@ export const PRODUCTS: Product[] = [
     tagline:
       "Word, Excel, PowerPoint et Windows activés à vie : un seul paiement, une installation guidée de quelques minutes, et plus aucun blocage.",
     summary:
-      "Windows 10/11 et Office 365 activés à vie : un seul paiement, installation guidée en quelques minutes, 2 antivirus offerts.",
+      "Windows 10/11 et Office 365 activés à vie : un seul paiement, installation guidée en quelques minutes, antivirus gratuit offert.",
     kind: "pack",
     price: 4000,
     cover: { tone: "navy", motif: "logiciel" },
@@ -1019,7 +1019,7 @@ export const PRODUCTS: Product[] = [
       title:
         "Activation Windows 10/11 + Office 365 à vie — Word, Excel, PowerPoint",
       description:
-        "Fini « Activer Windows » et les documents bloqués : Windows et Office 365 activés à vie, installation guidée en quelques minutes, 2 antivirus offerts. 4 000 F, paiement unique.",
+        "Fini « Activer Windows » et les documents bloqués : Windows et Office 365 activés à vie, installation guidée en quelques minutes, antivirus gratuit offert. 4 000 F, paiement unique.",
     },
     order: 20,
   },

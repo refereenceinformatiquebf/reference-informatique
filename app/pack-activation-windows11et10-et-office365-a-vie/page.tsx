@@ -119,8 +119,8 @@ const BENEFITS: { icon: IconKey; title: string; text: string }[] = [
   },
   {
     icon: "bouclier",
-    title: "Bonus : 2 antivirus gratuits",
-    text: "360 Total Security et Avast One Free sont fournis : installez celui que vous préférez pour protéger vos fichiers.",
+    title: "Bonus : antivirus gratuit",
+    text: "Un antivirus gratuit est fourni avec votre pack, pour protéger vos fichiers.",
   },
 ];
 
@@ -304,11 +304,6 @@ export default async function PackActivationPage() {
                   className="object-contain"
                 />
               </div>
-              <p className="mt-3 text-center text-xs text-white/65">
-                {fr(
-                  "Affiche de l'offre. Les informations de cette page (prix, contenu, livraison) font foi.",
-                )}
-              </p>
             </div>
           ) : null}
         </Container>
