@@ -17,6 +17,10 @@ import { cn } from "@/lib/utils";
 
 type Field = "name" | "email" | "phone";
 
+/** Une adresse trop longue pour la ligne se coupe après le « @ » (espace de largeur
+ * nulle), jamais au milieu du nom ou du domaine tant qu'une coupure propre existe. */
+const breakableEmail = (email: string) => email.replace(/@/g, "@\u200B");
+
 const STEPS = ["Vos informations", "Paiement"] as const;
 
 function PayButton({ priceLabel }: { priceLabel: string }) {
@@ -271,7 +275,7 @@ export function LicenceOrderForm({
                     </p>
                   ) : null}
                   <p id="co-email-help" className="text-ink-faint text-xs">
-                    Votre accès est envoyé à cette adresse : vérifiez-la bien.
+                    Votre pack est envoyé à cette adresse : vérifiez-la bien.
                   </p>
                 </div>
               )}
@@ -312,7 +316,7 @@ export function LicenceOrderForm({
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
               <dt className="text-ink-soft shrink-0">Email</dt>
               <dd className="text-ink ml-auto min-w-0 text-right font-medium [overflow-wrap:anywhere]">
-                {email}
+                {breakableEmail(email)}
               </dd>
             </div>
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
@@ -331,11 +335,10 @@ export function LicenceOrderForm({
               {priceLabel}
             </span>
           </div>
-          <p className="text-ink-soft mt-3 text-xs leading-relaxed">
-            Paiement sécurisé par Mobile Money ou carte bancaire. Votre accès
-            est envoyé à{" "}
+          <p className="text-ink-soft mt-3 text-sm leading-relaxed">
+            Votre pack est envoyé à{" "}
             <strong className="text-ink [overflow-wrap:anywhere]">
-              {email}
+              {breakableEmail(email)}
             </strong>{" "}
             dès la confirmation du paiement.
           </p>

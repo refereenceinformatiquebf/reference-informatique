@@ -65,8 +65,8 @@ export default async function CommandePage({
             Finaliser ma commande
           </h1>
           <p className="text-ink-soft mt-2 text-sm">
-            Paiement sécurisé — accès envoyé par e-mail dès la confirmation du
-            paiement
+            Paiement sécurisé — votre pack est envoyé par e-mail dès la
+            confirmation du paiement
           </p>
 
           <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:gap-8">
