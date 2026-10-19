@@ -55,6 +55,17 @@ export function accessDestination(
   return "/espace-client";
 }
 
+/** Le paiement vient-il d'être confirmé (moins de 2 h) ? Sert à n'envoyer l'achat au
+ * pixel publicitaire qu'au retour du paiement, jamais à la visite d'un ancien lien. */
+export function paidRecently(
+  paidAt: Date | null | undefined,
+  now: number = Date.now(),
+): boolean {
+  if (!paidAt) return false;
+  const age = now - paidAt.getTime();
+  return age >= 0 && age < 2 * 60 * 60 * 1000;
+}
+
 /** Un téléphone est indispensable quand l'équipe doit joindre le client
  * (livraison d'une clé, remise manuelle) ou l'assister sur WhatsApp pendant
  * l'activation d'une licence ; il reste facultatif pour une formation en ligne. */

@@ -15,6 +15,8 @@ import { Price } from "@/components/shop/price";
 import { ProductCover } from "@/components/shop/product-cover";
 import { IconBouclier } from "@/components/icons";
 import { LicenceOrderForm } from "@/components/checkout/licence-order-form";
+import { MetaEvent } from "@/components/marketing/meta-event";
+import { productParams } from "@/lib/meta-pixel";
 import { OrderForm } from "./order-form";
 
 export const metadata: Metadata = {
@@ -60,13 +62,14 @@ export default async function CommandePage({
     const priceLabel = formatPrice(product.price);
     return (
       <div className="py-8 sm:py-12">
+        <MetaEvent name="InitiateCheckout" params={productParams(product)} />
         <Container className="max-w-5xl">
           <h1 className="text-ink text-[1.875rem] leading-[1.1] sm:text-[2.25rem]">
             Finaliser ma commande
           </h1>
           <p className="text-ink-soft mt-2 text-sm">
-            Paiement sécurisé — votre pack est envoyé par e-mail dès la
-            confirmation du paiement
+            Paiement sécurisé — votre pack sera automatiquement envoyé par
+            e-mail dès la confirmation du paiement
           </p>
 
           <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:gap-8">
@@ -75,6 +78,7 @@ export default async function CommandePage({
               productName={product.name}
               posterSrc={product.poster?.src}
               priceLabel={priceLabel}
+              value={product.price}
               buyer={buyer}
             />
 
@@ -117,6 +121,7 @@ export default async function CommandePage({
 
   return (
     <div className="py-10 sm:py-16">
+      <MetaEvent name="InitiateCheckout" params={productParams(product)} />
       <Container className="max-w-3xl">
         <Link
           href={productPath(product.slug)}

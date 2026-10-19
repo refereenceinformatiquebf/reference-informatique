@@ -6,6 +6,7 @@ import { useFormStatus } from "react-dom";
 import { submitOrder, type OrderFormState } from "@/lib/actions/order";
 import { buyerSchema } from "@/lib/validations/order";
 import { suggestEmail } from "@/lib/checkout/rules";
+import { productParams, trackMeta } from "@/lib/meta-pixel";
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field-error";
 import { Form } from "@/components/ui/form";
@@ -82,12 +83,15 @@ export function LicenceOrderForm({
   productName,
   posterSrc,
   priceLabel,
+  value,
   buyer,
 }: {
   productSlug: string;
   productName: string;
   posterSrc?: string;
   priceLabel: string;
+  /** Prix en F CFA, pour le pixel publicitaire. */
+  value: number;
   /** Visiteur connecté : son email n'est pas modifiable ici. */
   buyer: { email?: string; name?: string; phone?: string };
 }) {
@@ -125,6 +129,10 @@ export function LicenceOrderForm({
     }
     setErrors({});
     setStep(1);
+    trackMeta(
+      "AddPaymentInfo",
+      productParams({ slug: productSlug, name: productName, price: value }),
+    );
   };
 
   const serverMessages = [
@@ -275,7 +283,8 @@ export function LicenceOrderForm({
                     </p>
                   ) : null}
                   <p id="co-email-help" className="text-ink-faint text-xs">
-                    Votre pack est envoyé à cette adresse : vérifiez-la bien.
+                    Votre pack sera automatiquement envoyé à cette adresse :
+                    vérifiez-la bien.
                   </p>
                 </div>
               )}
@@ -336,7 +345,7 @@ export function LicenceOrderForm({
             </span>
           </div>
           <p className="text-ink-soft mt-3 text-sm leading-relaxed">
-            Votre pack est envoyé à{" "}
+            Votre pack sera automatiquement envoyé à{" "}
             <strong className="text-ink [overflow-wrap:anywhere]">
               {breakableEmail(email)}
             </strong>{" "}

@@ -14,6 +14,7 @@ import {
   isAccessTokenShape,
   isOrderIdShape,
   maskEmail,
+  paidRecently,
   phoneRequired,
   suggestEmail,
 } from "../lib/checkout/rules";
@@ -110,6 +111,24 @@ describe("destination après « Accéder à mon achat »", () => {
     for (const delivery of ["numerique", "licence-edn", "manuel"] as const) {
       assert.ok(accessDestination(delivery, "x").startsWith("/espace-client"));
     }
+  });
+});
+
+describe("achat récent (pixel publicitaire)", () => {
+  const now = new Date("2026-10-19T12:00:00Z").getTime();
+  const ago = (minutes: number) => new Date(now - minutes * 60 * 1000);
+
+  it("vaut pour un paiement confirmé depuis moins de 2 h", () => {
+    assert.equal(paidRecently(ago(1), now), true);
+    assert.equal(paidRecently(ago(119), now), true);
+  });
+
+  it("ne vaut ni pour un ancien paiement, ni sans date, ni pour une date future", () => {
+    assert.equal(paidRecently(ago(121), now), false);
+    assert.equal(paidRecently(ago(60 * 24 * 3), now), false);
+    assert.equal(paidRecently(null, now), false);
+    assert.equal(paidRecently(undefined, now), false);
+    assert.equal(paidRecently(ago(-5), now), false);
   });
 });
 

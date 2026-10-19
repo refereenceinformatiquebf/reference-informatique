@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/section";
 import { JsonLd } from "@/components/json-ld";
 import { StickyBuyBar } from "@/components/shop/sticky-buy-bar";
+import { MetaEvent } from "@/components/marketing/meta-event";
+import { productParams } from "@/lib/meta-pixel";
 import { IconCadenas, IconFleche } from "@/components/icons";
 import { formatPrice } from "@/lib/format";
 import { getVisibleProduct } from "@/lib/catalog/live";
@@ -229,6 +231,7 @@ export default async function PackActivationPage() {
   return (
     <div>
       <JsonLd data={productJsonLd} />
+      <MetaEvent name="ViewContent" params={productParams(product)} />
 
       {/* ============================== Héros ============================== */}
       <section className="illus-zone on-navy">

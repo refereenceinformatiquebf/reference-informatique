@@ -16,7 +16,7 @@ const SECTIONS = [
   },
   {
     title: "Pourquoi nous les collectons",
-    body: "Ces données servent uniquement à traiter vos commandes et vos demandes, activer votre accès, vous livrer, vous contacter à propos de votre compte ou de votre commande, et améliorer nos services. Nous ne vendons ni ne louons vos données à des tiers.",
+    body: "Ces données servent à traiter vos commandes et vos demandes, activer votre accès, vous livrer, vous contacter à propos de votre compte ou de votre commande, et améliorer nos services. La mesure de nos publicités fait l'objet d'une rubrique à part, plus bas. Nous ne vendons ni ne louons vos données à des tiers.",
   },
   {
     title: "Paiement",
@@ -29,6 +29,10 @@ const SECTIONS = [
   {
     title: "Emails",
     body: "Nous vous écrivons pour confirmer vos commandes, vos paiements et vos accès, et pour répondre à vos demandes. Si vous ne terminez pas un paiement, nous pouvons vous envoyer un seul rappel pour le reprendre. Nous n'envoyons pas de publicité sans que vous l'ayez demandée.",
+  },
+  {
+    title: "Mesure d'audience et publicité (pixel Meta)",
+    body: "Notre site utilise le pixel Meta (Facebook et Instagram). Grâce à des cookies et à des identifiants, il enregistre les pages que vous consultez, le produit que vous regardez, les étapes de votre commande et, si vous achetez, le montant et la référence de la commande. Nous l'utilisons pour mesurer l'efficacité de nos publicités sur Facebook et Instagram et pour les montrer à des personnes susceptibles d'être intéressées. Ces informations sont transmises à Meta Platforms, qui les traite selon sa propre politique de confidentialité ; nous ne lui transmettons ni votre nom, ni votre adresse email, ni votre numéro de téléphone, ni vos moyens de paiement. Le pixel n'est pas chargé sur les pages de votre espace client, de connexion et d'administration. Pour le refuser, vous pouvez régler vos préférences publicitaires dans votre compte Facebook (facebook.com/adpreferences), bloquer les cookies de suivi dans votre navigateur, ou nous écrire.",
   },
   {
     title: "Conservation",

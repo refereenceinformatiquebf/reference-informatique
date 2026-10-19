@@ -9,9 +9,12 @@ import {
   accessDestination,
   isOrderIdShape,
   maskEmail,
+  paidRecently,
 } from "@/lib/checkout/rules";
 import { ActionForm } from "@/components/checkout/action-form";
 import { AutoRefresh } from "@/components/checkout/auto-refresh";
+import { MetaEvent } from "@/components/marketing/meta-event";
+import { META_CURRENCY } from "@/lib/meta-pixel";
 import { Button } from "@/components/ui/button";
 import { Container, IconChip } from "@/components/ui/section";
 import { IconWhatsapp } from "@/components/icons";
@@ -89,6 +92,9 @@ export default async function CommandeRetourPage({
   }
 
   const isPaid = order.status === "PAYE";
+  // Achat pour le pixel publicitaire : seulement le retour qui suit le paiement (pas la
+  // visite d'un ancien lien) ; le statut vient de la base, jamais de l'adresse.
+  const justPaid = isPaid && !deja && paidRecently(order.paidAt);
   const isOwner = profile?.id === order.profileId;
   const delivery = order.product
     ? (await getProduct(order.product.slug))?.delivery
@@ -135,6 +141,21 @@ export default async function CommandeRetourPage({
   return (
     <Container className="max-w-lg py-20 text-center sm:py-28">
       {pendingOnline ? <AutoRefresh /> : null}
+      {justPaid ? (
+        <MetaEvent
+          name="Purchase"
+          params={{
+            content_ids: order.product ? [order.product.slug] : [],
+            content_name: productName,
+            content_type: "product",
+            value: order.amount,
+            currency: META_CURRENCY,
+            num_items: order.quantity,
+          }}
+          eventId={order.id}
+          onceKey={`meta-purchase-${order.id}`}
+        />
+      ) : null}
       <span
         className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full ${
           isPaid
