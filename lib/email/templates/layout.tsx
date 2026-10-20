@@ -121,7 +121,7 @@ export function EmailLayout({
               }}
             >
               {support
-                ? "Une question ? Répondez à cet email, ou écrivez à notre assistance sur "
+                ? "Une question ? Répondez à cet email, ou écrivez à notre partenaire pour assistance sur "
                 : "Une question ? Répondez à cet email, ou écrivez-nous sur "}
               <Link
                 href={`https://wa.me/${support ? SUPPORT_WHATSAPP : SITE.whatsapp}`}
@@ -139,7 +139,7 @@ export function EmailLayout({
                 margin: "10px 0 0",
               }}
             >
-              {SITE.name} — Burkina Faso
+              {SITE.name}
             </Text>
           </Section>
         </Container>

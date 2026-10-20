@@ -28,7 +28,7 @@ export function LicenceReadyEmail({
         d&rsquo;activation, Windows, Office et le guide complet vous attendent.
       </Text>
       <Button href={ctaUrl} style={emailButtonStyle}>
-        Accéder à ma licence
+        Accéder à mon pack
       </Button>
       <Text style={{ ...emailTextStyle, marginTop: 14, fontSize: 13 }}>
         Ce lien est personnel : il ouvre votre achat sans mot de passe, depuis

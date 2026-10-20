@@ -41,7 +41,7 @@ export function PaymentConfirmationEmail({
       </Text>
       <Button href={ctaUrl} style={emailButtonStyle}>
         {licenceKey
-          ? "Accéder à ma licence"
+          ? "Accéder à mon pack"
           : delivery === "cle-physique"
             ? "Suivre ma commande"
             : "Accéder à mon achat"}

@@ -39,11 +39,23 @@ function assertPackSupport(page: string) {
     !page.includes(COMPANY_SPACED),
     "le numéro général apparaît dans le texte",
   );
+  assert.ok(
+    page.includes("écrivez à notre partenaire pour assistance sur"),
+    "formulation « notre partenaire pour assistance » absente",
+  );
+  assert.ok(
+    !page.includes("Burkina Faso"),
+    "le pays ne doit pas figurer en bas de l'e-mail",
+  );
 }
 
 function assertCompanyContact(page: string) {
   assert.ok(page.includes(`wa.me/${COMPANY_DIGITS}`));
   assert.ok(!page.includes(SUPPORT_WHATSAPP));
+  assert.ok(
+    !page.includes("Burkina Faso"),
+    "le pays ne doit pas figurer en bas de l'e-mail",
+  );
 }
 
 const base = {
@@ -54,14 +66,15 @@ const base = {
 
 describe("e-mails du pack : uniquement l'assistance dédiée", () => {
   it("confirmation de paiement d'un produit livré par licence", () => {
-    assertPackSupport(
-      html("PaymentConfirmationEmail", {
-        ...base,
-        delivery: "licence-edn",
-        ctaUrl: "https://exemple.test/lien",
-        licenceKey: "KEY",
-      }),
-    );
+    const page = html("PaymentConfirmationEmail", {
+      ...base,
+      delivery: "licence-edn",
+      ctaUrl: "https://exemple.test/lien",
+      licenceKey: "KEY",
+    });
+    assertPackSupport(page);
+    assert.ok(page.includes("Accéder à mon pack"));
+    assert.ok(!page.includes("Accéder à ma licence"));
   });
 
   it("relance de paiement, remboursement et « licence prête »", () => {
@@ -73,9 +86,12 @@ describe("e-mails du pack : uniquement l'assistance dédiée", () => {
       }),
     );
     assertPackSupport(html("RefundNoticeEmail", { ...base, licence: true }));
-    assertPackSupport(
-      html("LicenceReadyEmail", { ...base, ctaUrl: "https://exemple.test" }),
-    );
+    const ready = html("LicenceReadyEmail", {
+      ...base,
+      ctaUrl: "https://exemple.test",
+    });
+    assertPackSupport(ready);
+    assert.ok(ready.includes("Accéder à mon pack"));
   });
 
   it("« retrouver ma commande » dès qu'une commande est un pack", () => {
