@@ -13,8 +13,10 @@ import {
   listLicenceSales,
 } from "@/lib/licences/stock";
 import { safeGetEdnPartnerStatus } from "@/lib/licences/edn";
+import { listPendingLicences } from "@/lib/licences/fulfil";
 import { formatDateTime } from "@/lib/format";
 import { PullLotForm } from "./pull-lot-form";
+import { DeliverPendingForm } from "./deliver-pending-form";
 
 export const metadata: Metadata = { title: "Licences EDN" };
 export const dynamic = "force-dynamic";
@@ -25,13 +27,16 @@ const PROBLEM_LABELS: Record<string, string> = {
 };
 
 export default async function AdminLicencesPage() {
-  const [status, stock, sales, problems, forecast] = await Promise.all([
-    safeGetEdnPartnerStatus(),
-    getLocalStockOverview(),
-    listLicenceSales(),
-    listLicenceProblems(),
-    getConsumptionForecast(),
-  ]);
+  const [status, stock, sales, problems, forecast, waiting] = await Promise.all(
+    [
+      safeGetEdnPartnerStatus(),
+      getLocalStockOverview(),
+      listLicenceSales(),
+      listLicenceProblems(),
+      getConsumptionForecast(),
+      listPendingLicences(),
+    ],
+  );
   const lowStock =
     stock.available <= Math.max(5, Math.ceil(stock.totalReceived * 0.1));
   const forecastUrgent =
@@ -111,6 +116,44 @@ export default async function AdminLicencesPage() {
           </p>
         )}
       </Panel>
+
+      {waiting.length > 0 ? (
+        <Panel
+          title={`Clients en attente de licence (${waiting.length})`}
+          className="border-warning mt-5"
+        >
+          <p className="text-ink-soft mb-4 text-[0.8125rem] leading-relaxed">
+            Ces clients ont payé mais n&rsquo;ont pas encore reçu leur clé
+            (stock vide et EDN injoignable au moment du paiement). Un client est
+            aussi servi tout seul dès qu&rsquo;il rouvre sa page « Ma licence »
+            et que le stock n&rsquo;est pas vide. Ce bouton les sert tous
+            maintenant, et leur envoie un e-mail « Votre licence est prête ».
+          </p>
+          <ResponsiveTable
+            rows={waiting}
+            rowKey={(w) => w.accessId}
+            columns={[
+              { header: "Client", cell: (w) => w.clientName },
+              {
+                header: "E-mail",
+                hideOnMobile: true,
+                cell: (w) => w.clientEmail ?? "—",
+              },
+              {
+                header: "Commande",
+                cell: (w) => w.orderId.slice(0, 8).toUpperCase(),
+              },
+              {
+                header: "Payée le",
+                cell: (w) => (w.paidAt ? formatDateTime(w.paidAt) : "—"),
+              },
+            ]}
+          />
+          <div className="mt-4">
+            <DeliverPendingForm count={waiting.length} />
+          </div>
+        </Panel>
+      ) : null}
 
       {!status ? (
         <Panel className="border-warning mt-5">

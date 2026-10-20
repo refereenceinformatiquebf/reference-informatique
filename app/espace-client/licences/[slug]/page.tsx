@@ -11,6 +11,7 @@ import {
   FloatingAssistance,
 } from "@/components/support/assistance";
 import { formatDate } from "@/lib/format";
+import { fulfilPendingLicence } from "@/lib/licences/fulfil";
 import {
   SUPPORT_PHONE_DISPLAY,
   supportMessage,
@@ -108,6 +109,15 @@ export default async function LicencePage({
     );
   }
 
+  // Un client qui a payé sans avoir reçu sa clé (stock vide et EDN injoignable au moment
+  // du paiement) la reçoit ici dès que le stock le permet : plus besoin d'attendre l'équipe.
+  const licence = access.licenseKey
+    ? { licenseKey: access.licenseKey, installerUrl: access.installerUrl }
+    : await fulfilPendingLicence(access.id).catch((error) => {
+        console.error("[licence] livraison automatique impossible :", error);
+        return null;
+      });
+
   // Assistance dédiée : message prérempli avec le nom du client et la date de son achat.
   const supportHref = supportWhatsappLink(
     supportMessage(profile.name, formatDate(access.grantedAt)),
@@ -126,7 +136,7 @@ export default async function LicencePage({
           {product.name}
         </h1>
 
-        {access.licenseKey ? (
+        {licence ? (
           <>
             <div className="border-brand-200 bg-brand-50/40 mt-8 rounded-xl border-2 p-6 sm:p-8">
               <div className="mb-4 flex items-center gap-3">
@@ -148,13 +158,13 @@ export default async function LicencePage({
               </p>
               <div className="bg-paper border-line mt-2 rounded-lg border px-4 py-3">
                 <p className="text-ink font-mono text-[1.0625rem] font-bold tracking-wide break-all">
-                  {access.licenseKey}
+                  {licence.licenseKey}
                 </p>
               </div>
 
-              {access.installerUrl ? (
+              {licence.installerUrl ? (
                 <Button asChild size="lg" className="mt-5 w-full">
-                  <a href={access.installerUrl}>
+                  <a href={licence.installerUrl}>
                     Télécharger l&rsquo;application
                   </a>
                 </Button>

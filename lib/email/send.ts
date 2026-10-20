@@ -27,6 +27,7 @@ import { AuthLinkEmail, type AuthLinkKind } from "./templates/auth-link";
 import { LicenceStockAlertEmail } from "./templates/licence-stock-alert";
 import { OrderLinksEmail, type OrderLinkItem } from "./templates/order-links";
 import { PaymentReminderEmail } from "./templates/payment-reminder";
+import { LicenceReadyEmail } from "./templates/licence-ready";
 
 const SENDER = {
   name: SITE.name,
@@ -220,6 +221,24 @@ export async function sendPaymentReminder(params: {
     subject: `Votre commande vous attend — ${params.productName}`,
     react: PaymentReminderEmail(params),
     template: "payment-reminder",
+    relatedOrderId: params.orderId,
+    replyTo: ADMIN_REPLY_TO,
+  });
+}
+
+/** La licence d'un client qui avait payé sans l'avoir reçue est maintenant disponible. */
+export async function sendLicenceReady(params: {
+  to: string;
+  clientName: string;
+  productName: string;
+  orderId: string;
+  ctaUrl: string;
+}) {
+  await sendEmail({
+    to: { email: params.to, name: params.clientName },
+    subject: `Votre licence est prête — ${params.productName}`,
+    react: LicenceReadyEmail(params),
+    template: "licence-ready",
     relatedOrderId: params.orderId,
     replyTo: ADMIN_REPLY_TO,
   });

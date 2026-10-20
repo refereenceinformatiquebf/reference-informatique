@@ -27,6 +27,7 @@ const TEMPLATE_LABELS: Record<string, string> = {
   "order-confirmation": "Commande reçue (client)",
   "payment-confirmation": "Paiement confirmé (client)",
   "access-granted": "Accès accordé",
+  "licence-ready": "Licence prête",
   "order-new-admin": "Nouvelle commande (équipe)",
   "order-paid-admin": "Paiement reçu (équipe)",
   "delivery-update": "Suivi de livraison",
