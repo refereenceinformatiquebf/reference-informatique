@@ -160,6 +160,8 @@ describe("e-mails du pack : uniquement l'assistance dédiée", () => {
     });
     assertPackSupport(ready);
     assert.ok(ready.includes("Accéder à mon pack"));
+    assert.ok(ready.includes("Votre pack est prêt"));
+    assert.ok(!ready.includes("Votre licence est prête"));
   });
 
   it("« retrouver ma commande » dès qu'une commande est un pack", () => {

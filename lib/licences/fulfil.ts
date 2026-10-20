@@ -184,7 +184,7 @@ export type DeliverySummary = {
 /**
  * Livre leur licence à tous les clients en attente : d'abord depuis le stock
  * local ; s'il est vide, par un appel direct à EDN (un client à la fois). Chaque
- * client livré reçoit un e-mail « Votre licence est prête ».
+ * client livré reçoit un e-mail « Votre pack est prêt ».
  */
 export async function deliverPendingLicences(): Promise<DeliverySummary> {
   const summary: DeliverySummary = { delivered: 0, stillWaiting: 0, failed: 0 };

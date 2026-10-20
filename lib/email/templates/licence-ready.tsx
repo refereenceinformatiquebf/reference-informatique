@@ -21,14 +21,14 @@ export function LicenceReadyEmail({
 }) {
   return (
     <EmailLayout
-      preview={`Votre licence est prête — ${productName}`}
-      heading="Votre licence est prête"
+      preview={`Votre pack est prêt — ${productName}`}
+      heading="Votre pack est prêt"
       supportHref={supportWhatsappLink(supportMessage(clientName, paidOn))}
     >
       <Text style={emailTextStyle}>Bonjour {clientName},</Text>
       <Text style={emailTextStyle}>
-        Merci de votre patience : la licence de <strong>{productName}</strong>{" "}
-        est maintenant disponible. Votre licence, l&rsquo;application
+        Merci de votre patience : votre pack <strong>{productName}</strong> est
+        maintenant disponible. Votre licence, l&rsquo;application
         d&rsquo;activation, Windows, Office et le guide complet vous attendent.
       </Text>
       <Button href={ctaUrl} style={emailButtonStyle}>

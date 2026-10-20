@@ -127,7 +127,7 @@ export default async function AdminLicencesPage() {
             (stock vide et EDN injoignable au moment du paiement). Un client est
             aussi servi tout seul dès qu&rsquo;il rouvre sa page « Ma licence »
             et que le stock n&rsquo;est pas vide. Ce bouton les sert tous
-            maintenant, et leur envoie un e-mail « Votre licence est prête ».
+            maintenant, et leur envoie un e-mail « Votre pack est prêt ».
           </p>
           <ResponsiveTable
             rows={waiting}

@@ -248,7 +248,7 @@ export async function sendLicenceReady(params: {
 }) {
   await sendEmail({
     to: { email: params.to, name: params.clientName },
-    subject: `Votre licence est prête — ${params.productName}`,
+    subject: `Votre pack est prêt — ${params.productName}`,
     react: LicenceReadyEmail({
       ...params,
       paidOn: params.paidAt ? formatDate(params.paidAt) : undefined,
