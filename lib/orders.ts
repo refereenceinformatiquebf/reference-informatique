@@ -503,6 +503,7 @@ export async function refundPaidOrder(params: {
         productName: product.name,
         amount: order.amount,
         orderId: order.id,
+        licence: (await getProduct(product.slug))?.delivery === "licence-edn",
       });
     });
   }

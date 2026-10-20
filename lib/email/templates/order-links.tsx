@@ -7,6 +7,8 @@ export type OrderLinkItem = {
   amount: number;
   paid: boolean;
   url: string;
+  /** Produit livré par licence (le pack). */
+  licence?: boolean;
 };
 
 /**
@@ -25,6 +27,7 @@ export function OrderLinksEmail({
     <EmailLayout
       preview="Vos commandes chez Référence Informatique"
       heading="Vos commandes"
+      support={items.some((item) => item.licence)}
     >
       <Text style={emailTextStyle}>
         {name ? `Bonjour ${name}, v` : "V"}oici le lien de chacune de vos

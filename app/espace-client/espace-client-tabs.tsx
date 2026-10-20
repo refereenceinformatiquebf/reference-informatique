@@ -8,6 +8,7 @@ import { IconChip } from "@/components/ui/section";
 import { IconWhatsapp } from "@/components/icons";
 import { formatPrice } from "@/lib/format";
 import { whatsappLink } from "@/lib/site";
+import { supportWhatsappLink } from "@/lib/support";
 import { ORDER_STATUS_LABELS, QUOTE_STATUS_LABELS } from "@/lib/status-labels";
 import { signOut } from "@/lib/actions/auth";
 import { PasswordForm, ProfileForm } from "./profile-forms";
@@ -238,7 +239,9 @@ export function EspaceClientTabs({
           <div className="border-line bg-paper flex flex-col gap-3 rounded-lg border p-6 sm:flex-row sm:items-center sm:justify-between lg:col-span-2">
             <Button asChild variant="whatsapp">
               <a
-                href={whatsappLink(
+                href={(access.some((item) => item.isLicence)
+                  ? supportWhatsappLink
+                  : whatsappLink)(
                   "Bonjour, j'ai besoin d'aide avec mon espace.",
                 )}
                 target="_blank"

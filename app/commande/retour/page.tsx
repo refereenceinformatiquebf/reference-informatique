@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Container, IconChip } from "@/components/ui/section";
 import { IconWhatsapp } from "@/components/icons";
 import { Icon } from "@/components/icons/icon-by-key";
-import { whatsappLink } from "@/lib/site";
+import { whatsappLinkForDelivery } from "@/lib/support";
 import { fr } from "@/lib/typography";
 
 export const metadata: Metadata = {
@@ -228,7 +228,8 @@ export default async function CommandeRetourPage({
         <p className="text-ink-soft mt-8 text-sm leading-relaxed">
           Toujours rien après quelques minutes ?{" "}
           <a
-            href={whatsappLink(
+            href={whatsappLinkForDelivery(
+              delivery,
               `Bonjour, j'ai payé pour « ${productName} » mais mon accès n'est pas encore actif. Référence : ${order.id}`,
             )}
             target="_blank"

@@ -21,10 +21,21 @@ export function isFocusPath(pathname: string): boolean {
 }
 
 /**
- * Pages où le pied de page ne montre PAS les coordonnées de l'entreprise : la
- * page de réception d'un pack, qui a sa propre assistance WhatsApp dédiée
- * (lib/support.ts). Un seul numéro doit y être visible.
+ * Pages où le pied de page ne montre PAS les coordonnées de l'entreprise : tout
+ * ce que voit un client après son achat (espace client, retour de paiement, suivi
+ * de commande, guide d'activation). Un client du pack y est dirigé vers
+ * l'assistance dédiée (lib/support.ts) et ne doit voir qu'UN numéro, le bon ;
+ * chacune de ces pages porte son propre moyen de contact.
  */
+const COMPANY_CONTACT_HIDDEN_PREFIXES = [
+  "/espace-client",
+  "/commande/retour",
+  "/commande/suivi",
+  "/guide-activation",
+];
+
 export function hidesCompanyContact(pathname: string): boolean {
-  return pathname.startsWith("/espace-client/licences/");
+  return COMPANY_CONTACT_HIDDEN_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
 }

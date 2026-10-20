@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Container, IconChip } from "@/components/ui/section";
 import { IconWhatsapp } from "@/components/icons";
 import { formatDateTime, formatPrice } from "@/lib/format";
-import { whatsappLink } from "@/lib/site";
+import { whatsappLinkForDelivery } from "@/lib/support";
 import { fr } from "@/lib/typography";
 
 export const metadata: Metadata = {
@@ -269,7 +269,8 @@ export default async function SuiviPage({
       <p className="text-ink-soft mt-10 text-center text-sm leading-relaxed">
         Une question sur cette commande ?{" "}
         <a
-          href={whatsappLink(
+          href={whatsappLinkForDelivery(
+            delivery,
             `Bonjour, une question sur ma commande « ${productName} ». Référence : ${order.id}`,
           )}
           target="_blank"

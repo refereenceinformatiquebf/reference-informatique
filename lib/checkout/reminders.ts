@@ -2,6 +2,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma/client";
 import { addOrderEvent, getClientEmail } from "@/lib/orders";
 import { sendPaymentReminder } from "@/lib/email/send";
+import { getProduct } from "@/lib/catalog/live";
 import { syncSaspayOrder } from "@/lib/payments/saspay-sync";
 import { trackingUrlFor } from "./access";
 
@@ -77,6 +78,8 @@ export async function remindOrder(
       quantity: order.quantity,
       orderId: order.id,
       trackUrl: await trackingUrlFor(order.id),
+      licence:
+        (await getProduct(order.product.slug))?.delivery === "licence-edn",
     });
   } catch (error) {
     // Envoi échoué : on libère la réservation pour que la prochaine exécution réessaie.

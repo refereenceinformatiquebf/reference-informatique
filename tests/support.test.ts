@@ -49,19 +49,28 @@ describe("assistance WhatsApp du pack", () => {
 });
 
 describe("coordonnées de l'entreprise dans le pied de page", () => {
-  it("masquées sur la page de réception d'un pack, visibles ailleurs", () => {
-    assert.equal(
-      hidesCompanyContact(
-        "/espace-client/licences/pack-activation-windows11et10-et-office365-a-vie",
-      ),
-      true,
-    );
+  it("masquées sur tout le parcours client après achat", () => {
+    for (const path of [
+      "/espace-client",
+      "/espace-client/licences/pack-activation-windows11et10-et-office365-a-vie",
+      "/espace-client/formations/x",
+      "/commande/retour",
+      "/commande/suivi",
+      "/commande/suivi/un-jeton",
+      "/guide-activation",
+    ]) {
+      assert.equal(hidesCompanyContact(path), true, path);
+    }
+  });
+
+  it("visibles sur les pages publiques du site", () => {
     for (const path of [
       "/",
       "/contact",
-      "/espace-client",
-      "/espace-client/formations/x",
       "/boutique",
+      "/faq",
+      "/a-propos",
+      "/services",
     ]) {
       assert.equal(hidesCompanyContact(path), false, path);
     }

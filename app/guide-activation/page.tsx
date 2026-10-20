@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/section";
 import { IconWhatsapp } from "@/components/icons";
 import type { IconKey } from "@/lib/catalog/types";
-import { SITE, whatsappLink } from "@/lib/site";
+import { SUPPORT_PHONE_DISPLAY, supportWhatsappLink } from "@/lib/support";
 import { fr } from "@/lib/typography";
 
 export const metadata: Metadata = {
@@ -68,7 +68,7 @@ const STEPS: {
 ];
 
 export default function GuideActivationPage() {
-  const wa = whatsappLink(
+  const wa = supportWhatsappLink(
     "Bonjour, j'ai besoin d'aide pour l'activation de ma licence Expert.",
   );
 
@@ -157,7 +157,7 @@ export default function GuideActivationPage() {
                 Écrire sur WhatsApp
               </a>
             </Button>
-            <p className="text-ink-faint text-xs">{SITE.phoneDisplay}</p>
+            <p className="text-ink-faint text-xs">{SUPPORT_PHONE_DISPLAY}</p>
           </div>
         </div>
       </Container>

@@ -215,6 +215,7 @@ export async function sendPaymentReminder(params: {
   quantity?: number;
   orderId: string;
   trackUrl: string;
+  licence?: boolean;
 }) {
   await sendEmail({
     to: { email: params.to, name: params.clientName },
@@ -343,6 +344,7 @@ export async function sendRefundNotice(params: {
   productName: string;
   amount: number;
   orderId: string;
+  licence?: boolean;
 }) {
   await sendEmail({
     to: { email: params.to, name: params.clientName },

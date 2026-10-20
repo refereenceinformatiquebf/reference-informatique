@@ -1,3 +1,6 @@
+import type { DeliveryMode } from "@/lib/catalog/types";
+import { whatsappLink } from "@/lib/site";
+
 /**
  * Assistance après achat du pack Activation : numéro WhatsApp DÉDIÉ, distinct du
  * numéro général du site (lib/site.ts). Affiché sur la page où le client reçoit
@@ -19,4 +22,18 @@ export function supportMessage(name: string, paidOn: string): string {
 
 export function supportWhatsappLink(message: string): string {
   return `https://wa.me/${SUPPORT_WHATSAPP}?text=${encodeURIComponent(message)}`;
+}
+
+/**
+ * Lien WhatsApp à proposer à un client selon ce qu'il a acheté : l'assistance
+ * dédiée pour un produit livré par licence (le pack), le numéro général du site
+ * pour tout le reste. Un client du pack ne doit jamais voir le numéro général.
+ */
+export function whatsappLinkForDelivery(
+  delivery: DeliveryMode | undefined,
+  message: string,
+): string {
+  return delivery === "licence-edn"
+    ? supportWhatsappLink(message)
+    : whatsappLink(message);
 }

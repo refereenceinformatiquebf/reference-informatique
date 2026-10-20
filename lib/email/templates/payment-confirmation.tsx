@@ -32,6 +32,7 @@ export function PaymentConfirmationEmail({
     <EmailLayout
       preview={`Paiement confirmé — ${productName}`}
       heading="Paiement confirmé !"
+      support={delivery === "licence-edn"}
     >
       <Text style={emailTextStyle}>Bonjour {clientName},</Text>
       <Text style={emailTextStyle}>

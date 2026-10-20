@@ -19,6 +19,7 @@ export function LicenceReadyEmail({
     <EmailLayout
       preview={`Votre licence est prête — ${productName}`}
       heading="Votre licence est prête"
+      support
     >
       <Text style={emailTextStyle}>Bonjour {clientName},</Text>
       <Text style={emailTextStyle}>
