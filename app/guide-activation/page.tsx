@@ -14,7 +14,7 @@ import { fr } from "@/lib/typography";
 export const metadata: Metadata = {
   title: "Guide d'installation de votre licence Expert",
   description:
-    "Installez l'application d'activation, entrez votre licence et activez Microsoft Office 365 et Windows 11 en quelques minutes.",
+    "Installez l'application d'activation, entrez votre licence et activez Microsoft Office et Windows 10 et 11 en quelques minutes.",
   robots: { index: false, follow: false },
   alternates: { canonical: "/guide-activation" },
 };
@@ -48,7 +48,7 @@ const STEPS: {
     icon: "cadenas",
     title: "Entrez votre licence Expert",
     intro:
-      "Une seule clé active à la fois Microsoft Office 365 et Windows 11 — elle ne sert qu'à vous.",
+      "Une seule clé active à la fois Microsoft Office et Windows 10 et 11 — elle ne sert qu'à vous.",
     details: [
       "Retrouvez-la dans votre e-mail de confirmation de commande, ou sur votre espace client, rubrique « Mes licences ».",
       "Collez le code exactement tel qu'il vous a été fourni, puis validez.",
@@ -57,7 +57,7 @@ const STEPS: {
   },
   {
     icon: "acces-a-vie",
-    title: "Activez Office 365 et Windows 11",
+    title: "Activez Office et Windows 10 et 11",
     intro: "Un menu simple, quelques options claires.",
     details: [
       "Choisissez ce que vous voulez activer : Windows seul, Office seul, ou les deux.",
@@ -81,7 +81,7 @@ export default function GuideActivationPage() {
         </h1>
         <p className="text-ink-soft mt-3 text-[1.0625rem] leading-relaxed">
           {fr(
-            "Le parcours complet, du téléchargement de l'application jusqu'à l'activation d'Office 365 et de Windows 11 — en quelques minutes, sans compétence technique.",
+            "Le parcours complet, du téléchargement de l'application jusqu'à l'activation d'Office et de Windows 10 et 11 — en quelques minutes, sans compétence technique.",
           )}
         </p>
 

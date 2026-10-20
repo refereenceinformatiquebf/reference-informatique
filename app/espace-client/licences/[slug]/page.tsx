@@ -40,7 +40,7 @@ const DOWNLOADS: {
   },
   {
     icon: "logiciel",
-    label: "Microsoft 365 (Office 365)",
+    label: "Microsoft Office",
     description: "Word, Excel, PowerPoint, Outlook et plus",
     href: "https://officecdn.microsoft.com/pr/492350f6-3a01-4f97-b9c0-c7c6ddf67d60/media/fr-fr/O365HomePremRetail.img",
   },
@@ -69,6 +69,10 @@ const DOWNLOADS: {
     href: "/guides/guide-installation-activation.pdf",
   },
 ];
+
+/** Sur cette page le client lit « Office » : le nom exact de la version n'est pas affiché. */
+const withoutOffice365 = (text: string) =>
+  text.replace(/Office 365/g, "Office");
 
 export const metadata: Metadata = {
   title: "Ma licence",
@@ -133,7 +137,7 @@ export default async function LicencePage({
           ← Mon espace
         </Link>
         <h1 className="text-ink mt-3 text-[1.875rem] leading-[1.1] sm:text-[2.25rem]">
-          {product.name}
+          {withoutOffice365(product.name)}
         </h1>
 
         {licence ? (
@@ -153,8 +157,8 @@ export default async function LicencePage({
               </div>
 
               <p className="text-ink-soft text-sm font-medium">
-                Votre licence Expert — elle active Microsoft Office 365 et
-                Windows 11 :
+                Votre licence Expert — elle active Microsoft Office et Windows
+                10 et 11 :
               </p>
               <div className="bg-paper border-line mt-2 rounded-lg border px-4 py-3">
                 <p className="text-ink font-mono text-[1.0625rem] font-bold tracking-wide break-all">
