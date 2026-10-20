@@ -4,6 +4,7 @@ import { ALL_SERVICE_FAMILIES } from "@/lib/catalog";
 import { SITE, whatsappLink } from "@/lib/site";
 import { getLegalSettings, isLegalComplete } from "@/lib/settings";
 import { Brand } from "./logo";
+import { CompanyContact } from "./company-contact";
 
 /**
  * Pied de page marine (charte Boulga AI). Statique : il ne lit ni cookies ni
@@ -21,15 +22,17 @@ export async function Footer() {
             Sites web, agents IA, automatisation et maintenance. Formations et
             ressources numériques. Au Burkina Faso, et à distance.
           </p>
-          <a
-            href={whatsappLink()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 inline-flex w-fit items-center gap-2 rounded-md bg-green-600 px-4 py-2.5 text-sm font-medium text-white transition-[filter] hover:brightness-110"
-          >
-            <IconWhatsapp size={18} />
-            Nous écrire sur WhatsApp
-          </a>
+          <CompanyContact>
+            <a
+              href={whatsappLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 inline-flex w-fit items-center gap-2 rounded-md bg-green-600 px-4 py-2.5 text-sm font-medium text-white transition-[filter] hover:brightness-110"
+            >
+              <IconWhatsapp size={18} />
+              Nous écrire sur WhatsApp
+            </a>
+          </CompanyContact>
         </div>
 
         <FooterColumn title="Services">
@@ -64,13 +67,15 @@ export async function Footer() {
           {showLegal ? (
             <FooterLink href="/mentions-legales">Mentions légales</FooterLink>
           ) : null}
-          <a
-            href={`tel:${SITE.phoneInternational}`}
-            className="mt-1 inline-flex items-center gap-2 text-[0.9375rem] text-white/70 transition-colors hover:text-white"
-          >
-            <IconTelephone size={16} />
-            {SITE.phoneDisplay}
-          </a>
+          <CompanyContact>
+            <a
+              href={`tel:${SITE.phoneInternational}`}
+              className="mt-1 inline-flex items-center gap-2 text-[0.9375rem] text-white/70 transition-colors hover:text-white"
+            >
+              <IconTelephone size={16} />
+              {SITE.phoneDisplay}
+            </a>
+          </CompanyContact>
         </FooterColumn>
       </div>
 

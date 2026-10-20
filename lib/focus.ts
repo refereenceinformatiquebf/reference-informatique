@@ -19,3 +19,12 @@ export function isFocusPath(pathname: string): boolean {
   const checkout = /^\/commande\/([^/]+)$/.exec(clean);
   return checkout !== null && !CHECKOUT_FOLLOW_UP.has(checkout[1]);
 }
+
+/**
+ * Pages où le pied de page ne montre PAS les coordonnées de l'entreprise : la
+ * page de réception d'un pack, qui a sa propre assistance WhatsApp dédiée
+ * (lib/support.ts). Un seul numéro doit y être visible.
+ */
+export function hidesCompanyContact(pathname: string): boolean {
+  return pathname.startsWith("/espace-client/licences/");
+}

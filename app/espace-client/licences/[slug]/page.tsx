@@ -6,7 +6,16 @@ import { requireProfile } from "@/lib/auth/dal";
 import { Button } from "@/components/ui/button";
 import { Container, IconChip } from "@/components/ui/section";
 import { IconWhatsapp } from "@/components/icons";
-import { SITE, whatsappLink } from "@/lib/site";
+import {
+  AssistanceSection,
+  FloatingAssistance,
+} from "@/components/support/assistance";
+import { formatDate } from "@/lib/format";
+import {
+  SUPPORT_PHONE_DISPLAY,
+  supportMessage,
+  supportWhatsappLink,
+} from "@/lib/support";
 import { fr } from "@/lib/typography";
 import type { IconKey } from "@/lib/catalog/types";
 
@@ -99,8 +108,13 @@ export default async function LicencePage({
     );
   }
 
+  // Assistance dédiée : message prérempli avec le nom du client et la date de son achat.
+  const supportHref = supportWhatsappLink(
+    supportMessage(profile.name, formatDate(access.grantedAt)),
+  );
+
   return (
-    <div className="py-10 sm:py-14">
+    <div className="py-10 pb-28 sm:py-14 sm:pb-28">
       <Container className="max-w-2xl">
         <Link
           href="/espace-client"
@@ -204,6 +218,8 @@ export default async function LicencePage({
                 </Link>
               </Button>
             </div>
+
+            <AssistanceSection href={supportHref} />
           </>
         ) : (
           <div className="border-line bg-paper mt-8 flex flex-col items-start gap-4 rounded-lg border p-6">
@@ -213,21 +229,16 @@ export default async function LicencePage({
               )}
             </p>
             <Button asChild variant="whatsapp">
-              <a
-                href={whatsappLink(
-                  `Bonjour, je viens d'acheter « ${product.name} » et j'attends ma licence.`,
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={supportHref} target="_blank" rel="noopener noreferrer">
                 <IconWhatsapp size={18} />
-                Nous écrire sur WhatsApp
+                Écrire à l&rsquo;assistance sur WhatsApp
               </a>
             </Button>
-            <p className="text-ink-faint text-xs">{SITE.phoneDisplay}</p>
+            <p className="text-ink-faint text-xs">{SUPPORT_PHONE_DISPLAY}</p>
           </div>
         )}
       </Container>
+      <FloatingAssistance href={supportHref} />
     </div>
   );
 }
