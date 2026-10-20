@@ -11,7 +11,7 @@ import {
 } from "@react-email/components";
 import type { ReactNode } from "react";
 import { SITE } from "@/lib/site";
-import { SUPPORT_PHONE_DISPLAY, SUPPORT_WHATSAPP } from "@/lib/support";
+import { SUPPORT_PHONE_DISPLAY } from "@/lib/support";
 
 // Couleurs de la charte (app/globals.css), dupliquées ici : les clients
 // email ne peuvent pas lire les variables CSS du site, il faut des valeurs
@@ -35,13 +35,17 @@ export function EmailLayout({
   preview,
   heading,
   children,
-  support = false,
+  supportHref,
 }: {
   preview: string;
   heading: string;
   children: ReactNode;
-  /** E-mail d'un client du pack : le pied de page donne l'assistance dédiée, jamais le numéro général. */
-  support?: boolean;
+  /**
+   * E-mail d'un client du pack : lien WhatsApp de l'assistance dédiée (message déjà
+   * rédigé avec ses informations, voir lib/support.ts). Le pied de page n'affiche
+   * alors jamais le numéro général.
+   */
+  supportHref?: string;
 }) {
   return (
     <Html lang="fr">
@@ -120,15 +124,15 @@ export function EmailLayout({
                 margin: 0,
               }}
             >
-              {support
+              {supportHref
                 ? "Une question ? Répondez à cet email, ou écrivez à notre partenaire pour assistance sur "
                 : "Une question ? Répondez à cet email, ou écrivez-nous sur "}
               <Link
-                href={`https://wa.me/${support ? SUPPORT_WHATSAPP : SITE.whatsapp}`}
+                href={supportHref ?? `https://wa.me/${SITE.whatsapp}`}
                 style={{ color: EMAIL_COLORS.brand, fontWeight: 500 }}
               >
                 WhatsApp au{" "}
-                {support ? SUPPORT_PHONE_DISPLAY : SITE.phoneDisplay}
+                {supportHref ? SUPPORT_PHONE_DISPLAY : SITE.phoneDisplay}
               </Link>
               .
             </Text>

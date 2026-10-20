@@ -15,9 +15,20 @@ export const SUPPORT_PHONE_DISPLAY = "+226 66 23 37 33";
  * Message prérempli : le client se présente, rappelle qu'il a payé son pack et à
  * quelle date, pour que l'assistance retrouve sa commande sans lui poser de question.
  */
-export function supportMessage(name: string, paidOn: string): string {
+export function supportMessage(name: string, paidOn?: string): string {
   const who = name.trim() ? `je suis ${name.trim()}, ` : "";
-  return `Bonjour, ${who}j'ai payé mon pack avec Référence Informatique le ${paidOn}, j'ai besoin de votre assistance.`;
+  const when = paidOn ? ` le ${paidOn}` : "";
+  return `Bonjour, ${who}j'ai payé mon pack avec Référence Informatique${when}, j'ai besoin de votre assistance.`;
+}
+
+/** Même idée pour un client dont le paiement n'a pas abouti (relance de paiement). */
+export function supportPaymentMessage(
+  name: string,
+  orderedOn?: string,
+): string {
+  const who = name.trim() ? `je suis ${name.trim()}, ` : "";
+  const when = orderedOn ? ` le ${orderedOn}` : "";
+  return `Bonjour, ${who}j'ai commencé la commande de mon pack avec Référence Informatique${when}, j'ai besoin de votre assistance pour finaliser mon paiement.`;
 }
 
 export function supportWhatsappLink(message: string): string {

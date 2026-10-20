@@ -3,6 +3,7 @@ import { render } from "@react-email/render";
 import type { ReactElement } from "react";
 import { prisma } from "@/lib/prisma/client";
 import { SITE } from "@/lib/site";
+import { formatDate } from "@/lib/format";
 import type { DeliveryMode } from "@/lib/catalog/types";
 import { getBrevoClient } from "./client";
 import { OrderConfirmationEmail } from "./templates/order-confirmation";
@@ -191,12 +192,15 @@ export async function sendPaymentConfirmation(params: {
   /** Renseignés uniquement pour une livraison "licence-edn". */
   licenceKey?: string | null;
   installerUrl?: string | null;
+  /** Date du paiement ; à défaut, aujourd'hui (l'e-mail part au moment du paiement). */
+  paidAt?: Date | null;
 }) {
   await sendEmail({
     to: { email: params.to, name: params.clientName },
     subject: `Paiement confirmé — ${params.productName}`,
     react: PaymentConfirmationEmail({
       ...params,
+      paidOn: formatDate(params.paidAt ?? new Date()),
       orderRef: params.orderId.slice(0, 8).toUpperCase(),
       ctaUrl:
         params.ctaUrl ?? `${SITE.url}${params.ctaPath ?? "/espace-client"}`,
@@ -216,11 +220,16 @@ export async function sendPaymentReminder(params: {
   orderId: string;
   trackUrl: string;
   licence?: boolean;
+  /** Date de la commande (message d'assistance du pack). */
+  orderedAt?: Date | null;
 }) {
   await sendEmail({
     to: { email: params.to, name: params.clientName },
     subject: `Votre commande vous attend — ${params.productName}`,
-    react: PaymentReminderEmail(params),
+    react: PaymentReminderEmail({
+      ...params,
+      orderedOn: params.orderedAt ? formatDate(params.orderedAt) : undefined,
+    }),
     template: "payment-reminder",
     relatedOrderId: params.orderId,
     replyTo: ADMIN_REPLY_TO,
@@ -234,11 +243,16 @@ export async function sendLicenceReady(params: {
   productName: string;
   orderId: string;
   ctaUrl: string;
+  /** Date du paiement (message d'assistance du pack). */
+  paidAt?: Date | null;
 }) {
   await sendEmail({
     to: { email: params.to, name: params.clientName },
     subject: `Votre licence est prête — ${params.productName}`,
-    react: LicenceReadyEmail(params),
+    react: LicenceReadyEmail({
+      ...params,
+      paidOn: params.paidAt ? formatDate(params.paidAt) : undefined,
+    }),
     template: "licence-ready",
     relatedOrderId: params.orderId,
     replyTo: ADMIN_REPLY_TO,
@@ -345,11 +359,16 @@ export async function sendRefundNotice(params: {
   amount: number;
   orderId: string;
   licence?: boolean;
+  /** Date du paiement remboursé (message d'assistance du pack). */
+  paidAt?: Date | null;
 }) {
   await sendEmail({
     to: { email: params.to, name: params.clientName },
     subject: `Remboursement — ${params.productName}`,
-    react: RefundNoticeEmail(params),
+    react: RefundNoticeEmail({
+      ...params,
+      paidOn: params.paidAt ? formatDate(params.paidAt) : undefined,
+    }),
     template: "refund-notice",
     relatedOrderId: params.orderId,
   });

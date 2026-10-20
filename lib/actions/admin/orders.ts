@@ -253,6 +253,7 @@ export async function resendPaymentEmailAction(
       orderId: order.id,
       // Lien personnel de la commande : ouvre l'achat sans mot de passe.
       ctaUrl: await trackingUrlFor(order.id),
+      paidAt: order.paidAt,
     });
   } catch {
     return fail(

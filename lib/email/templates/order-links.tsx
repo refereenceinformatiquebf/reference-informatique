@@ -1,6 +1,11 @@
 import { Button, Text } from "@react-email/components";
 import { EmailLayout, emailButtonStyle, emailTextStyle } from "./layout";
 import { formatPrice } from "@/lib/format";
+import {
+  supportMessage,
+  supportPaymentMessage,
+  supportWhatsappLink,
+} from "@/lib/support";
 
 export type OrderLinkItem = {
   productName: string;
@@ -9,7 +14,21 @@ export type OrderLinkItem = {
   url: string;
   /** Produit livré par licence (le pack). */
   licence?: boolean;
+  /** Date du paiement (ou de la commande si non payée), déjà formatée. */
+  date?: string;
 };
+
+/** Lien d'assistance du pack : la commande payée en priorité, sinon la commande en cours. */
+function packSupportHref(name: string | undefined, items: OrderLinkItem[]) {
+  const packs = items.filter((item) => item.licence);
+  if (packs.length === 0) return undefined;
+  const paid = packs.find((item) => item.paid);
+  return supportWhatsappLink(
+    paid
+      ? supportMessage(name ?? "", paid.date)
+      : supportPaymentMessage(name ?? "", packs[0].date),
+  );
+}
 
 /**
  * « Retrouver ma commande » : les liens personnels des commandes récentes
@@ -27,7 +46,7 @@ export function OrderLinksEmail({
     <EmailLayout
       preview="Vos commandes chez Référence Informatique"
       heading="Vos commandes"
-      support={items.some((item) => item.licence)}
+      supportHref={packSupportHref(name, items)}
     >
       <Text style={emailTextStyle}>
         {name ? `Bonjour ${name}, v` : "V"}oici le lien de chacune de vos

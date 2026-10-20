@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma/client";
 import { displayNameFor } from "@/lib/auth/email-links";
 import { sendOrderLinks } from "@/lib/email/send";
 import { getProduct } from "@/lib/catalog/live";
+import { formatDate } from "@/lib/format";
 import { ensureAccessToken, orderTrackingUrl } from "./access";
 import { ACCESS_LINK_TTL_DAYS } from "./rules";
 
@@ -12,6 +13,8 @@ type LinkableOrder = {
   id: string;
   amount: number;
   status: string;
+  createdAt: Date;
+  paidAt: Date | null;
   product: { name: string; slug: string } | null;
 };
 
@@ -22,6 +25,11 @@ async function toItems(orders: LinkableOrder[]) {
       amount: order.amount,
       paid: order.status === "PAYE",
       url: orderTrackingUrl(await ensureAccessToken(order.id)),
+      date: formatDate(
+        order.status === "PAYE" && order.paidAt
+          ? order.paidAt
+          : order.createdAt,
+      ),
       licence: order.product
         ? (await getProduct(order.product.slug))?.delivery === "licence-edn"
         : false,

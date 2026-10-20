@@ -1,5 +1,6 @@
 import { Text, Button } from "@react-email/components";
 import { EmailLayout, emailButtonStyle, emailTextStyle } from "./layout";
+import { supportMessage, supportWhatsappLink } from "@/lib/support";
 
 /**
  * Envoyé à un client qui avait payé mais dont la licence n'était pas encore
@@ -9,17 +10,20 @@ export function LicenceReadyEmail({
   clientName,
   productName,
   ctaUrl,
+  paidOn,
 }: {
   clientName: string;
   productName: string;
   /** Lien personnel de la commande : ouvre l'achat sans mot de passe. */
   ctaUrl: string;
+  /** Date du paiement, déjà formatée : elle remplit le message d'assistance. */
+  paidOn?: string;
 }) {
   return (
     <EmailLayout
       preview={`Votre licence est prête — ${productName}`}
       heading="Votre licence est prête"
-      support
+      supportHref={supportWhatsappLink(supportMessage(clientName, paidOn))}
     >
       <Text style={emailTextStyle}>Bonjour {clientName},</Text>
       <Text style={emailTextStyle}>

@@ -230,6 +230,7 @@ export async function deliverPendingLicences(): Promise<DeliverySummary> {
           productName: pending.productName,
           orderId: pending.orderId,
           ctaUrl: await trackingUrlFor(pending.orderId),
+          paidAt: pending.paidAt,
         }).catch((error) =>
           console.error(
             "[licences] e-mail « licence prête » non envoyé :",

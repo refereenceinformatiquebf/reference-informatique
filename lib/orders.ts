@@ -387,6 +387,7 @@ async function notifyPaymentConfirmed(orderId: string) {
         ctaUrl: trackUrl,
         licenceKey: licence?.licenseKey,
         installerUrl: licence?.installerUrl,
+        paidAt: order.paidAt,
       }),
     );
   }
@@ -504,6 +505,7 @@ export async function refundPaidOrder(params: {
         amount: order.amount,
         orderId: order.id,
         licence: (await getProduct(product.slug))?.delivery === "licence-edn",
+        paidAt: order.paidAt,
       });
     });
   }

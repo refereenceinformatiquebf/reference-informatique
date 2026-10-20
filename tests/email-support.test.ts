@@ -25,10 +25,25 @@ function html(template: string, props: Record<string, unknown>): string {
 const COMPANY_DIGITS = SITE.whatsapp;
 const COMPANY_SPACED = SITE.phoneDisplay.replace(/ /g, " ");
 
+/** Message prérempli contenu dans le lien WhatsApp d'assistance (décodé), ou null. */
+function supportText(page: string): string | null {
+  const match = page.match(
+    new RegExp(`href="https://wa\\.me/${SUPPORT_WHATSAPP}\\?text=([^"]+)"`),
+  );
+  if (!match) return null;
+  return decodeURIComponent(
+    match[1].replace(/&amp;/g, "&").replace(/&#x27;/g, "'"),
+  );
+}
+
 function assertPackSupport(page: string) {
   assert.ok(
     page.includes(`wa.me/${SUPPORT_WHATSAPP}`),
     "lien d'assistance absent",
+  );
+  assert.ok(
+    supportText(page)?.startsWith("Bonjour, "),
+    "le lien d'assistance doit ouvrir WhatsApp avec un message prérempli",
   );
   assert.ok(page.includes("+226 66 23 37 33"), "numéro d'assistance absent");
   assert.ok(
@@ -77,6 +92,59 @@ describe("e-mails du pack : uniquement l'assistance dédiée", () => {
     assert.ok(!page.includes("Accéder à ma licence"));
   });
 
+  it("le lien d'assistance de l'e-mail de paiement porte le nom et la date du client", () => {
+    const page = html("PaymentConfirmationEmail", {
+      ...base,
+      delivery: "licence-edn",
+      ctaUrl: "https://exemple.test/lien",
+      licenceKey: "KEY",
+      paidOn: "21 octobre 2026",
+    });
+    assert.equal(
+      supportText(page),
+      "Bonjour, je suis Awa Traoré, j'ai payé mon pack avec Référence Informatique le 21 octobre 2026, j'ai besoin de votre assistance.",
+    );
+  });
+
+  it("le même message accompagne l'e-mail « licence prête » et le remboursement", () => {
+    const expected =
+      "Bonjour, je suis Awa Traoré, j'ai payé mon pack avec Référence Informatique le 3 septembre 2026, j'ai besoin de votre assistance.";
+    assert.equal(
+      supportText(
+        html("LicenceReadyEmail", {
+          ...base,
+          ctaUrl: "https://exemple.test",
+          paidOn: "3 septembre 2026",
+        }),
+      ),
+      expected,
+    );
+    assert.equal(
+      supportText(
+        html("RefundNoticeEmail", {
+          ...base,
+          licence: true,
+          paidOn: "3 septembre 2026",
+        }),
+      ),
+      expected,
+    );
+  });
+
+  it("une relance de paiement ne prétend pas que le client a payé", () => {
+    const text = supportText(
+      html("PaymentReminderEmail", {
+        ...base,
+        trackUrl: "https://exemple.test",
+        licence: true,
+        orderedOn: "21 octobre 2026",
+      }),
+    );
+    assert.ok(text?.includes("je suis Awa Traoré"));
+    assert.ok(text?.includes("le 21 octobre 2026"));
+    assert.ok(!text?.includes("j'ai payé"));
+  });
+
   it("relance de paiement, remboursement et « licence prête »", () => {
     assertPackSupport(
       html("PaymentReminderEmail", {
@@ -104,6 +172,14 @@ describe("e-mails du pack : uniquement l'assistance dédiée", () => {
     assertPackSupport(
       html("OrderLinksEmail", { items: [{ ...item, licence: true }] }),
     );
+    const named = supportText(
+      html("OrderLinksEmail", {
+        name: "Awa Traoré",
+        items: [{ ...item, licence: true, date: "21 octobre 2026" }],
+      }),
+    );
+    assert.ok(named?.includes("je suis Awa Traoré"));
+    assert.ok(named?.includes("le 21 octobre 2026"));
     assertCompanyContact(html("OrderLinksEmail", { items: [item] }));
   });
 });

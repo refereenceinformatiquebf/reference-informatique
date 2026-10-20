@@ -80,6 +80,7 @@ export async function remindOrder(
       trackUrl: await trackingUrlFor(order.id),
       licence:
         (await getProduct(order.product.slug))?.delivery === "licence-edn",
+      orderedAt: order.createdAt,
     });
   } catch (error) {
     // Envoi échoué : on libère la réservation pour que la prochaine exécution réessaie.

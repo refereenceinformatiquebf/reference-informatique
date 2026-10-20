@@ -2,6 +2,7 @@ import { Button, Text } from "@react-email/components";
 import { EmailLayout, emailButtonStyle, emailTextStyle } from "./layout";
 import { paidSentence } from "./delivery-copy";
 import { formatPrice } from "@/lib/format";
+import { supportMessage, supportWhatsappLink } from "@/lib/support";
 import type { DeliveryMode } from "@/lib/catalog/types";
 
 export function PaymentConfirmationEmail({
@@ -13,6 +14,7 @@ export function PaymentConfirmationEmail({
   orderRef,
   ctaUrl,
   licenceKey,
+  paidOn,
 }: {
   clientName: string;
   productName: string;
@@ -26,13 +28,19 @@ export function PaymentConfirmationEmail({
   /** Renseigné uniquement pour une livraison "licence-edn" — change le libellé du bouton,
    *  la licence elle-même et les liens de téléchargement restent sur la page dédiée. */
   licenceKey?: string | null;
+  /** Date du paiement, déjà formatée : elle remplit le message d'assistance du pack. */
+  paidOn?: string;
 }) {
   const label = quantity > 1 ? `${quantity} × ${productName}` : productName;
   return (
     <EmailLayout
       preview={`Paiement confirmé — ${productName}`}
       heading="Paiement confirmé !"
-      support={delivery === "licence-edn"}
+      supportHref={
+        delivery === "licence-edn"
+          ? supportWhatsappLink(supportMessage(clientName, paidOn))
+          : undefined
+      }
     >
       <Text style={emailTextStyle}>Bonjour {clientName},</Text>
       <Text style={emailTextStyle}>

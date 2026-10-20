@@ -1,6 +1,7 @@
 import { Button, Text } from "@react-email/components";
 import { EmailLayout, emailButtonStyle, emailTextStyle } from "./layout";
 import { formatPrice } from "@/lib/format";
+import { supportPaymentMessage, supportWhatsappLink } from "@/lib/support";
 
 /**
  * Relance d'une commande dont le paiement n'a pas été terminé. Un seul
@@ -14,6 +15,7 @@ export function PaymentReminderEmail({
   quantity = 1,
   trackUrl,
   licence = false,
+  orderedOn,
 }: {
   clientName: string;
   productName: string;
@@ -23,13 +25,19 @@ export function PaymentReminderEmail({
   trackUrl: string;
   /** Produit livré par licence (le pack) : le pied de page donne l'assistance dédiée. */
   licence?: boolean;
+  /** Date de la commande, déjà formatée : elle remplit le message d'assistance. */
+  orderedOn?: string;
 }) {
   const label = quantity > 1 ? `${quantity} × ${productName}` : productName;
   return (
     <EmailLayout
       preview={`Votre commande vous attend — ${productName}`}
       heading="Votre commande vous attend"
-      support={licence}
+      supportHref={
+        licence
+          ? supportWhatsappLink(supportPaymentMessage(clientName, orderedOn))
+          : undefined
+      }
     >
       <Text style={emailTextStyle}>Bonjour {clientName},</Text>
       <Text style={emailTextStyle}>
