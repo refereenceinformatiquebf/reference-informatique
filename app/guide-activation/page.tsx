@@ -133,17 +133,6 @@ export default function GuideActivationPage() {
           ))}
         </ol>
 
-        <div className="border-warning-text/30 bg-warning-bg mt-8 rounded-xl border p-5">
-          <p className="text-ink text-sm font-medium">
-            Une licence, deux appareils maximum
-          </p>
-          <p className="text-ink-soft mt-1 text-[0.9375rem] leading-relaxed">
-            {fr(
-              "Si vous tentez de l'utiliser sur un 3ᵉ appareil, l'application vous invitera à nous contacter. Une licence supplémentaire est disponible à l'achat.",
-            )}
-          </p>
-        </div>
-
         <div className="bg-paper-raised mt-12 rounded-xl p-6 text-center sm:p-8">
           <SectionHeading
             align="center"

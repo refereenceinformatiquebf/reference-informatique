@@ -1003,11 +1003,6 @@ export const PRODUCTS: Product[] = [
           "Non. Il suffit d'installer une seule petite application et de suivre le guide, étape par étape : comptez quelques minutes. Si une étape bloque, écrivez-nous sur WhatsApp, nous vous accompagnons.",
       },
       {
-        question: "Sur combien d'appareils puis-je l'utiliser ?",
-        answer:
-          "Votre licence active votre pack sur 2 appareils. Besoin d'un appareil supplémentaire ? Une nouvelle licence est disponible à l'achat : écrivez-nous sur WhatsApp.",
-      },
-      {
         question: "Est-ce que ça expire ou faut-il le renouveler ?",
         answer:
           "Non, c'est à vie : pas d'abonnement, pas de renouvellement à prévoir.",

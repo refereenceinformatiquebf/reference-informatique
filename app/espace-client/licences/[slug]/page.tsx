@@ -181,9 +181,7 @@ export default async function LicencePage({
               </p>
 
               <p className="text-ink-faint mt-5 text-xs leading-relaxed">
-                {fr(
-                  "Cette licence est personnelle : ne la partagez pas. Elle active 2 appareils maximum.",
-                )}
+                {fr("Cette licence est personnelle : ne la partagez pas.")}
               </p>
             </div>
 
