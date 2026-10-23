@@ -29,14 +29,19 @@ export function PackPurchaseCard({
         </span>
       </div>
 
-      <Button asChild size="lg" className="mt-5 w-full" id="hero-cta">
+      <Button
+        asChild
+        size="lg"
+        className="font-display mt-5 min-h-14 w-full text-base"
+        id="hero-cta"
+      >
         <Link href={orderHref}>
           Commander maintenant
           <IconFleche size={18} />
         </Link>
       </Button>
 
-      <ul className="mt-5 grid gap-3 text-[0.8125rem] leading-relaxed">
+      <ul className="mt-5 grid gap-3.5 text-[0.9375rem] leading-relaxed">
         {points.map((point) => (
           <li key={point.text} className="flex items-start gap-2.5">
             <span className="text-brand-text mt-px shrink-0">

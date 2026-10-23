@@ -13,10 +13,10 @@ export function StepsGrid({
           <span className="font-display text-brand-text tabular text-[2rem] leading-none">
             {String(index + 1).padStart(2, "0")}
           </span>
-          <h3 className="text-ink text-lg leading-tight font-semibold">
+          <h3 className="text-ink text-[1.1875rem] leading-tight">
             {fr(step.title)}
           </h3>
-          <p className="text-ink-soft text-[0.9375rem] leading-relaxed">
+          <p className="text-ink-soft text-base leading-[1.7]">
             {fr(step.text)}
           </p>
         </li>

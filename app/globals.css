@@ -374,3 +374,48 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- Page de vente du pack : typographie dédiée ----------
+   Titres en Plus Jakarta Sans (nette, chaleureuse, faite pour vendre), texte
+   en Inter (la plus lisible sur un petit écran). Les deux polices sont
+   chargées par next/font dans la page du pack uniquement : les variables
+   --font-pack-heading et --font-pack-body sont posées sur le conteneur
+   .pack-type, le reste du site garde la typographie de la charte. */
+@layer base {
+  .pack-type {
+    font-family:
+      var(--font-pack-body),
+      -apple-system,
+      "Segoe UI",
+      sans-serif;
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  .pack-type :is(h1, h2, h3, h4) {
+    font-family:
+      var(--font-pack-heading),
+      -apple-system,
+      "Segoe UI",
+      sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.012em;
+    line-height: 1.2;
+  }
+
+  .pack-type h1 {
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.12;
+  }
+}
+
+.pack-type .font-display {
+  font-family:
+    var(--font-pack-heading),
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}

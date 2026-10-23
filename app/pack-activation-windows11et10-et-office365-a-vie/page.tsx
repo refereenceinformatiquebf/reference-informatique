@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,20 @@ import { fr } from "@/lib/typography";
 import type { IconKey } from "@/lib/catalog/types";
 
 const SLUG = "pack-activation-windows11et10-et-office365-a-vie";
+
+// Typographie propre à cette page (règles .pack-type dans app/globals.css) :
+// titres en Plus Jakarta Sans, texte en Inter. Polices variables, sous-ensemble
+// latin : une quarantaine de ko chacune, chargées sur cette page seulement.
+const headingFont = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-pack-heading",
+  display: "swap",
+});
+const bodyFont = Inter({
+  subsets: ["latin"],
+  variable: "--font-pack-body",
+  display: "swap",
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const country = await getVisitorCountry();
@@ -65,6 +80,9 @@ export async function generateMetadata(): Promise<Metadata> {
 /* générales ne prévoient ni remboursement ni délai de rétractation, et la     */
 /* page n'en parle donc pas. « Plus de 160 clients » est un chiffre fourni par */
 /* le propriétaire.                                                            */
+/*                                                                             */
+/* Écriture : phrases courtes, une idée par phrase, le client au centre         */
+/* (« vous »), des scènes qu'il a déjà vécues, des mots simples.               */
 /* -------------------------------------------------------------------------- */
 
 const BADGES: { label: string; variant: "neutral" | "success" | "navy" }[] = [
@@ -74,49 +92,43 @@ const BADGES: { label: string; variant: "neutral" | "success" | "navy" }[] = [
 ];
 
 const TAGLINE =
-  "Fini « Activer Windows » et les documents bloqués : Word, Excel et PowerPoint travaillent enfin sans limite, pour un seul paiement.";
+  "Fini « Activer Windows » et les documents verrouillés. Word, Excel et PowerPoint tournent enfin sans limite, pour un seul paiement, à vie.";
 
 const CARD_POINTS: { icon: IconKey; text: string }[] = [
   {
     icon: "cadenas",
-    text: "Vous réglez avec votre compte Mobile Money ou votre carte, sur une page protégée : vos codes ne passent jamais par nous.",
+    text: "Réglez par Mobile Money ou carte sur une page protégée. Vos codes ne passent jamais par nous.",
   },
   {
     icon: "eclair",
-    text: "Votre accès personnel arrive dès la confirmation du paiement.",
+    text: "Votre accès arrive dès la confirmation de votre paiement. Pas d'attente.",
   },
   {
     icon: "support",
-    text: "Guide pas à pas inclus, et une assistance si une étape vous bloque.",
+    text: "Un guide pas à pas, et une assistance si une étape vous bloque.",
   },
   {
     icon: "verifie",
-    text: "Plus de 160 clients nous font confiance.",
+    text: "Plus de 160 clients nous font déjà confiance.",
   },
 ];
 
-const LEAD =
-  "Un ordinateur qui bloque ne prévient jamais : c'est la veille d'un rendu, d'un concours ou d'une réunion que « Activer Windows » s'affiche et que Word passe en lecture seule.";
-
-const INTRO =
-  "Ce pack règle tout cela en une seule fois. Vous payez, vous installez une petite application en suivant le guide, et Windows 10 ou 11 comme Office s'activent pour de bon : plus d'abonnement qui tourne, plus de bricolage, plus de rappel à l'écran.";
-
 const PROBLEMS: { title: string; text: string }[] = [
   {
-    title: "Le document qui refuse de s'enregistrer",
-    text: "Office non activé passe en mode lecture : vous ouvrez vos fichiers, mais vous ne pouvez plus les modifier. Rapport, mémoire, CV, dossier de candidature : tout s'arrête quand l'échéance approche.",
+    title: "Word refuse d'enregistrer.",
+    text: "Sans activation, Office passe en lecture seule : vous ouvrez vos fichiers, vous ne pouvez plus les modifier. Rapport, mémoire, CV, candidature : tout s'arrête.",
   },
   {
-    title: "« Activer Windows » qui ne part jamais",
-    text: "Le filigrane reste affiché, la personnalisation est verrouillée, les rappels reviennent. Devant un client ou un jury, votre PC fait bricolé.",
+    title: "« Activer Windows » ne part jamais.",
+    text: "Filigrane en permanence, réglages verrouillés, rappels à répétition. Devant un client ou un jury, votre PC fait bricolé.",
   },
   {
-    title: "L'astuce d'internet qui lâche au bout de quelques semaines",
-    text: "Lien douteux, activation faite par un inconnu sur Facebook : ça tient un temps, puis ça saute et il faut tout refaire. Sans compter les virus que ces fichiers peuvent cacher.",
+    title: "L'astuce d'internet lâche au bout de quelques semaines.",
+    text: "Un lien douteux ou une activation faite par un inconnu sur Facebook ne dure pas, et peut cacher des virus. Vous recommencez, vous repayez.",
   },
   {
-    title: "L'abonnement qui ne s'arrête jamais",
-    text: "Tant que vous payez, vous gardez vos outils. Le jour où l'argent manque, c'est l'accès à vos propres documents qui disparaît.",
+    title: "L'abonnement n'en finit jamais.",
+    text: "Tant que vous payez, vous gardez vos outils. Le jour où l'argent manque, vous perdez l'accès à vos propres documents.",
   },
 ];
 
@@ -131,48 +143,52 @@ const OFFICE_APPS: [name: string, detail: string][] = [
 const CONTENTS: { title: string; text: string; apps?: boolean }[] = [
   {
     title: "Votre accès personnel",
-    text: "Une clé à votre nom, créée automatiquement une fois le paiement confirmé. Une seule clé suffit pour activer Office et Windows, grâce à l'application fournie.",
+    text: "Une clé à votre nom, créée toute seule une fois le paiement confirmé. Une seule clé suffit pour activer Office et Windows.",
   },
   {
-    title: "Microsoft Office",
-    text: "Les logiciels que l'on utilise partout, au travail comme aux études :",
+    title: "Microsoft Office au complet",
+    text: "Les logiciels que l'on retrouve partout, au travail comme aux études :",
     apps: true,
   },
   {
     title: "Windows 10 et 11, activés",
-    text: "Fini le filigrane et les réglages verrouillés : la personnalisation s'ouvre et votre PC fonctionne comme il le doit, que vous soyez sous Windows 10 ou 11.",
+    text: "Plus de filigrane, plus de réglages verrouillés. Votre PC fonctionne enfin comme il le doit, sous Windows 10 comme sous Windows 11.",
   },
   {
-    title: "Une installation guidée, et un antivirus gratuit offert",
-    text: "L'application, les fichiers d'installation officiels de Windows et d'Office et un guide pas à pas vous attendent dans votre espace. Un antivirus gratuit est offert pour protéger vos fichiers.",
+    title: "Tout pour réussir l'installation",
+    text: "L'application, les fichiers d'installation officiels de Windows et d'Office, et un guide pas à pas. Un antivirus gratuit est offert en plus, pour protéger vos fichiers.",
   },
 ];
 
 const WHY: { title: string; text: string }[] = [
   {
-    title: "Un seul paiement.",
-    text: "Aucun abonnement, aucun renouvellement : ce que vous réglez aujourd'hui l'est pour de bon.",
+    title: "Vous payez une fois.",
+    text: "Pas d'abonnement, pas de renouvellement, pas de mauvaise surprise dans six mois.",
   },
   {
-    title: "Prêt en quelques minutes.",
-    text: "L'accès est créé automatiquement à la confirmation du paiement : personne à attendre, aucun rendez-vous à prendre.",
+    title: "C'est prêt en quelques minutes.",
+    text: "L'accès se crée tout seul après votre paiement. Personne à attendre, aucun rendez-vous à prendre.",
   },
   {
-    title: "Accessible à tous.",
-    text: "Une petite application et un guide pas à pas : si vous savez installer une application sur votre téléphone, vous y arriverez.",
+    title: "Pas besoin d'être technique.",
+    text: "Une petite application et un guide pas à pas. Si vous savez installer une application sur votre téléphone, vous y arriverez.",
   },
   {
     title: "Les bons fichiers.",
-    text: "Windows et Office s'installent à partir des fichiers d'installation officiels, fournis dans votre espace.",
+    text: "Windows et Office s'installent depuis les fichiers d'installation officiels, fournis dans votre espace.",
   },
   {
-    title: "Un coup de main si besoin.",
-    text: "En cas de blocage, l'assistance vous répond sur WhatsApp.",
+    title: "Une main tendue si ça bloque.",
+    text: "Une assistance vous répond sur WhatsApp.",
   },
 ];
 
-const FOR_WHO =
-  "Aux étudiants qui rédigent leur mémoire, aux fonctionnaires et salariés qui vivent dans Word et Excel, aux entrepreneurs qui préparent devis et présentations, et à toute personne qui vient d'acheter, d'installer ou de réinitialiser un ordinateur.";
+const FOR_WHO: string[] = [
+  "Vous êtes étudiant : mémoire, exposés, dossiers à rendre.",
+  "Vous êtes fonctionnaire ou salarié : Word et Excel font votre quotidien.",
+  "Vous êtes entrepreneur : devis, factures et présentations ne peuvent pas attendre.",
+  "Vous venez d'acheter, d'installer ou de réinitialiser un ordinateur.",
+];
 
 const GOOD_TO_KNOW: string[] = [
   "Ce pack est conçu pour les ordinateurs Windows : il ne fonctionne pas sur Mac.",
@@ -184,18 +200,18 @@ const GOOD_TO_KNOW: string[] = [
 const STEPS: { title: string; text: string }[] = [
   {
     title: "Vous commandez",
-    text: "En une minute, avec Mobile Money ou votre carte, depuis une page de paiement protégée. Aucun compte à créer.",
+    text: "Une minute suffit, avec Mobile Money ou votre carte, depuis une page de paiement protégée. Aucun compte à créer.",
   },
   {
-    title: "Votre accès est créé",
-    text: "Une fois le paiement confirmé, l'accès se crée tout seul et un e-mail vous envoie le lien de votre espace personnel.",
+    title: "Votre accès se crée",
+    text: "Une fois le paiement confirmé, tout est généré automatiquement. Un e-mail vous envoie le lien de votre espace personnel.",
   },
   {
-    title: "Vous installez et activez",
-    text: "Depuis votre espace, téléchargez l'application et collez-y votre clé : Windows et Office s'activent en un clic, avec le guide sous les yeux à chaque écran.",
+    title: "Vous installez, vous activez",
+    text: "Téléchargez l'application, collez-y votre clé : Windows et Office s'activent en un clic, avec le guide sous les yeux.",
   },
   {
-    title: "Vous êtes accompagné",
+    title: "Vous n'êtes jamais seul",
     text: "Une étape vous bloque ? L'assistance vous répond sur WhatsApp, depuis votre espace.",
   },
 ];
@@ -215,18 +231,18 @@ const FAQ: { question: string; answer: string }[] = [
   {
     question: "Combien de temps pour recevoir mon pack ?",
     answer:
-      "En quelques minutes : une fois votre paiement confirmé, l'accès se crée tout seul et un lien personnel arrive dans votre boîte e-mail. Vous n'attendez personne.",
+      "Quelques minutes. Une fois votre paiement confirmé, l'accès se crée tout seul et un lien personnel arrive dans votre boîte e-mail. Vous n'attendez personne.",
   },
 ];
 
-const H2 =
-  "font-display text-ink mt-4 text-[1.375rem] leading-tight sm:text-[1.625rem]";
+const H2 = "text-ink mt-6 text-[1.5rem] leading-tight sm:text-[1.75rem]";
+const BODY = "text-ink-soft text-base leading-[1.75]";
 
 function Dot() {
   return (
     <span
       aria-hidden
-      className="bg-brand mt-[0.55rem] h-[7px] w-[7px] shrink-0 rounded-full"
+      className="bg-brand mt-[0.65rem] h-[7px] w-[7px] shrink-0 rounded-full"
     />
   );
 }
@@ -262,7 +278,9 @@ export default async function PackActivationPage() {
   };
 
   return (
-    <div className="pb-24">
+    <div
+      className={`pack-type pb-24 ${headingFont.variable} ${bodyFont.variable}`}
+    >
       <JsonLd data={productJsonLd} />
       <MetaEvent name="ViewContent" params={productParams(product)} />
 
@@ -306,10 +324,10 @@ export default async function PackActivationPage() {
               </div>
 
               <div>
-                <h1 className="text-ink text-[1.875rem] leading-[1.1] tracking-[-0.02em] sm:text-[2.5rem] lg:text-[2.75rem]">
+                <h1 className="text-ink text-[1.75rem] sm:text-[2.25rem] lg:text-[2.5rem]">
                   {fr(product.name)}
                 </h1>
-                <p className="text-ink-soft mt-4 text-[1.0625rem] leading-relaxed">
+                <p className="text-ink-soft mt-4 text-[1.0625rem] leading-[1.7]">
                   {fr(TAGLINE)}
                 </p>
               </div>
@@ -334,13 +352,13 @@ export default async function PackActivationPage() {
             >
               <TabsTrigger
                 value="description"
-                className="min-h-12 text-[0.9375rem]"
+                className="font-display min-h-12 text-base font-semibold"
               >
                 Description
               </TabsTrigger>
               <TabsTrigger
                 value="livraison"
-                className="min-h-12 text-[0.9375rem]"
+                className="font-display min-h-12 text-base font-semibold"
               >
                 Livraison et accès
               </TabsTrigger>
@@ -354,19 +372,34 @@ export default async function PackActivationPage() {
               className="pt-8 data-[state=inactive]:hidden"
             >
               <div className="flex max-w-3xl flex-col gap-5">
-                <p className="font-display text-ink text-[1.375rem] leading-snug sm:text-[1.5rem]">
-                  {fr(LEAD)}
+                <p className="font-display text-ink text-[1.5rem] leading-[1.25] sm:text-[1.875rem]">
+                  {fr(
+                    "Le jour où votre ordinateur vous lâche, c'est toujours le pire jour.",
+                  )}
                 </p>
-                <p className="text-ink-soft text-[1.0625rem] leading-relaxed">
-                  {fr(INTRO)}
+                <p className={`${BODY} text-[1.0625rem]`}>
+                  {fr(
+                    "La veille d'un rendu. Avant un concours. Une heure avant une réunion. Et soudain, « Activer Windows » s'affiche, Word passe en lecture seule, votre document refuse de s'enregistrer.",
+                  )}
+                </p>
+                <p className={`${BODY} text-[1.0625rem]`}>
+                  {fr("Ce pack met fin à tout cela, ")}
+                  <strong className="text-ink font-semibold">
+                    {fr("une bonne fois pour toutes.")}
+                  </strong>{" "}
+                  {fr(
+                    "Vous payez, vous installez une petite application en suivant le guide, et Windows 10 ou 11 comme Office s'activent pour de bon.",
+                  )}
                 </p>
 
-                <h2 className={H2}>Les blocages que vous ne reverrez plus</h2>
-                <ul className="flex flex-col gap-4">
+                <h2 className={H2}>
+                  Reconnaissez-vous l&rsquo;un de ces blocages ?
+                </h2>
+                <ul className="flex flex-col gap-5">
                   {PROBLEMS.map((item) => (
                     <li key={item.title} className="flex items-start gap-3">
                       <Dot />
-                      <p className="text-ink-soft min-w-0 text-[0.9375rem] leading-relaxed">
+                      <p className={`${BODY} min-w-0`}>
                         <strong className="text-ink block font-semibold">
                           {fr(item.title)}
                         </strong>
@@ -375,28 +408,31 @@ export default async function PackActivationPage() {
                     </li>
                   ))}
                 </ul>
+                <p className="border-brand bg-paper font-display text-ink rounded-r-lg border-l-4 px-5 py-4 text-[1.0625rem] leading-snug">
+                  {fr(
+                    "Si l'un de ces blocages est le vôtre, ce pack est fait pour vous.",
+                  )}
+                </p>
 
-                <h2 className={H2}>Ce que contient votre pack</h2>
-                <div className="flex flex-col gap-5">
+                <h2 className={H2}>Ce que vous obtenez</h2>
+                <div className="flex flex-col gap-6">
                   {CONTENTS.map((block, index) => (
                     <div key={block.title}>
-                      <h3 className="text-ink text-[1.0625rem] leading-snug font-semibold">
+                      <h3 className="text-ink text-[1.125rem] leading-snug">
                         {index + 1}. {fr(block.title)}
                       </h3>
-                      <p className="text-ink-soft mt-1 text-[0.9375rem] leading-relaxed">
-                        {fr(block.text)}
-                      </p>
+                      <p className={`${BODY} mt-1.5`}>{fr(block.text)}</p>
                       {block.apps ? (
-                        <ul className="mt-2.5 flex flex-col gap-1.5">
+                        <ul className="mt-3 flex flex-col gap-2">
                           {OFFICE_APPS.map(([name, detail]) => (
-                            <li
-                              key={name}
-                              className="text-ink-soft text-[0.9375rem] leading-relaxed"
-                            >
-                              <span className="text-ink font-semibold">
-                                {name}
-                              </span>{" "}
-                              : {fr(detail)}
+                            <li key={name} className={`${BODY} flex gap-3`}>
+                              <Dot />
+                              <span className="min-w-0">
+                                <span className="text-ink font-semibold">
+                                  {name}
+                                </span>{" "}
+                                : {fr(detail)}
+                              </span>
                             </li>
                           ))}
                         </ul>
@@ -405,14 +441,12 @@ export default async function PackActivationPage() {
                   ))}
                 </div>
 
-                <h2 className={H2}>
-                  Pourquoi ce pack plutôt qu&rsquo;un autre
-                </h2>
-                <ul className="flex flex-col gap-3">
+                <h2 className={H2}>Pourquoi vous n&rsquo;y repenserez plus</h2>
+                <ul className="flex flex-col gap-4">
                   {WHY.map((item) => (
                     <li key={item.title} className="flex items-start gap-3">
                       <Dot />
-                      <p className="text-ink-soft min-w-0 text-[0.9375rem] leading-relaxed">
+                      <p className={`${BODY} min-w-0`}>
                         <strong className="text-ink font-semibold">
                           {fr(item.title)}
                         </strong>{" "}
@@ -422,41 +456,48 @@ export default async function PackActivationPage() {
                   ))}
                 </ul>
 
-                <h2 className={H2}>À qui s&rsquo;adresse ce pack</h2>
-                <p className="text-ink-soft text-[0.9375rem] leading-relaxed">
-                  {fr(FOR_WHO)}
-                </p>
+                <h2 className={H2}>Ce pack est pour vous si…</h2>
+                <ul className="flex flex-col gap-3">
+                  {FOR_WHO.map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <Dot />
+                      <span className={`${BODY} min-w-0`}>{fr(item)}</span>
+                    </li>
+                  ))}
+                </ul>
 
-                <div className="border-line bg-paper rounded-xl border p-5">
+                <div className="border-line bg-paper mt-2 rounded-xl border p-5 sm:p-6">
                   <p className="font-display text-ink flex items-center gap-3 text-[1.125rem]">
                     <IconChip name="verifie" size={32} />À savoir avant de
                     commander
                   </p>
-                  <ul className="mt-4 flex flex-col gap-2.5">
+                  <ul className="mt-4 flex flex-col gap-3">
                     {GOOD_TO_KNOW.map((item) => (
                       <li key={item} className="flex items-start gap-3">
                         <Dot />
-                        <span className="text-ink-soft min-w-0 text-[0.9375rem] leading-relaxed">
-                          {fr(item)}
-                        </span>
+                        <span className={`${BODY} min-w-0`}>{fr(item)}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <h2 className={H2}>Prix</h2>
-                <p className="text-ink-soft text-[0.9375rem] leading-relaxed">
+                <h2 className={H2}>Le prix</h2>
+                <p className={BODY}>
+                  <strong className="text-ink font-semibold">
+                    {price}, en un seul paiement.
+                  </strong>{" "}
                   {fr(
-                    `Le pack complet (Windows 10 et 11, Office et antivirus gratuit) pour ${price}. Vous payez une fois, sans abonnement ni renouvellement.`,
+                    "Windows 10 et 11, Office et antivirus gratuit compris. Rien d'autre à payer, ni aujourd'hui ni plus tard.",
                   )}
                 </p>
               </div>
 
               <PackInlineCta
                 id="description-cta"
-                title="Prêt à reprendre la main sur votre ordinateur ?"
+                title="Dans quelques minutes, votre PC peut enfin travailler comme vous."
                 label={`Je commande — ${price}`}
                 href={orderHref}
+                note="Paiement sécurisé · Accès dès la confirmation · À vie"
               />
             </TabsContent>
 
@@ -466,8 +507,8 @@ export default async function PackActivationPage() {
               className="pt-8 data-[state=inactive]:hidden"
             >
               <div className="max-w-3xl">
-                <h2 className="font-display text-ink text-[1.375rem] leading-tight sm:text-[1.625rem]">
-                  Comment vous recevez votre pack
+                <h2 className="text-ink text-[1.5rem] leading-tight sm:text-[1.75rem]">
+                  Comment ça se passe, concrètement
                 </h2>
                 <div className="mt-6">
                   <StepsGrid steps={STEPS} />
@@ -475,8 +516,8 @@ export default async function PackActivationPage() {
 
                 <div className="mt-12">
                   <Eyebrow>Questions fréquentes</Eyebrow>
-                  <h2 className="font-display text-ink mt-2 mb-5 text-[1.375rem] leading-tight sm:text-[1.625rem]">
-                    {fr("Avant de commander, vous vous demandez peut-être…")}
+                  <h2 className="text-ink mt-2 mb-5 text-[1.5rem] leading-tight sm:text-[1.75rem]">
+                    {fr("Les questions qu'on nous pose le plus")}
                   </h2>
                   <FaqList items={faq} />
                 </div>
@@ -487,6 +528,7 @@ export default async function PackActivationPage() {
                 title="Votre pack vous attend."
                 label={`Je commande — ${price}`}
                 href={orderHref}
+                note="Plus de 160 clients nous font déjà confiance."
               />
             </TabsContent>
           </Tabs>

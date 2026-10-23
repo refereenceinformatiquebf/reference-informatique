@@ -66,7 +66,7 @@ export function StickyBuyBar({
             {price}
           </p>
         </div>
-        <Button asChild size="lg" className="shrink-0">
+        <Button asChild size="lg" className="font-display shrink-0 text-base">
           <Link href={href}>{label}</Link>
         </Button>
       </div>
