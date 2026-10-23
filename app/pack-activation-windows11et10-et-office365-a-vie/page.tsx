@@ -1,20 +1,18 @@
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Container, Eyebrow, IconChip } from "@/components/ui/section";
 import { FaqList } from "@/components/ui/faq-list";
-import {
-  Container,
-  Eyebrow,
-  IconChip,
-  SectionHeading,
-} from "@/components/ui/section";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JsonLd } from "@/components/json-ld";
+import { PackInlineCta } from "@/components/shop/pack-inline-cta";
+import { PackPurchaseCard } from "@/components/shop/pack-purchase-card";
+import { ProductCover } from "@/components/shop/product-cover";
+import { StepsGrid } from "@/components/shop/steps-grid";
 import { StickyBuyBar } from "@/components/shop/sticky-buy-bar";
 import { MetaEvent } from "@/components/marketing/meta-event";
 import { productParams } from "@/lib/meta-pixel";
-import { IconCadenas, IconFleche } from "@/components/icons";
 import { formatPrice } from "@/lib/format";
 import { getVisibleProduct } from "@/lib/catalog/live";
 import { productPath } from "@/lib/catalog/paths";
@@ -59,144 +57,179 @@ export async function generateMetadata(): Promise<Metadata> {
 /* -------------------------------------------------------------------------- */
 /* Contenu de la page de vente                                                 */
 /*                                                                             */
-/* Chaque promesse ci-dessous correspond à ce qui est réellement livré (page   */
-/* « Mes licences » de l'espace client, guide d'activation). Aucun avis, aucun */
-/* chiffre de vente ni aucune garantie n'est inventé : les conditions          */
-/* générales ne prévoient ni remboursement ni délai de rétractation.           */
+/* Même architecture que la fiche du pack de 360 DIGITALE (affiche et carte    */
+/* d'achat, onglets, étapes numérotées, barre d'achat mobile), textes écrits    */
+/* pour Référence Informatique. Chaque promesse correspond à ce qui est        */
+/* réellement livré (page « Mes licences », guide d'activation). Aucun avis,   */
+/* aucun chiffre de vente ni aucune garantie n'est inventé : les conditions    */
+/* générales ne prévoient ni remboursement ni délai de rétractation, et la     */
+/* page n'en parle donc pas. « Plus de 160 clients » est un chiffre fourni par */
+/* le propriétaire.                                                            */
 /* -------------------------------------------------------------------------- */
 
-const REASSURANCE: { icon: IconKey; label: string }[] = [
-  { icon: "acces-a-vie", label: "Accès à vie, sans abonnement" },
-  { icon: "eclair", label: "Prêt en quelques minutes" },
-  { icon: "paiement", label: "Paiement Mobile Money et carte" },
-  { icon: "verifie", label: "Plus de 160 clients nous font confiance" },
+const BADGES: { label: string; variant: "neutral" | "success" | "navy" }[] = [
+  { label: "Pack Windows + Office", variant: "neutral" },
+  { label: "Accès instantané", variant: "success" },
+  { label: "Accès à vie", variant: "navy" },
 ];
+
+const TAGLINE =
+  "Fini « Activer Windows » et les documents bloqués : Word, Excel et PowerPoint travaillent enfin sans limite, pour un seul paiement.";
+
+const CARD_POINTS: { icon: IconKey; text: string }[] = [
+  {
+    icon: "cadenas",
+    text: "Vous réglez avec votre compte Mobile Money ou votre carte, sur une page protégée : vos codes ne passent jamais par nous.",
+  },
+  {
+    icon: "eclair",
+    text: "Votre accès personnel arrive dès la confirmation du paiement.",
+  },
+  {
+    icon: "support",
+    text: "Guide pas à pas inclus, et une assistance si une étape vous bloque.",
+  },
+  {
+    icon: "verifie",
+    text: "Plus de 160 clients nous font confiance.",
+  },
+];
+
+const LEAD =
+  "Un ordinateur qui bloque ne prévient jamais : c'est la veille d'un rendu, d'un concours ou d'une réunion que « Activer Windows » s'affiche et que Word passe en lecture seule.";
+
+const INTRO =
+  "Ce pack règle tout cela en une seule fois. Vous payez, vous installez une petite application en suivant le guide, et Windows 10 ou 11 comme Office s'activent pour de bon : plus d'abonnement qui tourne, plus de bricolage, plus de rappel à l'écran.";
 
 const PROBLEMS: { title: string; text: string }[] = [
   {
-    title: "Votre document refuse de s'enregistrer",
-    text: "Quand Office n'est pas activé, il passe en mode réduit : vous pouvez lire, mais plus modifier. Rapport, mémoire, CV, dossier de candidature… tout s'arrête au moment où vous en avez le plus besoin.",
+    title: "Le document qui refuse de s'enregistrer",
+    text: "Office non activé passe en mode lecture : vous ouvrez vos fichiers, mais vous ne pouvez plus les modifier. Rapport, mémoire, CV, dossier de candidature : tout s'arrête quand l'échéance approche.",
   },
   {
-    title: "« Activer Windows » reste collé à l'écran",
-    text: "Le filigrane ne part pas, la personnalisation est bloquée, les rappels reviennent. Devant un client, un patron ou un jury, votre ordinateur donne une image bricolée.",
+    title: "« Activer Windows » qui ne part jamais",
+    text: "Le filigrane reste affiché, la personnalisation est verrouillée, les rappels reviennent. Devant un client ou un jury, votre PC fait bricolé.",
   },
   {
-    title: "L'activation « trouvée sur internet » qui lâche",
-    text: "Un lien, un crack, une activation faite par quelqu'un sur Facebook : ça tient quelques semaines, puis ça saute. Vous recommencez, vous repayez — et ces fichiers douteux peuvent cacher des virus.",
+    title: "L'astuce d'internet qui lâche au bout de quelques semaines",
+    text: "Lien douteux, activation faite par un inconnu sur Facebook : ça tient un temps, puis ça saute et il faut tout refaire. Sans compter les virus que ces fichiers peuvent cacher.",
   },
   {
     title: "L'abonnement qui ne s'arrête jamais",
-    text: "Avec un abonnement, vous gardez vos outils tant que vous payez. Le jour où vous arrêtez, ou que l'argent manque, vous perdez l'accès à vos propres documents de travail.",
+    text: "Tant que vous payez, vous gardez vos outils. Le jour où l'argent manque, c'est l'accès à vos propres documents qui disparaît.",
   },
 ];
 
-const BENEFITS: { icon: IconKey; title: string; text: string }[] = [
+const OFFICE_APPS: [name: string, detail: string][] = [
+  ["Word", "rapports, courriers, CV et mémoires, sans limite."],
+  ["Excel", "budgets, factures et tableaux de suivi."],
+  ["PowerPoint", "des diaporamas qui font bonne impression."],
+  ["Outlook", "messagerie et agenda réunis au même endroit."],
+  ["OneNote", "vos notes et vos idées bien rangées."],
+];
+
+const CONTENTS: { title: string; text: string; apps?: boolean }[] = [
   {
-    icon: "modele",
-    title: "Word : écrivez sans limite",
-    text: "Rapports, courriers, CV, mémoires : tapez, mettez en forme et enregistrez, sans aucun blocage.",
+    title: "Votre accès personnel",
+    text: "Une clé à votre nom, créée automatiquement une fois le paiement confirmé. Une seule clé suffit pour activer Office et Windows, grâce à l'application fournie.",
   },
   {
-    icon: "logiciel",
-    title: "Excel : maîtrisez vos chiffres",
-    text: "Budgets, factures, tableaux de suivi : calculez et organisez vos données en toute tranquillité.",
+    title: "Microsoft Office",
+    text: "Les logiciels que l'on utilise partout, au travail comme aux études :",
+    apps: true,
   },
   {
-    icon: "formation",
-    title: "PowerPoint : présentez avec assurance",
-    text: "Des diaporamas propres et professionnels pour convaincre un jury, un client ou toute une salle.",
+    title: "Windows 10 et 11, activés",
+    text: "Fini le filigrane et les réglages verrouillés : la personnalisation s'ouvre et votre PC fonctionne comme il le doit, que vous soyez sous Windows 10 ou 11.",
   },
   {
-    icon: "mail",
-    title: "Outlook et OneNote : restez organisé",
-    text: "Vos e-mails, votre agenda et vos notes réunis au même endroit.",
-  },
-  {
-    icon: "ordinateur",
-    title: "Windows activé : un PC enfin complet",
-    text: "Plus de filigrane, personnalisation libre : votre ordinateur fonctionne comme il doit, à Windows 10 comme à Windows 11.",
-  },
-  {
-    icon: "bouclier",
-    title: "Bonus : antivirus gratuit",
-    text: "Un antivirus gratuit est fourni avec votre pack, pour protéger vos fichiers.",
+    title: "Une installation guidée, et un antivirus gratuit offert",
+    text: "L'application, les fichiers d'installation officiels de Windows et d'Office et un guide pas à pas vous attendent dans votre espace. Un antivirus gratuit est offert pour protéger vos fichiers.",
   },
 ];
 
-const PILLARS: { keyword: string; title: string; text: string }[] = [
+const WHY: { title: string; text: string }[] = [
   {
-    keyword: "À vie",
-    title: "Vous payez une seule fois",
-    text: "Pas d'échéance, pas de renouvellement, pas de mauvaise surprise dans six mois. Un seul paiement, et c'est réglé pour de bon.",
+    title: "Un seul paiement.",
+    text: "Aucun abonnement, aucun renouvellement : ce que vous réglez aujourd'hui l'est pour de bon.",
   },
   {
-    keyword: "Simple",
-    title: "Aucun niveau technique requis",
-    text: "Une seule petite application et un guide pas à pas. Si vous savez installer une application, vous saurez le faire.",
+    title: "Prêt en quelques minutes.",
+    text: "L'accès est créé automatiquement à la confirmation du paiement : personne à attendre, aucun rendez-vous à prendre.",
   },
   {
-    keyword: "Rapide",
-    title: "Prêt en quelques minutes",
-    text: "Votre accès est généré automatiquement dès la confirmation du paiement : pas d'attente, pas de rendez-vous à prendre.",
+    title: "Accessible à tous.",
+    text: "Une petite application et un guide pas à pas : si vous savez installer une application sur votre téléphone, vous y arriverez.",
   },
+  {
+    title: "Les bons fichiers.",
+    text: "Windows et Office s'installent à partir des fichiers d'installation officiels, fournis dans votre espace.",
+  },
+  {
+    title: "Un coup de main si besoin.",
+    text: "En cas de blocage, l'assistance vous répond sur WhatsApp.",
+  },
+];
+
+const FOR_WHO =
+  "Aux étudiants qui rédigent leur mémoire, aux fonctionnaires et salariés qui vivent dans Word et Excel, aux entrepreneurs qui préparent devis et présentations, et à toute personne qui vient d'acheter, d'installer ou de réinitialiser un ordinateur.";
+
+const GOOD_TO_KNOW: string[] = [
+  "Ce pack est conçu pour les ordinateurs Windows : il ne fonctionne pas sur Mac.",
+  "Chaque paiement correspond à un ordinateur.",
+  "Il faut une connexion Internet pour télécharger, installer et activer.",
+  "Le pack active Windows 10 et 11 ; installer Windows 11, en revanche, dépend de la configuration de votre PC (exigences de Microsoft).",
 ];
 
 const STEPS: { title: string; text: string }[] = [
   {
     title: "Vous commandez",
-    text: "En une minute, par Mobile Money ou carte bancaire, sur une page de paiement sécurisée. Aucun compte à créer.",
+    text: "En une minute, avec Mobile Money ou votre carte, depuis une page de paiement protégée. Aucun compte à créer.",
   },
   {
-    title: "Vous recevez tout, tout de suite",
-    text: "Dès que le paiement est confirmé, votre accès personnel est généré automatiquement et un lien vous est envoyé par e-mail.",
+    title: "Votre accès est créé",
+    text: "Une fois le paiement confirmé, l'accès se crée tout seul et un e-mail vous envoie le lien de votre espace personnel.",
   },
   {
-    title: "Vous installez, et c'est fini",
-    text: "Suivez le guide pas à pas : quelques minutes plus tard, Word, Excel, PowerPoint et Windows sont prêts à travailler.",
-  },
-];
-
-const TRUST: { icon: IconKey; title: string; text: string }[] = [
-  {
-    icon: "cadenas",
-    title: "Paiement sécurisé",
-    text: "Carte bancaire ou Mobile Money sur une page protégée. Nous ne voyons jamais vos codes.",
+    title: "Vous installez et activez",
+    text: "Depuis votre espace, téléchargez l'application et collez-y votre clé : Windows et Office s'activent en un clic, avec le guide sous les yeux à chaque écran.",
   },
   {
-    icon: "telecharger",
-    title: "Fichiers officiels",
-    text: "Windows et Office s'installent depuis des fichiers d'installation officiels.",
-  },
-  {
-    icon: "support",
-    title: "Un guide et une assistance",
-    text: "Un guide pas à pas, et une équipe joignable si une étape vous bloque.",
-  },
-  {
-    icon: "verifie",
-    title: "Déjà 160 clients",
-    text: "Plus de 160 clients nous font confiance pour leurs outils numériques.",
+    title: "Vous êtes accompagné",
+    text: "Une étape vous bloque ? L'assistance vous répond sur WhatsApp, depuis votre espace.",
   },
 ];
 
 const FAQ: { question: string; answer: string }[] = [
   {
-    question: "Je ne suis pas à l'aise en informatique : vais-je y arriver ?",
+    question:
+      "Je n'y connais pas grand-chose en informatique : vais-je y arriver ?",
     answer:
       "Oui. Il suffit d'installer une seule petite application et de suivre le guide, étape par étape : comptez quelques minutes. Et si une étape vous bloque, notre équipe vous aide pas à pas.",
   },
   {
     question: "Est-ce que ça expire ? Dois-je payer chaque année ?",
     answer:
-      "Non. C'est un accès à vie : un seul paiement, aucun abonnement, aucun renouvellement à prévoir.",
+      "Non. Vous payez une seule fois : pas d'abonnement, rien à renouveler, l'accès est à vie.",
   },
   {
     question: "Combien de temps pour recevoir mon pack ?",
     answer:
-      "Dès que votre paiement est confirmé, votre accès est généré automatiquement et un lien personnel vous est envoyé par e-mail : vous n'attendez personne.",
+      "En quelques minutes : une fois votre paiement confirmé, l'accès se crée tout seul et un lien personnel arrive dans votre boîte e-mail. Vous n'attendez personne.",
   },
 ];
+
+const H2 =
+  "font-display text-ink mt-4 text-[1.375rem] leading-tight sm:text-[1.625rem]";
+
+function Dot() {
+  return (
+    <span
+      aria-hidden
+      className="bg-brand mt-[0.55rem] h-[7px] w-[7px] shrink-0 rounded-full"
+    />
+  );
+}
 
 export default async function PackActivationPage() {
   const country = await getVisitorCountry();
@@ -229,298 +262,234 @@ export default async function PackActivationPage() {
   };
 
   return (
-    <div>
+    <div className="pb-24">
       <JsonLd data={productJsonLd} />
       <MetaEvent name="ViewContent" params={productParams(product)} />
 
-      {/* ============================== Héros ============================== */}
-      <section className="illus-zone on-navy">
-        <Container className="grid grid-cols-1 gap-8 pt-8 pb-20 sm:pt-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-14 lg:pb-24">
-          <div className="rise-in flex flex-col items-start gap-6">
-            <p className="rounded-2xl bg-white/12 px-3.5 py-1.5 text-[0.75rem] leading-snug font-medium tracking-[0.04em] text-white ring-1 ring-white/25">
-              {fr("Windows 10 et 11 + Office 365 · Activation à vie")}
-            </p>
-            <h1 className="text-[2.125rem] leading-[1.08] tracking-[-0.02em] sm:text-[3rem]">
-              {fr(
-                "Fini « Activer Windows » et les documents bloqués : Word, Excel et PowerPoint, à vie.",
-              )}
-            </h1>
-            <p className="max-w-xl text-[1.0625rem] leading-relaxed text-white/85 sm:text-lg">
-              {fr(
-                `Un seul paiement de ${price}. Vous installez en quelques minutes, guidé pas à pas, et votre ordinateur fonctionne enfin comme il le devrait : sans abonnement, sans blocage, sans mauvaise surprise.`,
-              )}
-            </p>
+      {/* ====================== En-tête : affiche + achat ====================== */}
+      <section className="bg-paper border-line border-b">
+        <Container className="py-8 sm:py-12">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.05fr] lg:gap-14">
+            <div className="mx-auto w-full max-w-md min-w-0 lg:sticky lg:top-6 lg:max-w-none lg:self-start">
+              <div className="border-line bg-paper-raised relative overflow-hidden rounded-xl border">
+                {product.poster ? (
+                  <div className="relative aspect-square w-full bg-white">
+                    <Image
+                      src={product.poster.src}
+                      alt={product.poster.alt}
+                      fill
+                      priority
+                      sizes="(min-width: 1024px) 520px, 100vw"
+                      className="object-contain"
+                    />
+                  </div>
+                ) : (
+                  <ProductCover product={product} />
+                )}
+              </div>
+              {product.poster ? (
+                <p className="text-ink-faint mt-3 text-xs">
+                  {fr(
+                    "Affiche de l'offre. Le prix, le contenu et la livraison indiqués sur cette page font foi.",
+                  )}
+                </p>
+              ) : null}
+            </div>
 
-            <ul className="flex flex-col gap-2.5 text-[0.9375rem] text-white/90">
-              {[
-                "Accès à vie : vous payez une seule fois",
-                "Prêt en quelques minutes, même sans être technique",
-                "Reçu dès la confirmation de votre paiement",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <span
-                    aria-hidden
-                    className="bg-brand-200 mt-[0.55rem] h-[7px] w-[7px] shrink-0 rounded-full"
-                  />
-                  <span>{fr(item)}</span>
-                </li>
-              ))}
-            </ul>
+            <div className="flex min-w-0 flex-col gap-6">
+              <div className="flex flex-wrap items-center gap-2">
+                {BADGES.map((badge) => (
+                  <Badge key={badge.label} variant={badge.variant}>
+                    {fr(badge.label)}
+                  </Badge>
+                ))}
+              </div>
 
-            <div id="hero-cta" className="flex w-full flex-col gap-3 sm:w-auto">
-              <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <span className="font-display tabular text-[2.5rem] leading-none">
-                  {price}
-                </span>
-                <span className="text-sm text-white/75">
-                  paiement unique, à vie
-                </span>
-              </p>
-              <Button asChild variant="inverse" size="lg" className="w-full">
-                <Link href={orderHref}>
-                  Je commande maintenant
-                  <IconFleche size={18} />
-                </Link>
-              </Button>
-              <p className="flex items-center gap-2 text-[0.8125rem] text-white/75">
-                <IconCadenas size={15} />
-                {fr("Paiement sécurisé par Mobile Money ou carte bancaire")}
-              </p>
+              <div>
+                <h1 className="text-ink text-[1.875rem] leading-[1.1] tracking-[-0.02em] sm:text-[2.5rem] lg:text-[2.75rem]">
+                  {fr(product.name)}
+                </h1>
+                <p className="text-ink-soft mt-4 text-[1.0625rem] leading-relaxed">
+                  {fr(TAGLINE)}
+                </p>
+              </div>
+
+              <PackPurchaseCard
+                price={product.price}
+                orderHref={orderHref}
+                points={CARD_POINTS}
+              />
             </div>
           </div>
-
-          {product.poster ? (
-            <div
-              className="rise-in mx-auto w-full max-w-[26rem]"
-              style={{ "--i": 2 } as React.CSSProperties}
-            >
-              <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-white shadow-[0_24px_60px_rgba(0,0,0,0.35)]">
-                <Image
-                  src={product.poster.src}
-                  alt={product.poster.alt}
-                  fill
-                  priority
-                  sizes="(min-width: 1024px) 416px, 92vw"
-                  className="object-contain"
-                />
-              </div>
-            </div>
-          ) : null}
         </Container>
       </section>
 
-      {/* ===================== Bandeau de réassurance ===================== */}
-      <Container className="relative z-10 -mt-12">
-        <ul className="bg-paper border-line shadow-lift grid grid-cols-2 gap-px overflow-hidden rounded-xl border lg:grid-cols-4">
-          {REASSURANCE.map((item) => (
-            <li
-              key={item.label}
-              className="bg-paper flex min-w-0 flex-col items-start gap-2.5 p-4 sm:flex-row sm:items-center sm:gap-3 sm:p-5"
-            >
-              <IconChip name={item.icon} size={40} />
-              <span className="text-ink min-w-0 text-[0.8125rem] leading-snug font-medium [overflow-wrap:anywhere] sm:text-sm">
-                {fr(item.label)}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </Container>
-
-      {/* ============================== Problème ============================== */}
-      <section className="py-12 sm:py-20">
-        <Container>
-          <SectionHeading
-            eyebrow="Vous connaissez sûrement ça"
-            title={fr("Le pire moment pour que votre ordinateur vous lâche")}
-            lead={fr(
-              "Ce n'est jamais un jour tranquille : c'est la veille d'un rendu, d'une candidature, d'une réunion. Et c'est toujours à ce moment-là que ça bloque.",
-            )}
-          />
-          <div className="mt-7 grid grid-cols-1 gap-3 sm:mt-10 sm:grid-cols-2 sm:gap-5">
-            {PROBLEMS.map(({ title, text }) => (
-              <div
-                key={title}
-                className="border-line bg-paper shadow-card border-l-danger flex flex-col gap-3 rounded-xl border border-l-4 p-5 sm:p-6"
-              >
-                <h3 className="text-ink text-[1.1875rem] leading-snug font-semibold">
-                  {fr(title)}
-                </h3>
-                <p className="text-ink-soft text-[0.9375rem] leading-relaxed">
-                  {fr(text)}
-                </p>
-              </div>
-            ))}
-          </div>
-          <p className="font-display text-ink mx-auto mt-7 max-w-2xl text-center text-[1.375rem] leading-snug sm:mt-10 sm:text-[1.625rem]">
-            {fr(
-              "Chaque blocage vous coûte du temps, du stress et parfois une occasion. Il existe une solution simple, une fois pour toutes.",
-            )}
-          </p>
-        </Container>
-      </section>
-
-      {/* ============================== Solution ============================== */}
-      <section className="bg-paper-raised border-line border-y py-12 sm:py-20">
-        <Container>
-          <SectionHeading
-            align="center"
-            eyebrow="La solution"
-            title={fr("Un seul pack. Tout est prêt. Pour de bon.")}
-            lead={fr(
-              "Windows et Office, activés ensemble, à vie. Vous payez une fois, vous installez en quelques minutes, et vous n'y pensez plus.",
-            )}
-          />
-          <div className="mt-8 grid grid-cols-1 gap-3 sm:mt-12 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-            {BENEFITS.map((item) => (
-              <div
-                key={item.title}
-                className="border-line bg-paper shadow-card flex flex-col gap-3 rounded-xl border p-5 sm:p-6"
-              >
-                <div className="flex items-center gap-3">
-                  <IconChip name={item.icon} size={40} />
-                  <h3 className="text-ink min-w-0 text-[1.1875rem] leading-snug font-semibold">
-                    {fr(item.title)}
-                  </h3>
-                </div>
-                <p className="text-ink-soft text-[0.9375rem] leading-relaxed">
-                  {fr(item.text)}
-                </p>
-              </div>
-            ))}
-          </div>
-          <div className="mx-auto mt-7 flex max-w-md flex-col gap-3 sm:mt-10">
-            <Button asChild size="lg" className="w-full">
-              <Link href={orderHref}>
-                {fr(`Je veux mon pack — ${price}`)}
-                <IconFleche size={18} />
-              </Link>
-            </Button>
-          </div>
-        </Container>
-      </section>
-
-      {/* ============================== Piliers ============================== */}
-      <section className="py-12 sm:py-20">
-        <Container>
-          <SectionHeading
-            eyebrow="Pourquoi c'est le bon choix"
-            title={fr("Trois raisons de ne plus jamais y repenser")}
-          />
-          <div className="mt-7 grid grid-cols-1 gap-3 sm:mt-10 sm:gap-5 md:grid-cols-3">
-            {PILLARS.map((item) => (
-              <div
-                key={item.keyword}
-                className="border-line bg-paper shadow-card border-l-brand flex flex-col gap-2 rounded-xl border border-l-4 p-5 sm:p-6"
-              >
-                <p className="font-display text-brand-text text-[2.25rem] leading-none">
-                  {fr(item.keyword)}
-                </p>
-                <h3 className="text-ink text-[1.0625rem] leading-snug font-semibold">
-                  {fr(item.title)}
-                </h3>
-                <p className="text-ink-soft text-[0.9375rem] leading-relaxed">
-                  {fr(item.text)}
-                </p>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      {/* ============================== Étapes ============================== */}
-      <section className="bg-paper-raised border-line border-y py-12 sm:py-20">
-        <Container>
-          <SectionHeading
-            align="center"
-            eyebrow="Comment ça se passe"
-            title={fr("Trois étapes, et c'est terminé")}
-          />
-          <ol className="mt-8 grid grid-cols-1 gap-3 sm:mt-12 sm:gap-5 md:grid-cols-3">
-            {STEPS.map((step, index) => (
-              <li
-                key={step.title}
-                className="border-line bg-paper shadow-card flex flex-col gap-3 rounded-xl border p-5 sm:p-6"
-              >
-                <span className="bg-brand text-brand-contrast font-display flex h-10 w-10 items-center justify-center rounded-full text-[1.25rem]">
-                  {index + 1}
-                </span>
-                <h3 className="text-ink text-[1.1875rem] leading-snug font-semibold">
-                  {fr(step.title)}
-                </h3>
-                <p className="text-ink-soft text-[0.9375rem] leading-relaxed">
-                  {fr(step.text)}
-                </p>
-              </li>
-            ))}
-          </ol>
-        </Container>
-      </section>
-
-      {/* ============================== Confiance ============================== */}
-      <section className="py-12 sm:py-20">
-        <Container>
-          <SectionHeading
-            eyebrow="Votre tranquillité"
-            title={fr("Vous achetez en confiance")}
-            lead={fr(
-              "On sait que vous avez peut-être déjà été déçu. Voilà ce qui rend cet achat sûr.",
-            )}
-          />
-          <div className="mt-7 grid grid-cols-1 gap-3 sm:mt-10 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
-            {TRUST.map((item) => (
-              <div
-                key={item.title}
-                className="border-line bg-paper shadow-card flex flex-col gap-3 rounded-xl border p-5"
-              >
-                <div className="flex items-center gap-3">
-                  <IconChip name={item.icon} size={40} />
-                  <h3 className="text-ink min-w-0 text-base leading-snug font-semibold">
-                    {fr(item.title)}
-                  </h3>
-                </div>
-                <p className="text-ink-soft text-[0.875rem] leading-relaxed">
-                  {fr(item.text)}
-                </p>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      {/* ============================== Questions ============================== */}
-      <section className="bg-paper-raised border-line border-y py-12 sm:py-20">
+      {/* ====================== Description / Livraison ====================== */}
+      <section className="bg-paper-raised py-12 sm:py-16">
         <Container className="max-w-3xl">
-          <Eyebrow>Questions fréquentes</Eyebrow>
-          <h2 className="font-display text-ink mt-2 mb-6 text-[1.625rem] leading-tight sm:text-[2rem]">
-            {fr("Avant de commander, vous vous demandez peut-être…")}
-          </h2>
-          <FaqList items={faq} />
-        </Container>
-      </section>
+          <Tabs defaultValue="description">
+            <TabsList
+              aria-label="Détails du pack"
+              className="-mx-4 [scrollbar-width:none] px-4 sm:mx-0 sm:px-0"
+            >
+              <TabsTrigger
+                value="description"
+                className="min-h-12 text-[0.9375rem]"
+              >
+                Description
+              </TabsTrigger>
+              <TabsTrigger
+                value="livraison"
+                className="min-h-12 text-[0.9375rem]"
+              >
+                Livraison et accès
+              </TabsTrigger>
+            </TabsList>
 
-      {/* ============================== Appel final ============================== */}
-      <section className="illus-zone on-navy">
-        <Container className="flex flex-col items-center gap-6 py-12 text-center sm:py-20">
-          <h2 className="max-w-2xl text-[1.875rem] leading-[1.1] tracking-[-0.01em] sm:text-[2.75rem]">
-            {fr("Reprenez la main sur votre ordinateur, dès aujourd'hui.")}
-          </h2>
-          <p className="max-w-xl text-[1.0625rem] leading-relaxed text-white/85">
-            {fr(
-              `Un seul paiement de ${price}, une fois pour toutes. Dans quelques minutes, Word, Excel, PowerPoint et Windows fonctionnent enfin sans limite.`,
-            )}
-          </p>
-          <div id="final-cta" className="flex w-full max-w-sm flex-col gap-3">
-            <Button asChild variant="inverse" size="lg" className="w-full">
-              <Link href={orderHref}>
-                {fr(`Je commande maintenant — ${price}`)}
-                <IconFleche size={18} />
-              </Link>
-            </Button>
-            <p className="flex items-center justify-center gap-2 text-[0.8125rem] text-white/75">
-              <IconCadenas size={15} />
-              {fr("Paiement sécurisé · Accès immédiat · À vie")}
-            </p>
-          </div>
+            {/* forceMount : les deux onglets restent dans la page (lisibles par
+                les moteurs de recherche, boutons surveillés par la barre d'achat). */}
+            <TabsContent
+              value="description"
+              forceMount
+              className="pt-8 data-[state=inactive]:hidden"
+            >
+              <div className="flex max-w-3xl flex-col gap-5">
+                <p className="font-display text-ink text-[1.375rem] leading-snug sm:text-[1.5rem]">
+                  {fr(LEAD)}
+                </p>
+                <p className="text-ink-soft text-[1.0625rem] leading-relaxed">
+                  {fr(INTRO)}
+                </p>
+
+                <h2 className={H2}>Les blocages que vous ne reverrez plus</h2>
+                <ul className="flex flex-col gap-4">
+                  {PROBLEMS.map((item) => (
+                    <li key={item.title} className="flex items-start gap-3">
+                      <Dot />
+                      <p className="text-ink-soft min-w-0 text-[0.9375rem] leading-relaxed">
+                        <strong className="text-ink block font-semibold">
+                          {fr(item.title)}
+                        </strong>
+                        {fr(item.text)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+
+                <h2 className={H2}>Ce que contient votre pack</h2>
+                <div className="flex flex-col gap-5">
+                  {CONTENTS.map((block, index) => (
+                    <div key={block.title}>
+                      <h3 className="text-ink text-[1.0625rem] leading-snug font-semibold">
+                        {index + 1}. {fr(block.title)}
+                      </h3>
+                      <p className="text-ink-soft mt-1 text-[0.9375rem] leading-relaxed">
+                        {fr(block.text)}
+                      </p>
+                      {block.apps ? (
+                        <ul className="mt-2.5 flex flex-col gap-1.5">
+                          {OFFICE_APPS.map(([name, detail]) => (
+                            <li
+                              key={name}
+                              className="text-ink-soft text-[0.9375rem] leading-relaxed"
+                            >
+                              <span className="text-ink font-semibold">
+                                {name}
+                              </span>{" "}
+                              : {fr(detail)}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+
+                <h2 className={H2}>
+                  Pourquoi ce pack plutôt qu&rsquo;un autre
+                </h2>
+                <ul className="flex flex-col gap-3">
+                  {WHY.map((item) => (
+                    <li key={item.title} className="flex items-start gap-3">
+                      <Dot />
+                      <p className="text-ink-soft min-w-0 text-[0.9375rem] leading-relaxed">
+                        <strong className="text-ink font-semibold">
+                          {fr(item.title)}
+                        </strong>{" "}
+                        {fr(item.text)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+
+                <h2 className={H2}>À qui s&rsquo;adresse ce pack</h2>
+                <p className="text-ink-soft text-[0.9375rem] leading-relaxed">
+                  {fr(FOR_WHO)}
+                </p>
+
+                <div className="border-line bg-paper rounded-xl border p-5">
+                  <p className="font-display text-ink flex items-center gap-3 text-[1.125rem]">
+                    <IconChip name="verifie" size={32} />À savoir avant de
+                    commander
+                  </p>
+                  <ul className="mt-4 flex flex-col gap-2.5">
+                    {GOOD_TO_KNOW.map((item) => (
+                      <li key={item} className="flex items-start gap-3">
+                        <Dot />
+                        <span className="text-ink-soft min-w-0 text-[0.9375rem] leading-relaxed">
+                          {fr(item)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <h2 className={H2}>Prix</h2>
+                <p className="text-ink-soft text-[0.9375rem] leading-relaxed">
+                  {fr(
+                    `Le pack complet (Windows 10 et 11, Office et antivirus gratuit) pour ${price}. Vous payez une fois, sans abonnement ni renouvellement.`,
+                  )}
+                </p>
+              </div>
+
+              <PackInlineCta
+                id="description-cta"
+                title="Prêt à reprendre la main sur votre ordinateur ?"
+                label={`Je commande — ${price}`}
+                href={orderHref}
+              />
+            </TabsContent>
+
+            <TabsContent
+              value="livraison"
+              forceMount
+              className="pt-8 data-[state=inactive]:hidden"
+            >
+              <div className="max-w-3xl">
+                <h2 className="font-display text-ink text-[1.375rem] leading-tight sm:text-[1.625rem]">
+                  Comment vous recevez votre pack
+                </h2>
+                <div className="mt-6">
+                  <StepsGrid steps={STEPS} />
+                </div>
+
+                <div className="mt-12">
+                  <Eyebrow>Questions fréquentes</Eyebrow>
+                  <h2 className="font-display text-ink mt-2 mb-5 text-[1.375rem] leading-tight sm:text-[1.625rem]">
+                    {fr("Avant de commander, vous vous demandez peut-être…")}
+                  </h2>
+                  <FaqList items={faq} />
+                </div>
+              </div>
+
+              <PackInlineCta
+                id="delivery-cta"
+                title="Votre pack vous attend."
+                label={`Je commande — ${price}`}
+                href={orderHref}
+              />
+            </TabsContent>
+          </Tabs>
         </Container>
       </section>
 
@@ -529,7 +498,7 @@ export default async function PackActivationPage() {
         label="Commander"
         name={product.name}
         price={price}
-        hideWhileVisible={["hero-cta", "final-cta"]}
+        hideWhileVisible={["hero-cta", "description-cta", "delivery-cta"]}
       />
     </div>
   );

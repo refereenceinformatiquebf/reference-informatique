@@ -1011,10 +1011,9 @@ export const PRODUCTS: Product[] = [
       faqAcces,
     ],
     seo: {
-      title:
-        "Activation Windows 10/11 + Office 365 à vie — Word, Excel, PowerPoint",
+      title: "Activation Windows 10/11 + Office 365 à vie",
       description:
-        "Fini « Activer Windows » et les documents bloqués : Windows et Office 365 activés à vie, installation guidée en quelques minutes, antivirus gratuit offert. 4 000 F, paiement unique.",
+        "Windows 10/11 et Office 365 activés à vie : un seul paiement de 4 000 F, installation guidée en quelques minutes, antivirus gratuit offert.",
     },
     order: 20,
   },
