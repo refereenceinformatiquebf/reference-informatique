@@ -3,7 +3,7 @@ import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
-import { Container, Eyebrow, IconChip } from "@/components/ui/section";
+import { Container, Eyebrow } from "@/components/ui/section";
 import { FaqList } from "@/components/ui/faq-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JsonLd } from "@/components/json-ld";
@@ -20,7 +20,6 @@ import { productPath } from "@/lib/catalog/paths";
 import { getVisitorCountry } from "@/lib/geo";
 import { SITE } from "@/lib/site";
 import { fr } from "@/lib/typography";
-import type { IconKey } from "@/lib/catalog/types";
 
 const SLUG = "pack-activation-windows11et10-et-office365-a-vie";
 
@@ -92,26 +91,7 @@ const BADGES: { label: string; variant: "neutral" | "success" | "navy" }[] = [
 ];
 
 const TAGLINE =
-  "Fini « Activer Windows » et les documents verrouillés. Word, Excel et PowerPoint tournent enfin sans limite, pour un seul paiement, à vie.";
-
-const CARD_POINTS: { icon: IconKey; text: string }[] = [
-  {
-    icon: "cadenas",
-    text: "Réglez par Mobile Money ou carte sur une page protégée. Vos codes ne passent jamais par nous.",
-  },
-  {
-    icon: "eclair",
-    text: "Votre accès arrive dès la confirmation de votre paiement. Pas d'attente.",
-  },
-  {
-    icon: "support",
-    text: "Un guide pas à pas, et une assistance si une étape vous bloque.",
-  },
-  {
-    icon: "verifie",
-    text: "Plus de 160 clients nous font déjà confiance.",
-  },
-];
+  "Fini « Activer Windows » et les documents verrouillés. Word, Excel et PowerPoint tournent enfin sans limite, pour un seul paiement, à vie.";
 
 const PROBLEMS: { title: string; text: string }[] = [
   {
@@ -160,41 +140,11 @@ const CONTENTS: { title: string; text: string; apps?: boolean }[] = [
   },
 ];
 
-const WHY: { title: string; text: string }[] = [
-  {
-    title: "Vous payez une fois.",
-    text: "Pas d'abonnement, pas de renouvellement, pas de mauvaise surprise dans six mois.",
-  },
-  {
-    title: "C'est prêt en quelques minutes.",
-    text: "L'accès se crée tout seul après votre paiement. Personne à attendre, aucun rendez-vous à prendre.",
-  },
-  {
-    title: "Pas besoin d'être technique.",
-    text: "Une petite application et un guide pas à pas. Si vous savez installer une application sur votre téléphone, vous y arriverez.",
-  },
-  {
-    title: "Les bons fichiers.",
-    text: "Windows et Office s'installent depuis les fichiers d'installation officiels, fournis dans votre espace.",
-  },
-  {
-    title: "Une main tendue si ça bloque.",
-    text: "Une assistance vous répond sur WhatsApp.",
-  },
-];
-
 const FOR_WHO: string[] = [
   "Vous êtes étudiant : mémoire, exposés, dossiers à rendre.",
   "Vous êtes fonctionnaire ou salarié : Word et Excel font votre quotidien.",
   "Vous êtes entrepreneur : devis, factures et présentations ne peuvent pas attendre.",
   "Vous venez d'acheter, d'installer ou de réinitialiser un ordinateur.",
-];
-
-const GOOD_TO_KNOW: string[] = [
-  "Ce pack est conçu pour les ordinateurs Windows : il ne fonctionne pas sur Mac.",
-  "Chaque paiement correspond à un ordinateur.",
-  "Il faut une connexion Internet pour télécharger, installer et activer.",
-  "Le pack active Windows 10 et 11 ; installer Windows 11, en revanche, dépend de la configuration de votre PC (exigences de Microsoft).",
 ];
 
 const STEPS: { title: string; text: string }[] = [
@@ -221,7 +171,7 @@ const FAQ: { question: string; answer: string }[] = [
     question:
       "Je n'y connais pas grand-chose en informatique : vais-je y arriver ?",
     answer:
-      "Oui. Il suffit d'installer une seule petite application et de suivre le guide, étape par étape : comptez quelques minutes. Et si une étape vous bloque, notre équipe vous aide pas à pas.",
+      "Oui. C'est très simple d'activer Windows et Office à vie, vous recevez le guide aussi : comptez juste quelques minutes. Et si vous rencontrez des difficultés, notre équipe vous aide pas à pas.",
   },
   {
     question: "Est-ce que ça expire ? Dois-je payer chaque année ?",
@@ -305,13 +255,6 @@ export default async function PackActivationPage() {
                   <ProductCover product={product} />
                 )}
               </div>
-              {product.poster ? (
-                <p className="text-ink-faint mt-3 text-xs">
-                  {fr(
-                    "Affiche de l'offre. Le prix, le contenu et la livraison indiqués sur cette page font foi.",
-                  )}
-                </p>
-              ) : null}
             </div>
 
             <div className="flex min-w-0 flex-col gap-6">
@@ -332,11 +275,7 @@ export default async function PackActivationPage() {
                 </p>
               </div>
 
-              <PackPurchaseCard
-                price={product.price}
-                orderHref={orderHref}
-                points={CARD_POINTS}
-              />
+              <PackPurchaseCard price={product.price} orderHref={orderHref} />
             </div>
           </div>
         </Container>
@@ -441,21 +380,6 @@ export default async function PackActivationPage() {
                   ))}
                 </div>
 
-                <h2 className={H2}>Pourquoi vous n&rsquo;y repenserez plus</h2>
-                <ul className="flex flex-col gap-4">
-                  {WHY.map((item) => (
-                    <li key={item.title} className="flex items-start gap-3">
-                      <Dot />
-                      <p className={`${BODY} min-w-0`}>
-                        <strong className="text-ink font-semibold">
-                          {fr(item.title)}
-                        </strong>{" "}
-                        {fr(item.text)}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-
                 <h2 className={H2}>Ce pack est pour vous si…</h2>
                 <ul className="flex flex-col gap-3">
                   {FOR_WHO.map((item) => (
@@ -465,21 +389,6 @@ export default async function PackActivationPage() {
                     </li>
                   ))}
                 </ul>
-
-                <div className="border-line bg-paper mt-2 rounded-xl border p-5 sm:p-6">
-                  <p className="font-display text-ink flex items-center gap-3 text-[1.125rem]">
-                    <IconChip name="verifie" size={32} />À savoir avant de
-                    commander
-                  </p>
-                  <ul className="mt-4 flex flex-col gap-3">
-                    {GOOD_TO_KNOW.map((item) => (
-                      <li key={item} className="flex items-start gap-3">
-                        <Dot />
-                        <span className={`${BODY} min-w-0`}>{fr(item)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
 
                 <h2 className={H2}>Le prix</h2>
                 <p className={BODY}>
