@@ -2,6 +2,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma/client";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { findAuthUser, normalizeEmail } from "@/lib/auth/email-links";
+import { countryFromPhone } from "@/lib/phone";
 import type { BuyerInput } from "@/lib/validations/order";
 
 type Profile = NonNullable<
@@ -108,9 +109,9 @@ export async function ensureAccount(input: {
   return { profile, createdAccount };
 }
 
-/** Complète (sans jamais écraser) le nom et le téléphone du profil. */
+/** Complète (sans jamais écraser) le nom, le téléphone et le pays du profil. */
 async function completeProfile(profile: Profile, input: BuyerInput) {
-  const data: { name?: string; phone?: string } = {};
+  const data: { name?: string; phone?: string; country?: string } = {};
 
   // Un compte créé par simple lien porte comme « nom » la partie locale de
   // son email : on le remplace par le vrai nom. Un nom saisi par le client,
@@ -120,7 +121,13 @@ async function completeProfile(profile: Profile, input: BuyerInput) {
   if (placeholderName && input.name && input.name !== profile.name) {
     data.name = input.name;
   }
-  if (!profile.phone && input.phone) data.phone = input.phone;
+  if (!profile.phone && input.phone) {
+    data.phone = input.phone;
+    // Déduit du même numéro (indicatif du sélecteur PhoneInput), jamais d'un
+    // champ saisi séparément — voir lib/phone.ts.
+    const country = countryFromPhone(input.phone);
+    if (!profile.country && country) data.country = country;
+  }
 
   if (Object.keys(data).length === 0) return profile;
   return prisma.profile.update({ where: { id: profile.id }, data });

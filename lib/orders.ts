@@ -364,6 +364,7 @@ async function notifyPaymentConfirmed(orderId: string) {
       orderId: order.id,
       clientName: order.profile.name,
       clientPhone: order.profile.phone ?? shipping?.phone ?? "",
+      clientCountry: order.profile.country,
       clientEmail: email ?? undefined,
       productName: product.name,
       amount: order.amount,

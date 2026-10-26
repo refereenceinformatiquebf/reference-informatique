@@ -32,7 +32,9 @@ export function whatsappLink(message?: string) {
 /**
  * Lien WhatsApp vers le numéro d'un CLIENT (et non celui de l'entreprise),
  * pour l'administration. Le numéro est nettoyé ; s'il n'a pas d'indicatif
- * pays (8 chiffres), on ajoute celui du Burkina Faso (226).
+ * pays (8 chiffres), on ajoute celui du Burkina Faso (226) — repli pour les
+ * profils créés avant PhoneInput (components/ui/phone-input.tsx), qui
+ * garantit désormais un indicatif explicite sur tout nouveau numéro.
  */
 export function whatsappLinkTo(phone: string, message?: string) {
   let digits = phone.replace(/\D/g, "");

@@ -17,6 +17,7 @@ import { AdminReplyEmail } from "@/lib/email/templates/admin-reply";
 import { AuthLinkEmail } from "@/lib/email/templates/auth-link";
 import { OrderLinksEmail } from "@/lib/email/templates/order-links";
 import { PaymentReminderEmail } from "@/lib/email/templates/payment-reminder";
+import { PendingOrdersDigestEmail } from "@/lib/email/templates/pending-orders-digest";
 
 /**
  * Aperçu visuel de chaque gabarit d'email, sans envoi réel — pour itérer
@@ -166,6 +167,41 @@ export default function EmailPreviewPage() {
           channel="WHATSAPP"
           adminUrl="http://localhost:3000/admin/commandes/exemple"
         />
+      </Preview>
+      <Preview title="Rapport équipe : commandes à relancer (9h/13h/19h)">
+        <PendingOrdersDigestEmail
+          rows={[
+            {
+              reference: "3F9A2C71",
+              clientName: "Awa Compaoré",
+              clientPhone: "+226 70 00 00 00",
+              clientCountry: "Burkina Faso",
+              clientEmail: "awa@example.com",
+              productName: sampleProduct,
+              amount: 12000,
+              status: "EN_ATTENTE",
+              createdAgo: "il y a 3 h",
+              whatsappUrl: "https://wa.me/22670000000",
+              adminUrl: "http://localhost:3000/admin/commandes/exemple",
+            },
+            {
+              reference: "7B1D4E90",
+              clientName: "Issa Ouédraogo",
+              clientPhone: null,
+              clientCountry: null,
+              clientEmail: "issa@example.com",
+              productName: "Le Chercheur Augmenté",
+              amount: 6000,
+              status: "ECHOUE",
+              createdAgo: "il y a 9 h",
+              whatsappUrl: null,
+              adminUrl: "http://localhost:3000/admin/commandes/exemple2",
+            },
+          ]}
+        />
+      </Preview>
+      <Preview title="Rapport équipe : rien à signaler">
+        <PendingOrdersDigestEmail rows={[]} />
       </Preview>
       <Preview title="Devis reçu (client)">
         <DevisReceivedClientEmail

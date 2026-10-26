@@ -13,7 +13,7 @@ import { NoteForm } from "@/components/admin/note-form";
 import { EmailForm } from "@/components/admin/email-form";
 import { prisma } from "@/lib/prisma/client";
 import { getProduct } from "@/lib/catalog/live";
-import { formatDateTime, formatPrice } from "@/lib/format";
+import { formatDateTime, formatPrice, timeAgo } from "@/lib/format";
 import { ORDER_STATUS_LABELS } from "@/lib/status-labels";
 import { whatsappLinkTo } from "@/lib/site";
 import {
@@ -63,6 +63,9 @@ export default async function AdminOrderDetailPage({
   const physical =
     Boolean(order.deliveryStatus) || Boolean(order.shippingAddress);
   const shippingPhone = order.shippingPhone ?? order.profile.phone;
+  const now = new Date();
+  const pendingSince = now.getTime() - order.createdAt.getTime();
+  const pendingLong = pendingSince > 24 * 60 * 60 * 1000;
 
   return (
     <>
@@ -76,7 +79,17 @@ export default async function AdminOrderDetailPage({
             {order.paidAt ? ` · payée le ${formatDateTime(order.paidAt)}` : ""}
           </>
         }
-        actions={<StatusBadge label={status.label} variant={status.variant} />}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge label={status.label} variant={status.variant} />
+            {order.status === "EN_ATTENTE" ? (
+              <StatusBadge
+                label={`En attente ${timeAgo(order.createdAt, now)}`}
+                variant={pendingLong ? "danger" : "warning"}
+              />
+            ) : null}
+          </div>
+        }
       />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
@@ -387,6 +400,7 @@ export default async function AdminOrderDetailPage({
                 },
                 { label: "Email", value: order.profile.email ?? "—" },
                 { label: "Téléphone", value: order.profile.phone ?? "—" },
+                { label: "Pays", value: order.profile.country ?? "—" },
               ]}
             />
             {order.profile.phone ? (

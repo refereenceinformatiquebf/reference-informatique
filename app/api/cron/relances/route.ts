@@ -1,14 +1,8 @@
-import { timingSafeEqual } from "node:crypto";
+import { authorizeCron } from "@/lib/cron-auth";
 import { sendDueReminders } from "@/lib/checkout/reminders";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
-
-function safeEqual(a: string, b: string) {
-  const left = Buffer.from(a);
-  const right = Buffer.from(b);
-  return left.length === right.length && timingSafeEqual(left, right);
-}
 
 /**
  * Tâche planifiée (voir vercel.json) : une relance, une seule, pour chaque
@@ -19,19 +13,8 @@ function safeEqual(a: string, b: string) {
  * ne laisse jamais une adresse publique déclencher des emails.
  */
 export async function GET(request: Request) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) {
-    return Response.json({
-      disabled: true,
-      message:
-        "CRON_SECRET n'est pas défini : les relances automatiques sont désactivées.",
-    });
-  }
-
-  const authorization = request.headers.get("authorization") ?? "";
-  if (!safeEqual(authorization, `Bearer ${secret}`)) {
-    return new Response("Non autorisé", { status: 401 });
-  }
+  const auth = authorizeCron(request);
+  if (!auth.ok) return auth.response;
 
   const result = await sendDueReminders();
   return Response.json(result);

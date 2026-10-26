@@ -13,6 +13,7 @@ export type OrderAlertProps = {
   clientName: string;
   clientPhone: string;
   clientEmail?: string;
+  clientCountry?: string | null;
   productName: string;
   amount: number;
   quantity?: number;
@@ -27,6 +28,7 @@ export function NewOrderAdminEmail({
   clientName,
   clientPhone,
   clientEmail,
+  clientCountry,
   productName,
   amount,
   quantity = 1,
@@ -45,6 +47,7 @@ export function NewOrderAdminEmail({
     <EmailLayout preview={`${heading} — ${productName}`} heading={heading}>
       <Text style={emailTextStyle}>
         <strong style={emailStrongStyle}>{clientName}</strong> — {clientPhone}
+        {clientCountry ? ` — ${clientCountry}` : ""}
         {clientEmail ? ` — ${clientEmail}` : ""}
       </Text>
       <Text style={emailTextStyle}>

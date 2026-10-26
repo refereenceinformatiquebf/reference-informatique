@@ -41,6 +41,12 @@ export const buyerSchema = z.object({
     .max(30, { error: "Ce numéro est trop long." })
     .refine((value) => value === "" || value.replace(/\D/g, "").length >= 8, {
       error: "Indiquez un numéro valide (au moins 8 chiffres).",
+    })
+    // Le composant PhoneInput (indicatif + numéro local) produit toujours un
+    // numéro commençant par « + » : un envoi qui le contourne (requête
+    // forgée) est rejeté plutôt que stocké sans indicatif de pays connu.
+    .refine((value) => value === "" || value.startsWith("+"), {
+      error: "Indiquez votre indicatif pays (sélecteur à gauche du numéro).",
     }),
 });
 

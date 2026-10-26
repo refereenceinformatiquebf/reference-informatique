@@ -13,6 +13,7 @@ import { Form } from "@/components/ui/form";
 import { Honeypot } from "@/components/ui/honeypot";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { IconCadenas, IconCoche, IconFleche } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
@@ -238,14 +239,10 @@ export function LicenceOrderForm({
 
               <div className="flex min-w-0 flex-col gap-1.5">
                 <Label htmlFor="co-phone">Téléphone (WhatsApp)</Label>
-                <Input
+                <PhoneInput
                   id="co-phone"
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  placeholder="+226 XX XX XX XX"
                   value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
+                  onChange={setPhone}
                   required
                   aria-invalid={Boolean(errors.phone)}
                 />

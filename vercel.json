@@ -1,3 +1,8 @@
 {
-  "crons": [{ "path": "/api/cron/relances", "schedule": "0 9 * * *" }]
+  "crons": [
+    { "path": "/api/cron/relances", "schedule": "0 9 * * *" },
+    { "path": "/api/cron/rapport-commandes", "schedule": "0 9 * * *" },
+    { "path": "/api/cron/rapport-commandes", "schedule": "0 13 * * *" },
+    { "path": "/api/cron/rapport-commandes", "schedule": "0 19 * * *" }
+  ]
 }

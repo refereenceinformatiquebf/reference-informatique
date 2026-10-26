@@ -29,6 +29,10 @@ model Profile {
   id           String   @id @db.Uuid // == auth.users.id
   name         String
   phone        String?
+  // Déduit de l'indicatif du téléphone au moment de la commande (voir
+  // lib/phone.ts, components/ui/phone-input.tsx) — jamais un champ saisi
+  // séparément, pour ne jamais désynchroniser le pays affiché du numéro réel.
+  country      String?
   // Miroir de auth.users.email, tenu à jour par un déclencheur (voir
   // supabase/migrations/0004_profile_email.sql) : permet de chercher un
   // client par email sans appeler l'API d'authentification.
@@ -222,6 +226,10 @@ model Order {
   accessToken       String?         @unique @map("access_token")
   // Date de l'unique relance d'une commande jamais payée.
   reminderSentAt    DateTime?       @map("reminder_sent_at")
+  // Dernier rapport admin (9h/13h/19h, voir lib/checkout/call-digest.ts) dans
+  // lequel cette commande non finalisée a été signalée — une commande
+  // n'apparaît qu'une seule fois dans ces rapports, jamais réempilée.
+  adminDigestSentAt DateTime?       @map("admin_digest_sent_at")
   // Commande créée par l'équipe (client mal localisé, paiement hors site…).
   manual            Boolean         @default(false)
   internalNote      String?         @map("internal_note") @db.Text
@@ -234,6 +242,7 @@ model Order {
 
   @@index([providerSessionId])
   @@index([status, createdAt])
+  @@index([status, adminDigestSentAt])
   @@index([paidAt])
   @@index([profileId])
   @@index([productId])

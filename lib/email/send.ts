@@ -29,6 +29,10 @@ import { LicenceStockAlertEmail } from "./templates/licence-stock-alert";
 import { OrderLinksEmail, type OrderLinkItem } from "./templates/order-links";
 import { PaymentReminderEmail } from "./templates/payment-reminder";
 import { LicenceReadyEmail } from "./templates/licence-ready";
+import {
+  PendingOrdersDigestEmail,
+  type PendingOrderDigestRow,
+} from "./templates/pending-orders-digest";
 
 const SENDER = {
   name: SITE.name,
@@ -330,6 +334,19 @@ export async function sendOrderAlert(
     replyTo: params.clientEmail
       ? { email: params.clientEmail, name: params.clientName }
       : undefined,
+  });
+}
+
+/** Rapport interne (9h/13h/19h) des commandes non finalisées jamais encore signalées — voir lib/checkout/call-digest.ts. */
+export async function sendPendingOrdersDigest(rows: PendingOrderDigestRow[]) {
+  await sendEmail({
+    to: adminRecipients(),
+    subject:
+      rows.length > 0
+        ? `${rows.length} commande${rows.length > 1 ? "s" : ""} à relancer`
+        : "Rien à signaler — aucune commande en attente",
+    react: PendingOrdersDigestEmail({ rows }),
+    template: "pending-orders-digest",
   });
 }
 
