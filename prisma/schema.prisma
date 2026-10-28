@@ -233,6 +233,14 @@ model Order {
   // Commande créée par l'équipe (client mal localisé, paiement hors site…).
   manual            Boolean         @default(false)
   internalNote      String?         @map("internal_note") @db.Text
+  // Signaux captés côté serveur à la création/mise à jour de la commande (voir
+  // lib/actions/order.ts, getOrCreatePendingOrder), pour l'API Conversions Meta
+  // (lib/meta-capi.ts) — sans eux, un achat remonte à Meta sans pouvoir être relié
+  // de façon fiable au clic publicitaire qui l'a réellement généré.
+  clientIp          String?         @map("client_ip")
+  userAgent         String?         @map("user_agent") @db.Text
+  fbp               String?         @map("fbp")
+  fbc               String?         @map("fbc")
   createdAt         DateTime        @default(now()) @map("created_at")
   updatedAt         DateTime        @updatedAt @map("updated_at")
 

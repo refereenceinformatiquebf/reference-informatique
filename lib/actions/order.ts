@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers, cookies } from "next/headers";
 import { prisma } from "@/lib/prisma/client";
 import { getCurrentProfile } from "@/lib/auth/dal";
 import { isProductAvailable, type Product } from "@/lib/catalog";
@@ -25,6 +26,7 @@ import { ensureAccessToken, newAccessToken } from "@/lib/checkout/access";
 import { CheckoutError, openOnlinePayment } from "@/lib/checkout/pay";
 import { sendLinksForOrder } from "@/lib/checkout/links";
 import { phoneRequired } from "@/lib/checkout/rules";
+import { sendMetaInitiateCheckoutEvent } from "@/lib/meta-capi";
 
 export type OrderFormState =
   | {
@@ -197,6 +199,36 @@ async function getOrCreatePendingOrder(
       }
     : {};
 
+  // Signaux pour l'API Conversions Meta (voir lib/meta-capi.ts) — captés ici, au moment où la
+  // commande est créée/mise à jour, car c'est le seul endroit server-side systématiquement
+  // traversé avant le paiement. _fbp/_fbc sont posés par le pixel Meta lui-même dès qu'il
+  // charge ; sans eux, l'achat remonte plus tard à Meta sans pouvoir être relié de façon
+  // fiable au clic publicitaire qui l'a réellement généré.
+  const h = await headers();
+  const c = await cookies();
+  const metaSignals = {
+    clientIp:
+      h.get("x-real-ip") ??
+      h.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      null,
+    userAgent: h.get("user-agent"),
+    fbp: c.get("_fbp")?.value ?? null,
+    fbc: c.get("_fbc")?.value ?? null,
+  };
+
+  const fireInitiateCheckout = (order: { id: string }) => {
+    sendMetaInitiateCheckoutEvent({
+      eventId: `${order.id}-initiate`,
+      value: amount,
+      contentIds: [productRow.slug],
+      email: profile.email,
+      phone: profile.phone,
+      ...metaSignals,
+    }).catch((err) =>
+      console.error("[meta-capi] InitiateCheckout échoué pour", order.id, err),
+    );
+  };
+
   const pending = await prisma.order.findFirst({
     where: {
       profileId: profile.id,
@@ -216,8 +248,10 @@ async function getOrCreatePendingOrder(
         channel,
         paymentProvider: provider,
         ...shippingData,
+        ...metaSignals,
       },
     });
+    fireInitiateCheckout(updated);
     return { order: updated, isNew: false };
   }
 
@@ -245,6 +279,7 @@ async function getOrCreatePendingOrder(
       // Lien personnel de suivi : prêt dès la création (envoyé par email, jamais affiché).
       accessToken: newAccessToken(),
       ...shippingData,
+      ...metaSignals,
     },
   });
   await addOrderEvent(
@@ -255,6 +290,7 @@ async function getOrCreatePendingOrder(
       : "Commande créée (paiement via WhatsApp).",
     profile.email ?? profile.name,
   );
+  fireInitiateCheckout(order);
 
   return { order, isNew: true };
 }

@@ -23,6 +23,8 @@ import {
 } from "@/lib/licences/stock";
 import { audit } from "@/lib/admin/audit";
 import { trackingUrlFor } from "@/lib/checkout/access";
+import { sendMetaPurchaseEvent } from "@/lib/meta-capi";
+import { SITE } from "@/lib/site";
 
 /* ----------------------------- Historique ----------------------------- */
 
@@ -371,6 +373,21 @@ async function notifyPaymentConfirmed(orderId: string) {
       quantity: order.quantity,
       channel: order.channel,
       shipping,
+    }),
+    // eventId = order.id, identique a celui deja passe cote navigateur
+    // (app/commande/retour/page.tsx, <MetaEvent name="Purchase" eventId={order.id} .../>)
+    // pour que Meta deduplique les deux envois plutot que de compter l'achat deux fois.
+    sendMetaPurchaseEvent({
+      eventId: order.id,
+      value: order.amount,
+      contentIds: [product.slug],
+      email,
+      phone: order.profile.phone ?? shipping?.phone ?? null,
+      eventSourceUrl: `${SITE.url}/commande/retour?order=${order.id}`,
+      clientIp: order.clientIp,
+      userAgent: order.userAgent,
+      fbp: order.fbp,
+      fbc: order.fbc,
     }),
   ];
   if (email) {

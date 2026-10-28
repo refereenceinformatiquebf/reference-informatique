@@ -191,6 +191,28 @@ export async function runHealthChecks(): Promise<HealthCheck[]> {
       };
     }),
 
+    run(
+      "meta-capi",
+      "Attribution publicitaire (API Conversions Meta)",
+      async () => {
+        const token = process.env.META_CAPI_ACCESS_TOKEN;
+        // Pas d'appel de lecture possible avec ce jeton (droit d'écriture seul, voir
+        // lib/meta-capi.ts) : présence uniquement, pas une vérification en direct.
+        if (!token) {
+          return {
+            level: "warning",
+            detail:
+              "META_CAPI_ACCESS_TOKEN absent : les événements InitiateCheckout/Purchase ne partent que depuis le navigateur du client (jamais si bloqué ou sans consentement cookie).",
+          };
+        }
+        return {
+          level: "ok",
+          detail:
+            "Jeton présent (non vérifié en direct — consultez le Gestionnaire d'événements Meta pour confirmer la réception).",
+        };
+      },
+    ),
+
     run("env", "Adresse et réglages du site", async () => {
       const problems: string[] = [];
       if (
