@@ -2,13 +2,15 @@ name: Relances de paiement
 
 # Relance (une seule fois) les clients qui n'ont pas terminé leur paiement.
 # Vercel Hobby n'autorise qu'une tâche planifiée par jour (vercel.json) : ce
-# workflow appelle la même route toutes les 15 minutes, pour que la relance
-# parte environ 1 h après la commande. La route est idempotente (une relance par
-# commande) et protégée par CRON_SECRET, qui doit être IDENTIQUE ici (secret du
-# dépôt) et dans les variables d'environnement Vercel.
+# workflow appelle la même route à 9 h, 13 h et 19 h. Chaque passage relance les
+# commandes en attente depuis au moins 1 h. Les heures sont en UTC, soit l'heure
+# locale du Burkina Faso, de la Côte d'Ivoire, du Sénégal et du Mali. La route
+# est idempotente (une relance par commande) et protégée par CRON_SECRET, qui
+# doit être IDENTIQUE ici (secret du dépôt) et dans les variables
+# d'environnement Vercel.
 on:
   schedule:
-    - cron: "7,22,37,52 * * * *"
+    - cron: "3 9,13,19 * * *"
   workflow_dispatch:
 
 concurrency:
