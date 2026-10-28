@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { Container, Eyebrow } from "@/components/ui/section";
-import { Icon } from "@/components/icons/icon-by-key";
 import { FaqList } from "@/components/ui/faq-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JsonLd } from "@/components/json-ld";
@@ -108,8 +107,8 @@ const PROBLEMS: { title: string; text: string }[] = [
     text: "Un lien douteux ou une activation faite par un inconnu sur Facebook ne dure pas, et peut cacher des virus. Vous recommencez, vous repayez.",
   },
   {
-    title: "L'abonnement Microsoft pèse lourd, année après année.",
-    text: "Il se paie chaque année, en devises, et demande souvent une carte internationale que beaucoup n'ont pas. Le jour où vous arrêtez, vous perdez l'accès à vos propres documents.",
+    title: "L'abonnement n'en finit jamais.",
+    text: "Tant que vous payez, vous gardez vos outils. Le jour où l'argent manque, vous perdez l'accès à vos propres documents.",
   },
 ];
 
@@ -121,53 +120,31 @@ const OFFICE_APPS: [name: string, detail: string][] = [
   ["OneNote", "vos notes et vos idées bien rangées."],
 ];
 
-const INCLUDED: { title: string; text: string }[] = [
+const CONTENTS: { title: string; text: string; apps?: boolean }[] = [
   {
-    title: "Votre clé d'activation personnelle.",
-    text: "Elle porte votre nom et se crée dès que votre paiement passe : une seule clé active Office et Windows.",
+    title: "Votre accès personnel",
+    text: "Une clé à votre nom, créée toute seule une fois le paiement confirmé. Une seule clé suffit pour activer Office et Windows.",
   },
   {
-    title: "L'application d'activation.",
-    text: "Vous y collez votre clé, un clic, et c'est fait.",
+    title: "Microsoft Office au complet",
+    text: "Les logiciels que l'on retrouve partout, au travail comme aux études :",
+    apps: true,
   },
   {
-    title: "Microsoft Office, en deux versions.",
-    text: "Office 365 et Office 2024 Professional Plus, au choix : Word, Excel, PowerPoint, Outlook, OneNote et plus encore.",
+    title: "Windows 10 et 11, activés",
+    text: "Plus de filigrane, plus de réglages verrouillés. Votre PC fonctionne enfin comme il le doit, sous Windows 10 comme sous Windows 11.",
   },
   {
-    title: "Windows 10 et 11, activés.",
-    text: "Plus de filigrane, plus de réglages verrouillés.",
-  },
-  {
-    title: "Les fichiers d'installation officiels.",
-    text: "Windows et Office, à télécharger depuis votre espace.",
-  },
-  {
-    title: "Un antivirus gratuit, offert.",
-    text: "Pour protéger vos fichiers dès le premier jour.",
-  },
-  {
-    title: "Le guide pas à pas.",
-    text: "En PDF et en ligne, à suivre écran après écran.",
-  },
-  {
-    title: "Une assistance sur WhatsApp.",
-    text: "Si une étape vous bloque, quelqu'un vous répond.",
-  },
-  {
-    title: "Votre espace personnel.",
-    text: "Votre clé, vos fichiers et votre guide, à retrouver quand vous voulez, sur téléphone comme sur ordinateur.",
+    title: "Tout pour réussir l'installation",
+    text: "L'application, les fichiers d'installation officiels de Windows et d'Office, et un guide pas à pas. Un antivirus gratuit est offert en plus, pour protéger vos fichiers.",
   },
 ];
 
 const FOR_WHO: string[] = [
   "Vous êtes étudiant : mémoire, exposés, dossiers à rendre.",
   "Vous êtes fonctionnaire ou salarié : Word et Excel font votre quotidien.",
-  "Vous êtes entrepreneur ou freelance : devis, factures et présentations ne peuvent pas attendre.",
-  "Vous êtes secrétaire ou assistant : courriers, plannings et comptes rendus s'enchaînent.",
-  "Vous êtes comptable ou gestionnaire : vos tableaux Excel doivent tourner sans accroc.",
-  "Vous êtes enseignant : cours, supports et évaluations à préparer.",
-  "Vous venez d'acheter, d'installer ou de réinitialiser un ordinateur Windows (le pack ne fonctionne pas sur Mac).",
+  "Vous êtes entrepreneur : devis, factures et présentations ne peuvent pas attendre.",
+  "Vous venez d'acheter, d'installer ou de réinitialiser un ordinateur.",
 ];
 
 const STEPS: { title: string; text: string }[] = [
@@ -348,14 +325,9 @@ export default async function PackActivationPage() {
                   {fr("Ce pack met fin à tout cela, ")}
                   <strong className="text-ink font-semibold">
                     {fr("une bonne fois pour toutes.")}
-                  </strong>
-                </p>
-                <p className="font-display text-brand-text text-[1.375rem] leading-snug sm:text-[1.625rem]">
-                  {fr("Vous payez. Vous installez. Ça marche.")}
-                </p>
-                <p className={`${BODY} text-[1.0625rem]`}>
+                  </strong>{" "}
                   {fr(
-                    "Une petite application, un guide pas à pas, et Windows 10 ou 11 comme Office s'activent pour de bon.",
+                    "Vous payez, vous installez une petite application en suivant le guide, et Windows 10 ou 11 comme Office s'activent pour de bon.",
                   )}
                 </p>
 
@@ -381,37 +353,32 @@ export default async function PackActivationPage() {
                   )}
                 </p>
 
-                <h2 className={H2}>Ce que vous recevez exactement</h2>
-                <ul className="flex flex-col gap-4">
-                  {INCLUDED.map((item) => (
-                    <li key={item.title} className="flex items-start gap-3">
-                      <span className="text-brand-text mt-[0.2rem] shrink-0">
-                        <Icon name="verifie" size={20} />
-                      </span>
-                      <p className={`${BODY} min-w-0`}>
-                        <strong className="text-ink font-semibold">
-                          {fr(item.title)}
-                        </strong>{" "}
-                        {fr(item.text)}
-                      </p>
-                    </li>
+                <h2 className={H2}>Ce que vous obtenez</h2>
+                <div className="flex flex-col gap-6">
+                  {CONTENTS.map((block, index) => (
+                    <div key={block.title}>
+                      <h3 className="text-ink text-[1.125rem] leading-snug">
+                        {index + 1}. {fr(block.title)}
+                      </h3>
+                      <p className={`${BODY} mt-1.5`}>{fr(block.text)}</p>
+                      {block.apps ? (
+                        <ul className="mt-3 flex flex-col gap-2">
+                          {OFFICE_APPS.map(([name, detail]) => (
+                            <li key={name} className={`${BODY} flex gap-3`}>
+                              <Dot />
+                              <span className="min-w-0">
+                                <span className="text-ink font-semibold">
+                                  {name}
+                                </span>{" "}
+                                : {fr(detail)}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
                   ))}
-                </ul>
-
-                <h3 className="text-ink mt-2 text-[1.125rem] leading-snug">
-                  Avec Office, vous pouvez enfin :
-                </h3>
-                <ul className="flex flex-col gap-2">
-                  {OFFICE_APPS.map(([name, detail]) => (
-                    <li key={name} className={`${BODY} flex gap-3`}>
-                      <Dot />
-                      <span className="min-w-0">
-                        <span className="text-ink font-semibold">{name}</span> :{" "}
-                        {fr(detail)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                </div>
 
                 <h2 className={H2}>Ce pack est pour vous si…</h2>
                 <ul className="flex flex-col gap-3">
@@ -426,27 +393,17 @@ export default async function PackActivationPage() {
                 <h2 className={H2}>Le prix</h2>
                 <p className={BODY}>
                   <strong className="text-ink font-semibold">
-                    {price}, une seule fois.
+                    {price}, en un seul paiement.
                   </strong>{" "}
                   {fr(
-                    "Windows 10 et 11, Office, antivirus gratuit et guide compris. Rien d'autre à payer, ni aujourd'hui ni plus tard.",
-                  )}
-                </p>
-                <p className={BODY}>
-                  {fr(
-                    "Un abonnement Microsoft se paie chaque année, sans fin. Ici, vous payez une fois et c'est à vous pour de bon.",
-                  )}
-                </p>
-                <p className={BODY}>
-                  {fr(
-                    "Réglez avec Orange Money, Moov Money ou un autre Mobile Money, ou par carte bancaire, depuis une page protégée.",
+                    "Windows 10 et 11, Office et antivirus gratuit compris. Rien d'autre à payer, ni aujourd'hui ni plus tard.",
                   )}
                 </p>
               </div>
 
               <PackInlineCta
                 id="description-cta"
-                title="Vous payez. Vous installez. Ça marche."
+                title="Dans quelques minutes, votre PC peut enfin travailler comme vous."
                 label={`Je commande — ${price}`}
                 href={orderHref}
                 note="Paiement sécurisé · Accès dès la confirmation · À vie"
@@ -462,11 +419,6 @@ export default async function PackActivationPage() {
                 <h2 className="text-ink text-[1.5rem] leading-tight sm:text-[1.75rem]">
                   Comment ça se passe, concrètement
                 </h2>
-                <p className={`${BODY} mt-3`}>
-                  {fr(
-                    "Pas d'attente, pas de rendez-vous : tout se fait en ligne, à votre rythme.",
-                  )}
-                </p>
                 <div className="mt-6">
                   <StepsGrid steps={STEPS} />
                 </div>
