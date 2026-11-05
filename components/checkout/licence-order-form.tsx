@@ -6,7 +6,7 @@ import { useFormStatus } from "react-dom";
 import { submitOrder, type OrderFormState } from "@/lib/actions/order";
 import { buyerSchema } from "@/lib/validations/order";
 import { suggestEmail } from "@/lib/checkout/rules";
-import { productParams, trackMeta } from "@/lib/meta-pixel";
+import { META_CURRENCY, productParams, trackMeta } from "@/lib/meta-pixel";
 import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field-error";
 import { Form } from "@/components/ui/form";
@@ -14,7 +14,13 @@ import { Honeypot } from "@/components/ui/honeypot";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { IconCadenas, IconCoche, IconFleche } from "@/components/icons";
+import {
+  IconCadenas,
+  IconChevronBas,
+  IconCoche,
+  IconFleche,
+  IconWhatsapp,
+} from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 type Field = "name" | "email" | "phone";
@@ -26,12 +32,90 @@ const breakableEmail = (email: string) => email.replace(/@/g, "@\u200B");
 const STEPS = ["Vos informations", "Paiement"] as const;
 
 function PayButton({ priceLabel }: { priceLabel: string }) {
-  const { pending } = useFormStatus();
+  const { pending, data } = useFormStatus();
+  const opening = pending && data?.get("intent") !== "whatsapp";
   return (
-    <Button type="submit" size="lg" disabled={pending} className="w-full">
+    <Button
+      type="submit"
+      name="intent"
+      value="online"
+      size="lg"
+      disabled={pending}
+      className="w-full"
+    >
       <IconCadenas size={18} />
-      {pending ? "Ouverture du paiement…" : `Payer ${priceLabel}`}
+      {opening ? "Ouverture du paiement…" : `Payer ${priceLabel}`}
     </Button>
+  );
+}
+
+/**
+ * « Un souci pour payer ? » : un lien discret sous le bouton de paiement. Il
+ * déplie un court message et un bouton WhatsApp. Ce bouton enregistre la
+ * commande (avec les coordonnées déjà saisies) puis ouvre l'assistance du pack
+ * avec un message prérempli : voir submitOrder (intent = « whatsapp »).
+ */
+function PaymentHelp({
+  productSlug,
+  productName,
+  value,
+}: {
+  productSlug: string;
+  productName: string;
+  value: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const { pending, data } = useFormStatus();
+  const opening = pending && data?.get("intent") === "whatsapp";
+  return (
+    <div className="border-line mt-5 border-t pt-3">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls="aide-paiement"
+        onClick={() => setOpen((current) => !current)}
+        className="text-brand-text inline-flex min-h-11 items-center gap-1.5 rounded-md text-sm font-medium underline-offset-4 hover:underline focus-visible:shadow-[var(--focus-halo)] focus-visible:outline-none"
+      >
+        Un souci pour payer ?
+        <IconChevronBas
+          size={16}
+          className={cn("transition-transform", open && "rotate-180")}
+        />
+      </button>
+      {open ? (
+        <div
+          id="aide-paiement"
+          className="bg-paper-raised mt-1 flex flex-col gap-3 rounded-lg p-4"
+        >
+          <p className="text-ink-soft text-sm leading-relaxed">
+            Votre paiement ne passe pas ? Écrivez-nous sur WhatsApp : nous vous
+            aidons à finaliser votre commande, ou vous pouvez payer directement
+            avec nous.
+          </p>
+          <Button
+            type="submit"
+            name="intent"
+            value="whatsapp"
+            size="lg"
+            variant="whatsapp"
+            disabled={pending}
+            onClick={() =>
+              trackMeta("Contact", {
+                content_name: productName,
+                content_ids: [productSlug],
+                value,
+                currency: META_CURRENCY,
+                intent: "paiement_bloque",
+              })
+            }
+            className="w-full"
+          >
+            <IconWhatsapp size={18} />
+            {opening ? "Ouverture de WhatsApp…" : "Écrire sur WhatsApp"}
+          </Button>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -72,8 +156,9 @@ function ProductRow({
 /**
  * Formulaire de commande d'un accès livré automatiquement (licence), en deux
  * étapes comme celui du pack Windows d'Expert du Numérique : 1) coordonnées,
- * 2) récapitulatif et paiement. Paiement en ligne uniquement : jamais de
- * commande par WhatsApp.
+ * 2) récapitulatif et paiement. Le paiement se fait en ligne ; un client qui
+ * n'y arrive pas dispose d'un lien d'aide vers l'assistance WhatsApp du pack
+ * (voir PaymentHelp), jamais d'un bouton concurrent du bouton « Payer ».
  *
  * Les champs saisis vivent dans l'état du composant ; des champs cachés les
  * portent jusqu'à l'action serveur (submitOrder), quelle que soit l'étape
@@ -154,7 +239,6 @@ export function LicenceOrderForm({
       className="flex min-w-0 flex-col gap-6"
     >
       <input type="hidden" name="productSlug" value={productSlug} />
-      <input type="hidden" name="intent" value="online" />
       <input type="hidden" name="name" value={name} />
       <input type="hidden" name="phone" value={phone} />
       {signedIn ? null : <input type="hidden" name="email" value={email} />}
@@ -371,6 +455,12 @@ export function LicenceOrderForm({
               Modifier mes informations
             </Button>
           </div>
+
+          <PaymentHelp
+            productSlug={productSlug}
+            productName={productName}
+            value={value}
+          />
         </section>
       )}
     </Form>

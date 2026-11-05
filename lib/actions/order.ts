@@ -18,6 +18,7 @@ import {
 import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
 import { isHoneypotFilled } from "@/lib/honeypot";
 import { whatsappLink } from "@/lib/site";
+import { supportOrderMessage, supportWhatsappLink } from "@/lib/support";
 import { formatPrice } from "@/lib/format";
 import { addOrderEvent } from "@/lib/orders";
 import { runAfterResponse } from "@/lib/after-response";
@@ -378,6 +379,21 @@ async function startWhatsappOrder(context: OrderContext): Promise<string> {
   if (order.status === "PAYE") {
     runAfterResponse(() => sendLinksForOrder(order.id));
     return `${followUpUrl(order.id)}&deja=1`;
+  }
+
+  // Pack livré par licence : le client écrit à l'assistance dédiée (jamais au
+  // numéro général du site), avec ses coordonnées et la référence de sa commande.
+  if (catalogProduct.delivery === "licence-edn") {
+    return supportWhatsappLink(
+      supportOrderMessage({
+        name: profile.name,
+        phone: profile.phone,
+        email: profile.email,
+        productName: catalogProduct.name,
+        priceLabel: formatPrice(order.amount),
+        orderId: order.id,
+      }),
+    );
   }
 
   const lines = [

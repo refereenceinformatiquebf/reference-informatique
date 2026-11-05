@@ -38,7 +38,11 @@ export function isTrackablePath(pathname: string): boolean {
 }
 
 export type MetaEventName =
-  "ViewContent" | "InitiateCheckout" | "AddPaymentInfo" | "Purchase";
+  | "ViewContent"
+  | "InitiateCheckout"
+  | "AddPaymentInfo"
+  | "Purchase"
+  | "Contact";
 
 type Fbq = (...args: unknown[]) => void;
 

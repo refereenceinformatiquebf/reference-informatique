@@ -57,7 +57,7 @@ export default async function CommandePage({
     : {};
 
   // Accès livré automatiquement (licence) : formulaire en deux étapes, paiement
-  // en ligne uniquement — pas de commande par WhatsApp, pas de lien de sortie.
+  // en ligne ; seul le lien « Un souci pour payer ? » mène à l'assistance WhatsApp.
   if (product.delivery === "licence-edn") {
     const priceLabel = formatPrice(product.price);
     return (

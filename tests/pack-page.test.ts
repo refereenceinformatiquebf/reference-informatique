@@ -58,6 +58,41 @@ describe("page de vente du pack : mentions interdites", () => {
   });
 });
 
+describe("bouton « Contactez-nous » de la page de vente", () => {
+  const read = (file: string) => fs.readFileSync(path.join(ROOT, file), "utf8");
+  const fab = read("components/shop/contact-fab.tsx");
+  const fabText = fab
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/.*$/gm, "");
+
+  it("écrit à l'assistance dédiée du pack, jamais au numéro de l'entreprise", () => {
+    assert.ok(fab.includes('from "@/lib/support"'));
+    assert.ok(!fab.includes('from "@/lib/site"'));
+    assert.ok(!/\b\d{2}\s?\d{2}\s?\d{2}\s?\d{2}\b/.test(fabText));
+    assert.ok(!/wa\.me/i.test(fabText));
+  });
+
+  it("tient les mêmes engagements que la page : ni remboursement, ni garantie, ni limite d'appareils", () => {
+    assert.ok(!/rembours|garanti|appareil/i.test(fabText));
+  });
+
+  it("propose les deux accès WhatsApp demandés et le bouton de commande", () => {
+    assert.ok(
+      fabText.includes("J&apos;ai payé et j&apos;ai besoin d&apos;assistance"),
+    );
+    assert.ok(fabText.includes("Je veux payer sur WhatsApp"));
+    assert.ok(fabText.includes("Commander maintenant"));
+    assert.ok(!/une question/i.test(fabText));
+  });
+
+  it("le formulaire de commande distingue paiement en ligne et WhatsApp par le bouton cliqué", () => {
+    const form = read("components/checkout/licence-order-form.tsx");
+    assert.ok(!/type="hidden" name="intent"/.test(form));
+    assert.ok(/name="intent"\s+value="online"/.test(form));
+    assert.ok(/name="intent"\s+value="whatsapp"/.test(form));
+  });
+});
+
 describe("page de vente du pack : structure", () => {
   const source = visibleSource();
 

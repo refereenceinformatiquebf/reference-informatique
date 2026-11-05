@@ -7,6 +7,7 @@ import { Container, Eyebrow } from "@/components/ui/section";
 import { FaqList } from "@/components/ui/faq-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JsonLd } from "@/components/json-ld";
+import { ContactFab } from "@/components/shop/contact-fab";
 import { PackInlineCta } from "@/components/shop/pack-inline-cta";
 import { PackPurchaseCard } from "@/components/shop/pack-purchase-card";
 import { ProductCover } from "@/components/shop/product-cover";
@@ -450,6 +451,14 @@ export default async function PackActivationPage() {
         name={product.name}
         price={price}
         hideWhileVisible={["hero-cta", "description-cta", "delivery-cta"]}
+      />
+
+      <ContactFab
+        productSlug={product.slug}
+        productName={product.name}
+        priceLabel={price}
+        value={product.price}
+        orderHref={orderHref}
       />
     </div>
   );
