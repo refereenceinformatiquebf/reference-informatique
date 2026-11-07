@@ -11,11 +11,14 @@ import {
 import { AdminAction } from "@/components/admin/admin-action";
 import { NoteForm } from "@/components/admin/note-form";
 import { EmailForm } from "@/components/admin/email-form";
+import { ManualEmailForm } from "@/components/admin/manual-email-form";
 import { prisma } from "@/lib/prisma/client";
 import { getProduct } from "@/lib/catalog/live";
 import { formatDateTime, formatPrice, timeAgo } from "@/lib/format";
 import { ORDER_STATUS_LABELS } from "@/lib/status-labels";
 import { whatsappLinkTo } from "@/lib/site";
+import { buildManualEmailPrefill } from "@/lib/admin/manual-email";
+import { isManualEmailConfigured } from "@/lib/email/manual-fallback";
 import {
   cancelOrderAction,
   correctClientEmailAction,
@@ -23,6 +26,7 @@ import {
   remindPaymentAction,
   resendPaymentEmailAction,
   saveOrderNoteAction,
+  sendManualFallbackEmailAction,
   setDeliveryStatusAction,
   validateOrderManuallyAction,
   verifySaspayOrderAction,
@@ -66,6 +70,8 @@ export default async function AdminOrderDetailPage({
   const now = new Date();
   const pendingSince = now.getTime() - order.createdAt.getTime();
   const pendingLong = pendingSince > 24 * 60 * 60 * 1000;
+  const manualPrefill =
+    order.status === "PAYE" ? await buildManualEmailPrefill(order.id) : null;
 
   return (
     <>
@@ -439,6 +445,19 @@ export default async function AdminOrderDetailPage({
               placeholder="Ex. : client rappelé, remise prévue samedi…"
             />
           </Panel>
+
+          {manualPrefill ? (
+            <Panel title="Secours">
+              <ManualEmailForm
+                action={sendManualFallbackEmailAction}
+                orderId={order.id}
+                defaultTo={manualPrefill.to}
+                defaultSubject={manualPrefill.subject}
+                defaultText={manualPrefill.text}
+                configured={isManualEmailConfigured()}
+              />
+            </Panel>
+          ) : null}
         </div>
       </div>
     </>

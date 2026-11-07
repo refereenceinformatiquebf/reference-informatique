@@ -23,6 +23,7 @@ import {
 } from "@/lib/payments/saspay";
 import { syncSaspayOrder } from "@/lib/payments/saspay-sync";
 import { sendPaymentConfirmation } from "@/lib/email/send";
+import { sendManualFallbackEmail } from "@/lib/email/manual-fallback";
 import { newAccessToken, trackingUrlFor } from "@/lib/checkout/access";
 import { remindOrder } from "@/lib/checkout/reminders";
 import { sendLinksForOrder } from "@/lib/checkout/links";
@@ -539,4 +540,64 @@ export async function createManualOrderAction(
   );
   refresh(order.id);
   return { ok: true, message: "Commande créée.", orderId: order.id };
+}
+
+const manualEmailSchema = z.object({
+  to: z.email({ error: "Adresse email invalide." }),
+  subject: z.string().trim().min(1, { error: "Objet requis." }).max(200),
+  text: z.string().trim().min(1, { error: "Message requis." }).max(5000),
+});
+
+/**
+ * Envoi manuel de secours (boîte admin, hors Brevo) — voir ManualEmailForm. Le lien d'accès
+ * personnel de la commande n'est JAMAIS reçu depuis le navigateur ni affiché à l'écran : il est
+ * récupéré et ajouté ici, côté serveur uniquement, juste avant l'envoi (voir
+ * lib/checkout/access.ts sur le pourquoi).
+ */
+export async function sendManualFallbackEmailAction(
+  _state: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const orderId = orderIdFrom(formData);
+  const parsed = manualEmailSchema.safeParse({
+    to: formData.get("to"),
+    subject: formData.get("subject"),
+    text: formData.get("text"),
+  });
+  if (!parsed.success) {
+    return fail(parsed.error.issues[0]?.message ?? "Formulaire invalide.");
+  }
+
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order) return fail("Commande introuvable.");
+  if (order.status !== "PAYE") {
+    return fail("Seule une commande payée a un accès à envoyer.");
+  }
+
+  const trackUrl = await trackingUrlFor(order.id);
+  const fullText = `${parsed.data.text}\n\nOuvrez votre commande ici : ${trackUrl}`;
+
+  const result = await sendManualFallbackEmail({
+    to: parsed.data.to,
+    subject: parsed.data.subject,
+    text: fullText,
+  });
+  if (!result.ok) return fail(result.error ?? "Échec de l'envoi.");
+
+  await addOrderEvent(
+    order.id,
+    "EMAIL",
+    "Email de secours envoyé manuellement par l'équipe.",
+    actorLabel(admin),
+  );
+  await audit(
+    admin,
+    "order.manual_fallback_email",
+    "order",
+    order.id,
+    `Email de secours envoyé à ${parsed.data.to}`,
+  );
+  refresh(order.id);
+  return done(`Email envoyé à ${parsed.data.to}.`);
 }
