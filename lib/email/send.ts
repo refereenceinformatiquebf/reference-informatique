@@ -7,6 +7,7 @@ import { formatDate } from "@/lib/format";
 import type { DeliveryMode } from "@/lib/catalog/types";
 import { getBrevoClient } from "./client";
 import { getResendClient } from "./resend-client";
+import { emailSafeProductName } from "./safe-name";
 import { OrderConfirmationEmail } from "./templates/order-confirmation";
 import { PaymentConfirmationEmail } from "./templates/payment-confirmation";
 import { AccessGrantedEmail } from "./templates/access-granted";
@@ -200,10 +201,11 @@ export async function sendOrderConfirmation(params: {
   /** Lien personnel de la commande (suivi, reprise du paiement, accès). */
   trackUrl?: string;
 }) {
+  const productName = emailSafeProductName(params.productName);
   await sendEmail({
     to: { email: params.to, name: params.clientName },
-    subject: `Commande reçue — ${params.productName}`,
-    react: OrderConfirmationEmail(params),
+    subject: `Commande reçue — ${productName}`,
+    react: OrderConfirmationEmail({ ...params, productName }),
     template: "order-confirmation",
     relatedOrderId: params.orderId,
   });
@@ -227,11 +229,13 @@ export async function sendPaymentConfirmation(params: {
   /** Date du paiement ; à défaut, aujourd'hui (l'e-mail part au moment du paiement). */
   paidAt?: Date | null;
 }) {
+  const productName = emailSafeProductName(params.productName);
   await sendEmail({
     to: { email: params.to, name: params.clientName },
-    subject: `Paiement confirmé — ${params.productName}`,
+    subject: `Paiement confirmé — ${productName}`,
     react: PaymentConfirmationEmail({
       ...params,
+      productName,
       paidOn: formatDate(params.paidAt ?? new Date()),
       orderRef: params.orderId.slice(0, 8).toUpperCase(),
       ctaUrl:
@@ -255,11 +259,13 @@ export async function sendPaymentReminder(params: {
   /** Date de la commande (message d'assistance du pack). */
   orderedAt?: Date | null;
 }) {
+  const productName = emailSafeProductName(params.productName);
   await sendEmail({
     to: { email: params.to, name: params.clientName },
-    subject: `Votre commande vous attend — ${params.productName}`,
+    subject: `Votre commande vous attend — ${productName}`,
     react: PaymentReminderEmail({
       ...params,
+      productName,
       orderedOn: params.orderedAt ? formatDate(params.orderedAt) : undefined,
     }),
     template: "payment-reminder",
@@ -278,11 +284,13 @@ export async function sendLicenceReady(params: {
   /** Date du paiement (message d'assistance du pack). */
   paidAt?: Date | null;
 }) {
+  const productName = emailSafeProductName(params.productName);
   await sendEmail({
     to: { email: params.to, name: params.clientName },
-    subject: `Votre pack est prêt — ${params.productName}`,
+    subject: `Votre pack est prêt — ${productName}`,
     react: LicenceReadyEmail({
       ...params,
+      productName,
       paidOn: params.paidAt ? formatDate(params.paidAt) : undefined,
     }),
     template: "licence-ready",
@@ -331,10 +339,11 @@ export async function sendAccessGranted(params: {
   clientName: string;
   productName: string;
 }) {
+  const productName = emailSafeProductName(params.productName);
   await sendEmail({
     to: { email: params.to, name: params.clientName },
-    subject: `Votre accès est prêt — ${params.productName}`,
-    react: AccessGrantedEmail({ ...params, siteUrl: SITE.url }),
+    subject: `Votre accès est prêt — ${productName}`,
+    react: AccessGrantedEmail({ ...params, productName, siteUrl: SITE.url }),
     template: "access-granted",
   });
 }
@@ -385,13 +394,14 @@ export async function sendDeliveryUpdate(params: {
   status: "EN_LIVRAISON" | "LIVREE";
   orderId: string;
 }) {
+  const productName = emailSafeProductName(params.productName);
   await sendEmail({
     to: { email: params.to, name: params.clientName },
     subject:
       params.status === "EN_LIVRAISON"
-        ? `Votre clé est en route — ${params.productName}`
-        : `Votre clé vous a été remise — ${params.productName}`,
-    react: DeliveryUpdateEmail(params),
+        ? `Votre clé est en route — ${productName}`
+        : `Votre clé vous a été remise — ${productName}`,
+    react: DeliveryUpdateEmail({ ...params, productName }),
     template: "delivery-update",
     relatedOrderId: params.orderId,
   });
@@ -407,11 +417,13 @@ export async function sendRefundNotice(params: {
   /** Date du paiement remboursé (message d'assistance du pack). */
   paidAt?: Date | null;
 }) {
+  const productName = emailSafeProductName(params.productName);
   await sendEmail({
     to: { email: params.to, name: params.clientName },
-    subject: `Remboursement — ${params.productName}`,
+    subject: `Remboursement — ${productName}`,
     react: RefundNoticeEmail({
       ...params,
+      productName,
       paidOn: params.paidAt ? formatDate(params.paidAt) : undefined,
     }),
     template: "refund-notice",

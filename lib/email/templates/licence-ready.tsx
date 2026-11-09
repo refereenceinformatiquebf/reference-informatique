@@ -29,7 +29,7 @@ export function LicenceReadyEmail({
       <Text style={emailTextStyle}>
         Merci de votre patience : votre pack <strong>{productName}</strong> est
         maintenant disponible. Votre licence, l&rsquo;application
-        d&rsquo;activation, Windows, Office et le guide complet vous attendent.
+        d&rsquo;installation et le guide complet vous attendent.
       </Text>
       <Button href={ctaUrl} style={emailButtonStyle}>
         Accéder à mon pack

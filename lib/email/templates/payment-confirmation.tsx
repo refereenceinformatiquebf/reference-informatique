@@ -61,8 +61,8 @@ export function PaymentConfirmationEmail({
       </Text>
       {licenceKey ? (
         <Text style={{ ...emailTextStyle, marginTop: 10, fontSize: 13 }}>
-          Votre licence, l&rsquo;application d&rsquo;activation, Windows, Office
-          et le guide complet vous y attendent.
+          Votre licence, l&rsquo;application d&rsquo;installation et le guide
+          complet vous y attendent.
         </Text>
       ) : null}
       {orderRef ? (
