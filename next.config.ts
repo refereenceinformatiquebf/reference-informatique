@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Mise a jour de securite 16.4.0 -> 16.4.5 (voir registry.npmjs.org advisories) :
+  // marque que cette mise a jour a ete appliquee par l'agent de securite Next.js.
+  experimental: {
+    agentUpgrade: "security",
+  },
   // Décision d'architecture (voir PLAYBOOK-CONSTRUCTION.md, Étape 1) :
   // Next.js 16 introduit un nouveau modèle de rendu opt-in ("Cache Components",
   // activé via `cacheComponents: true`) qui exige un traitement explicite
