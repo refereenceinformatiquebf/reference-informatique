@@ -6,6 +6,7 @@ import { SITE } from "@/lib/site";
 import { formatDate } from "@/lib/format";
 import type { DeliveryMode } from "@/lib/catalog/types";
 import { getBrevoClient } from "./client";
+import { getResendClient } from "./resend-client";
 import { OrderConfirmationEmail } from "./templates/order-confirmation";
 import { PaymentConfirmationEmail } from "./templates/payment-confirmation";
 import { AccessGrantedEmail } from "./templates/access-granted";
@@ -87,11 +88,21 @@ async function writeLog(entry: {
   }
 }
 
+/** Fournisseur actif : Resend (RESEND_API_KEY) en priorité — le compte Brevo
+ * de ce site est suspendu pour la catégorie de produits vendue (voir mémoire
+ * projet) — sinon Brevo (BREVO_API_KEY) en repli, sinon aucun. */
+function emailProvider(): "resend" | "brevo" | null {
+  if (process.env.RESEND_API_KEY) return "resend";
+  if (process.env.BREVO_API_KEY) return "brevo";
+  return null;
+}
+
 /**
  * Point d'envoi unique. Chaque envoi laisse une trace (table email_log), y
  * compris les échecs, pour que l'équipe voie ce qui n'est pas parti. En
- * développement (pas de clé Brevo), rien n'est envoyé et l'envoi est noté
- * « SKIPPED » — voir aussi /dev/emails pour un aperçu visuel des gabarits.
+ * développement (pas de clé configurée), rien n'est envoyé et l'envoi est
+ * noté « SKIPPED » — voir aussi /dev/emails pour un aperçu visuel des
+ * gabarits.
  */
 async function sendEmail(params: {
   to: Recipient | Recipient[];
@@ -104,10 +115,11 @@ async function sendEmail(params: {
 }) {
   const recipients = Array.isArray(params.to) ? params.to : [params.to];
   const html = await render(params.react);
+  const provider = emailProvider();
 
-  if (!process.env.BREVO_API_KEY) {
+  if (!provider) {
     console.info(
-      `[email:dev] À ${recipients.map((r) => r.email).join(", ")} — "${params.subject}" (BREVO_API_KEY absent, non envoyé réellement)`,
+      `[email:dev] À ${recipients.map((r) => r.email).join(", ")} — "${params.subject}" (RESEND_API_KEY / BREVO_API_KEY absents, non envoyé réellement)`,
     );
     await writeLog({
       to: recipients,
@@ -120,21 +132,37 @@ async function sendEmail(params: {
   }
 
   try {
-    const response =
-      await getBrevoClient().transactionalEmails.sendTransacEmail({
-        sender: SENDER,
-        // Les clients répondent à « cet email » : la réponse doit arriver
-        // dans la boîte de l'équipe, même si l'adresse d'expédition n'a pas
-        // de boîte de réception.
-        replyTo: params.replyTo ?? ADMIN_REPLY_TO,
-        to: recipients,
+    let providerId: string | undefined;
+    if (provider === "resend") {
+      const replyTo = params.replyTo ?? ADMIN_REPLY_TO;
+      const { data, error } = await getResendClient().emails.send({
+        from: `${SENDER.name} <${SENDER.email}>`,
+        replyTo: `${replyTo.name ?? SITE.name} <${replyTo.email}>`,
+        to: recipients.map((r) =>
+          r.name ? `${r.name} <${r.email}>` : r.email,
+        ),
         subject: params.subject,
-        htmlContent: html,
+        html,
       });
-    const providerId =
-      response && typeof response === "object" && "messageId" in response
-        ? String((response as { messageId?: unknown }).messageId ?? "")
-        : undefined;
+      if (error) throw new Error(error.message);
+      providerId = data?.id;
+    } else {
+      const response =
+        await getBrevoClient().transactionalEmails.sendTransacEmail({
+          sender: SENDER,
+          // Les clients répondent à « cet email » : la réponse doit arriver
+          // dans la boîte de l'équipe, même si l'adresse d'expédition n'a pas
+          // de boîte de réception.
+          replyTo: params.replyTo ?? ADMIN_REPLY_TO,
+          to: recipients,
+          subject: params.subject,
+          htmlContent: html,
+        });
+      providerId =
+        response && typeof response === "object" && "messageId" in response
+          ? String((response as { messageId?: unknown }).messageId ?? "")
+          : undefined;
+    }
     await writeLog({
       to: recipients,
       subject: params.subject,
