@@ -10,7 +10,7 @@
 export function emailSafeProductName(name: string): string {
   return name
     .replace(/[-–—]?\s*(installation\s+facile\s+)?[àa]\s+vie\b/gi, "")
-    .replace(/\bactiv[ée]e?s?\b/gi, "")
+    .replace(/\bactiv[ée]e?s?(?=[^a-zà-ÿ]|$)/gi, "")
     .replace(/\s*[-–—]\s*$/, "")
     .replace(/\s{2,}/g, " ")
     .trim();
