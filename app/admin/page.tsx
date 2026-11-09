@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import {
   AdminHeader,
   Kpi,
@@ -33,33 +32,6 @@ export default async function AdminDashboardPage() {
         title="Tableau de bord"
         subtitle="Ventes confirmées uniquement (commandes payées)."
       />
-
-      {d.alerts.length > 0 ? (
-        <ul className="mb-6 space-y-2" aria-label="Alertes">
-          {d.alerts.map((alert) => (
-            <li
-              key={alert.text}
-              role="alert"
-              className={`rounded-lg border px-4 py-3 text-sm ${
-                alert.level === "danger"
-                  ? "border-danger bg-danger-bg text-danger-text"
-                  : "border-warning bg-warning-bg text-warning-text"
-              }`}
-            >
-              {alert.href ? (
-                <Link
-                  href={alert.href}
-                  className="underline underline-offset-4"
-                >
-                  {alert.text}
-                </Link>
-              ) : (
-                alert.text
-              )}
-            </li>
-          ))}
-        </ul>
-      ) : null}
 
       <Panel title="À faire maintenant" className="mb-6">
         {todo === 0 ? (
@@ -135,7 +107,7 @@ export default async function AdminDashboardPage() {
         <RevenueChart data={d.chart} />
       </Panel>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-2">
+      <div className="mt-6 space-y-6">
         <Panel
           title="Dernières commandes"
           actions={<RowLink href="/admin/commandes">Tout voir</RowLink>}
@@ -179,31 +151,7 @@ export default async function AdminDashboardPage() {
           />
         </Panel>
 
-        <Panel title="Meilleurs produits (30 jours)">
-          <ResponsiveTable
-            rows={d.topProducts}
-            rowKey={(product) => product.name}
-            empty="Aucune vente sur la période."
-            columns={[
-              { header: "Produit", cell: (product) => product.name },
-              {
-                header: "Ventes",
-                right: true,
-                cell: (product) => product.count,
-              },
-              {
-                header: "Revenus",
-                right: true,
-                cell: (product) => formatPrice(product.revenue),
-              },
-            ]}
-          />
-        </Panel>
-
-        <Panel
-          title="Paiements en ligne en attente depuis plus d'une heure"
-          className="xl:col-span-2"
-        >
+        <Panel title="Paiements en ligne en attente depuis plus d'une heure">
           <ResponsiveTable
             rows={d.pendingOver1h}
             rowKey={(order) => order.id}

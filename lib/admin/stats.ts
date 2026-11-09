@@ -3,12 +3,6 @@ import { prisma } from "@/lib/prisma/client";
 
 const DAY = 86_400_000;
 
-export type DashboardAlert = {
-  level: "warning" | "danger";
-  text: string;
-  href?: string;
-};
-
 /**
  * Chiffres du tableau de bord. Tout est calculé en base, jamais estimé :
  * le chiffre d'affaires ne compte que les commandes PAYÉES, et un chiffre
@@ -50,9 +44,6 @@ export async function getDashboard() {
     latestOrders,
     pendingOver1h,
     lastWebhook,
-    rejectedWebhooks24h,
-    failedEmails24h,
-    topGroups,
     chartRows,
   ] = await Promise.all([
     paidSince(startOfToday),
@@ -100,27 +91,6 @@ export async function getDashboard() {
       where: { provider: "SASPAY", status: "VERIFIED" },
       orderBy: { receivedAt: "desc" },
     }),
-    prisma.webhookEvent.count({
-      where: {
-        provider: "SASPAY",
-        status: { in: ["REJECTED", "ERROR"] },
-        receivedAt: { gte: new Date(now.getTime() - DAY) },
-      },
-    }),
-    prisma.emailLog.count({
-      where: {
-        status: "FAILED",
-        createdAt: { gte: new Date(now.getTime() - DAY) },
-      },
-    }),
-    prisma.order.groupBy({
-      by: ["productId"],
-      where: { status: "PAYE", paidAt: { gte: d30 }, productId: { not: null } },
-      _sum: { amount: true },
-      _count: true,
-      orderBy: { _sum: { amount: "desc" } },
-      take: 5,
-    }),
     prisma.$queryRaw<{ day: Date; total: bigint; count: bigint }[]>`
       SELECT date_trunc('day', paid_at) AS day,
              COALESCE(SUM(amount), 0) AS total,
@@ -129,21 +99,6 @@ export async function getDashboard() {
       WHERE status = 'PAYE' AND paid_at >= ${d30}
       GROUP BY 1 ORDER BY 1`,
   ]);
-
-  const productIds = topGroups.map((group) => group.productId!).filter(Boolean);
-  const productNames = new Map(
-    (
-      await prisma.product.findMany({
-        where: { id: { in: productIds } },
-        select: { id: true, name: true },
-      })
-    ).map((product) => [product.id, product.name]),
-  );
-  const topProducts = topGroups.map((group) => ({
-    name: productNames.get(group.productId!) ?? "Produit supprimé",
-    count: group._count,
-    revenue: group._sum.amount ?? 0,
-  }));
 
   // Série complète sur 30 jours (les jours sans vente valent 0).
   const byDay = new Map(
@@ -160,29 +115,6 @@ export async function getDashboard() {
 
   const paid30 = month._count;
   const revenue30 = month._sum.amount ?? 0;
-
-  const alerts: DashboardAlert[] = [];
-  if (pendingOver1h.length > 0) {
-    alerts.push({
-      level: "warning",
-      text: `${pendingOver1h.length} paiement(s) en ligne en attente depuis plus d'une heure : vérifiez-les auprès de SasPay.`,
-      href: "/admin/commandes?statut=EN_ATTENTE&canal=BOUTIQUE",
-    });
-  }
-  if (rejectedWebhooks24h > 0) {
-    alerts.push({
-      level: "danger",
-      text: `${rejectedWebhooks24h} notification(s) SasPay refusée(s) ou en erreur ces dernières 24 h : vérifiez le secret du webhook.`,
-      href: "/admin/etat",
-    });
-  }
-  if (failedEmails24h > 0) {
-    alerts.push({
-      level: "danger",
-      text: `${failedEmails24h} email(s) n'ont pas pu partir ces dernières 24 h.`,
-      href: "/admin/emails?statut=FAILED",
-    });
-  }
 
   return {
     revenue: {
@@ -207,9 +139,7 @@ export async function getDashboard() {
     pendingWhatsapp,
     latestOrders,
     pendingOver1h,
-    topProducts,
     chart,
     lastWebhook,
-    alerts,
   };
 }

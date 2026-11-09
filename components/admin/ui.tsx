@@ -93,13 +93,13 @@ export function Kpi({
   const body = (
     <div
       className={cn(
-        "bg-paper shadow-card h-full rounded-xl border p-4 transition-colors",
+        "bg-paper shadow-card h-full min-w-0 rounded-xl border p-4 transition-colors",
         tone === "warning" ? "border-warning" : "border-line",
         href && "hover:border-brand",
       )}
     >
       <p className="text-ink-soft text-sm">{label}</p>
-      <p className="font-display text-ink tabular mt-1 text-[1.75rem] leading-tight">
+      <p className="font-display text-ink tabular mt-1 text-[1.375rem] leading-tight [overflow-wrap:anywhere] break-words sm:text-[1.75rem]">
         {value}
       </p>
       {hint ? (
@@ -199,7 +199,7 @@ export function ResponsiveTable<T>({
                     className="flex justify-between gap-3"
                   >
                     <dt className="text-ink-faint shrink-0">{column.header}</dt>
-                    <dd className="text-ink min-w-0 text-right font-medium break-words">
+                    <dd className="text-ink min-w-0 text-right font-medium [overflow-wrap:anywhere] break-words">
                       {column.cell(row)}
                     </dd>
                   </div>

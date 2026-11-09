@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import Link from "next/link";
-import { getAdminAssurance, requireAdmin } from "@/lib/auth/dal";
+import { requireAdmin } from "@/lib/auth/dal";
 import { signOut } from "@/lib/actions/auth";
 import { adminBadgeCounts } from "@/lib/admin/counts";
 import { AdminShell, type AdminNavGroup } from "@/components/admin/admin-shell";
@@ -19,10 +18,7 @@ export default async function AdminLayout({
   children: ReactNode;
 }) {
   const admin = await requireAdmin();
-  const [counts, assurance] = await Promise.all([
-    adminBadgeCounts(),
-    getAdminAssurance(),
-  ]);
+  const counts = await adminBadgeCounts();
 
   const groups: AdminNavGroup[] = [
     {
@@ -73,18 +69,6 @@ export default async function AdminLayout({
       adminName={admin.email ?? admin.name}
       signOutAction={signOut}
     >
-      {!assurance.enrolled ? (
-        <p className="bg-warning-bg text-warning-text mb-6 rounded-lg px-4 py-3 text-sm leading-relaxed">
-          Votre compte administrateur n&apos;est protégé que par votre email.{" "}
-          <Link
-            href="/admin/securite"
-            className="font-semibold underline underline-offset-4"
-          >
-            Activez la double vérification
-          </Link>{" "}
-          : un code sur votre téléphone en plus.
-        </p>
-      ) : null}
       {children}
     </AdminShell>
   );
