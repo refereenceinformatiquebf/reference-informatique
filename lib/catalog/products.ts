@@ -1021,8 +1021,6 @@ export const PRODUCTS: Product[] = [
   },
 
   /* ------------------------ Pack Activation Microsoft Office à vie — Mac ------------------------ */
-  // NOTE : prix (4000) repris du pack Windows à titre provisoire — à confirmer avec le client
-  // avant publication (voir plan « Pack Mac Office »).
   {
     slug: "pack-activation-office-365-mac-a-vie",
     name: "Pack Activation Microsoft Office à vie — Mac",
@@ -1031,7 +1029,7 @@ export const PRODUCTS: Product[] = [
     summary:
       "Microsoft Office activé à vie sur Mac : un seul paiement, installation guidée en quelques minutes, sans abonnement mensuel.",
     kind: "pack",
-    price: 4000,
+    price: 5000,
     cover: { tone: "navy", motif: "logiciel" },
     delivery: "licence-edn-mac",
     facts: [
