@@ -1096,11 +1096,6 @@ export const PRODUCTS: Product[] = [
           "Microsoft Office 2024 complet pour Mac — Word, Excel, PowerPoint et Outlook — activé à vie en un seul achat. Ce n'est pas un essai limité dans le temps ni un abonnement 365 : c'est une activation réelle, perpétuelle et définitive.",
       },
       {
-        question: "Pourquoi « Office 2024 » et pas « Office 365 » ?",
-        answer:
-          "Parce que c'est la vérité sur ce que vous achetez. Office 365 est un abonnement : vous payez chaque mois ou chaque année, et tout s'arrête si vous ne renouvelez pas. Office 2024 est la version perpétuelle de Microsoft, activée une seule fois, pour toujours. C'est exactement ce que ce pack vous donne — à vie, sans mensualité.",
-      },
-      {
         question: "Comment vais-je recevoir mon pack ?",
         answer:
           "Dès que votre paiement est confirmé, votre licence est générée automatiquement et apparaît dans votre espace client, rubrique « Mes licences » — avec l'installeur, l'outil d'activation et le guide pas à pas. Aucune attente.",
@@ -1109,11 +1104,6 @@ export const PRODUCTS: Product[] = [
         question: "Est-ce difficile à installer ?",
         answer:
           "Non. Il suffit d'installer Office puis l'outil d'activation fourni, et de suivre le guide étape par étape : comptez quelques minutes. Si une étape bloque, écrivez-nous sur WhatsApp, nous vous accompagnons.",
-      },
-      {
-        question: "Mon Mac est-il compatible ?",
-        answer:
-          "Ce pack est conçu pour macOS. Si vous avez un doute sur la compatibilité de votre modèle, écrivez-nous sur WhatsApp avant de commander : nous vous orientons.",
       },
       {
         question: "Est-ce que ça expire ou faut-il le renouveler ?",
