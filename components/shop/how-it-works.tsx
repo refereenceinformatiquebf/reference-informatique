@@ -92,7 +92,7 @@ const STEPS: Record<DeliveryMode, { title: string; text: string }[]> = {
     },
     {
       title: "Vous l'installez en quelques minutes",
-      text: "L'installeur Office, l'outil d'activation et le guide sont dans votre espace client.",
+      text: "L'installeur Office 2024, l'outil d'activation et le guide sont dans votre espace client.",
     },
     {
       title: "Vous êtes accompagné",

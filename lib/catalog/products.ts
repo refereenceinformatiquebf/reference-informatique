@@ -986,7 +986,7 @@ export const PRODUCTS: Product[] = [
       "Qui préfère payer une fois et garder son accès à vie plutôt que renouveler chaque année",
     ],
     notForWho: [
-      "Ordinateurs Mac (ce pack est conçu pour Windows — voir le Pack Activation Microsoft Office à vie — Mac)",
+      "Ordinateurs Mac (ce pack est conçu pour Windows — voir le Pack Activation Microsoft Office 2024 à vie — Mac)",
     ],
     faq: [
       {
@@ -1020,31 +1020,32 @@ export const PRODUCTS: Product[] = [
     order: 20,
   },
 
-  /* ------------------------ Pack Activation Microsoft Office à vie — Mac ------------------------ */
+  /* ------------------------ Pack Activation Microsoft Office 2024 à vie — Mac ------------------------ */
   {
     slug: "pack-activation-office-365-mac-a-vie",
-    name: "Pack Activation Microsoft Office à vie — Mac",
+    name: "Pack Activation Microsoft Office 2024 à vie — Mac",
     tagline:
-      "Word, Excel, PowerPoint et Outlook activés à vie sur votre Mac : un seul paiement, une installation guidée de quelques minutes, et plus jamais ce bandeau qui réclame un abonnement.",
+      "Word, Excel, PowerPoint et Outlook — Microsoft Office 2024 — activés à vie sur votre Mac : un seul paiement, une installation guidée de quelques minutes, et plus jamais ce bandeau qui réclame un abonnement.",
     summary:
-      "Microsoft Office activé à vie sur Mac : un seul paiement, installation guidée en quelques minutes, sans abonnement mensuel.",
+      "Microsoft Office 2024 activé à vie sur Mac : un seul paiement, installation guidée en quelques minutes, sans abonnement 365.",
     kind: "pack",
     price: 5000,
     cover: { tone: "navy", motif: "logiciel" },
     delivery: "licence-edn-mac",
     facts: [
       { icon: "eclair", label: "Prêt en quelques minutes" },
-      { icon: "ordinateur", label: "Word, Excel, PowerPoint sur Mac" },
+      { icon: "ordinateur", label: "Office 2024 complet sur Mac" },
       { icon: "acces-a-vie", label: "À vie, sans abonnement" },
       { icon: "support", label: "Guide + aide WhatsApp" },
     ],
     story: [
-      "Un rapport à rendre, un budget à boucler, une présentation à préparer pour demain : et ce bandeau qui s'affiche encore, « Votre essai a expiré » ou « Abonnez-vous pour continuer ». Sur Mac aussi, Microsoft Office mérite d'être à vous, pas loué au mois.",
-      "Ce pack réunit Microsoft Office complet sur Mac — Word pour écrire, Excel pour calculer, PowerPoint pour présenter, Outlook pour vos e-mails — activé une bonne fois pour toutes. Une seule petite application, guidée pas à pas : en quelques minutes, vous êtes prêt à travailler, sans compte Microsoft à créer ni carte bancaire à enregistrer pour un renouvellement automatique.",
+      "Un essai Microsoft qui s'éternise, ou ce bandeau « Activer Office » qui refuse de disparaître en haut de Word… Cela arrive toujours au mauvais moment : en plein rapport, en pleine préparation de cours, la veille d'un entretien. Sur Mac aussi, Microsoft Office mérite d'être à vous pour de bon — pas loué au mois.",
+      "Ce pack réunit Microsoft Office 2024 complet pour Mac — Word pour écrire, Excel pour calculer, PowerPoint pour présenter, Outlook pour vos e-mails — activé une bonne fois pour toutes, en version perpétuelle : ce n'est pas un abonnement Office 365 habillé autrement, c'est une véritable activation, définitive. Une seule petite application, guidée pas à pas : en quelques minutes, vous êtes prêt à travailler, sans compte Microsoft à créer ni carte bancaire à enregistrer pour un renouvellement automatique.",
       "Et c'est pour la vie : un seul paiement, aucun renouvellement. Votre accès est prêt dès la confirmation du paiement, avec un guide d'installation et notre équipe sur WhatsApp si vous avez besoin d'un coup de main.",
     ],
     highlights: [
       "Word, Excel, PowerPoint et Outlook réunis dans un seul pack, pour Mac",
+      "Microsoft Office 2024 : la version perpétuelle, pas un abonnement 365",
       "À vie : un seul paiement, aucun abonnement à renouveler",
       "Simple : une seule installation, guidée pas à pas",
       "Rapide : accès immédiat après paiement, prêt en quelques minutes",
@@ -1074,7 +1075,7 @@ export const PRODUCTS: Product[] = [
           {
             name: "Application d'installation",
             detail:
-              "L'installeur Office complet pour Mac et l'outil d'activation, avec votre licence personnelle et le guide pas à pas",
+              "L'installeur Microsoft Office 2024 complet pour Mac et l'outil d'activation, avec votre licence personnelle et le guide pas à pas",
           },
         ],
       },
@@ -1092,7 +1093,12 @@ export const PRODUCTS: Product[] = [
       {
         question: "Que contient exactement ce pack ?",
         answer:
-          "Microsoft Office complet pour Mac — Word, Excel, PowerPoint et Outlook — activé à vie en un seul achat. Ce n'est pas un essai limité dans le temps : c'est une activation réelle et définitive.",
+          "Microsoft Office 2024 complet pour Mac — Word, Excel, PowerPoint et Outlook — activé à vie en un seul achat. Ce n'est pas un essai limité dans le temps ni un abonnement 365 : c'est une activation réelle, perpétuelle et définitive.",
+      },
+      {
+        question: "Pourquoi « Office 2024 » et pas « Office 365 » ?",
+        answer:
+          "Parce que c'est la vérité sur ce que vous achetez. Office 365 est un abonnement : vous payez chaque mois ou chaque année, et tout s'arrête si vous ne renouvelez pas. Office 2024 est la version perpétuelle de Microsoft, activée une seule fois, pour toujours. C'est exactement ce que ce pack vous donne — à vie, sans mensualité.",
       },
       {
         question: "Comment vais-je recevoir mon pack ?",
@@ -1103,6 +1109,11 @@ export const PRODUCTS: Product[] = [
         question: "Est-ce difficile à installer ?",
         answer:
           "Non. Il suffit d'installer Office puis l'outil d'activation fourni, et de suivre le guide étape par étape : comptez quelques minutes. Si une étape bloque, écrivez-nous sur WhatsApp, nous vous accompagnons.",
+      },
+      {
+        question: "Mon Mac est-il compatible ?",
+        answer:
+          "Ce pack est conçu pour macOS. Si vous avez un doute sur la compatibilité de votre modèle, écrivez-nous sur WhatsApp avant de commander : nous vous orientons.",
       },
       {
         question: "Est-ce que ça expire ou faut-il le renouveler ?",
@@ -1118,9 +1129,9 @@ export const PRODUCTS: Product[] = [
       faqAcces,
     ],
     seo: {
-      title: "Activation Microsoft Office à vie sur Mac",
+      title: "Activation Microsoft Office 2024 à vie sur Mac",
       description:
-        "Microsoft Office (Word, Excel, PowerPoint, Outlook) activé à vie sur Mac : un seul paiement, installation guidée en quelques minutes.",
+        "Microsoft Office 2024 (Word, Excel, PowerPoint, Outlook) activé à vie sur Mac : un seul paiement de 5 000 F, installation guidée en quelques minutes.",
     },
     order: 21,
   },

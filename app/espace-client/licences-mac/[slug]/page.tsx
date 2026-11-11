@@ -108,14 +108,14 @@ export default async function LicenceMacPage({
                   </p>
                   <p className="text-ink-soft text-xs">
                     Votre licence, l&rsquo;installeur et le guide pour activer
-                    Office à vie sur votre Mac
+                    Office 2024 à vie sur votre Mac
                   </p>
                 </div>
               </div>
 
               <p className="text-ink-soft text-sm font-medium">
-                Votre licence Expert — elle active Microsoft Office sur votre
-                Mac :
+                Votre licence Expert — elle active Microsoft Office 2024 sur
+                votre Mac :
               </p>
               <div className="bg-paper border-line mt-2 rounded-lg border px-4 py-3">
                 <p className="text-ink font-mono text-[1.0625rem] font-bold tracking-wide break-all">
@@ -152,7 +152,7 @@ export default async function LicenceMacPage({
                       />
                       <span className="min-w-0 flex-1">
                         <span className="text-ink block text-[0.9375rem] font-medium">
-                          1. Installeur Microsoft Office (Mac)
+                          1. Installeur Microsoft Office 2024 (Mac)
                         </span>
                         <span className="text-ink-faint block text-xs">
                           Word, Excel, PowerPoint, Outlook
