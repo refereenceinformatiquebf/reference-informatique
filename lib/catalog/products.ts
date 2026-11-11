@@ -1080,8 +1080,8 @@ export const PRODUCTS: Product[] = [
       },
     ],
     forWho: [
-      "Propriétaires de Mac qui ont besoin de Word, Excel et PowerPoint pour travailler",
-      "Étudiants, entrepreneurs et salariés qui veulent un Office complet sans abonnement mensuel",
+      "Propriétaires de Mac qui ont besoin de Word, Excel, PowerPoint et Outlook pour travailler",
+      "Étudiants, entrepreneurs et salariés fatigués de l'essai gratuit qui expire",
       "Qui vient d'acheter ou de réinitialiser son Mac",
       "Qui préfère payer une fois et garder son accès à vie plutôt que renouveler chaque année",
     ],
