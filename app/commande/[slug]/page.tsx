@@ -56,9 +56,14 @@ export default async function CommandePage({
       }
     : {};
 
-  // Accès livré automatiquement (licence) : formulaire en deux étapes, paiement
-  // en ligne ; seul le lien « Un souci pour payer ? » mène à l'assistance WhatsApp.
-  if (product.delivery === "licence-edn") {
+  // Accès livré automatiquement (licence, Windows ou Mac) : formulaire en deux
+  // étapes, paiement en ligne ; seul le lien « Un souci pour payer ? » mène à
+  // l'assistance WhatsApp. Même formulaire pour les deux : il ne dépend que du
+  // slug/nom/prix du produit, jamais de la plateforme.
+  if (
+    product.delivery === "licence-edn" ||
+    product.delivery === "licence-edn-mac"
+  ) {
     const priceLabel = formatPrice(product.price);
     return (
       <div className="py-8 sm:py-12">

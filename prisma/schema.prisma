@@ -244,9 +244,10 @@ model Order {
   createdAt         DateTime        @default(now()) @map("created_at")
   updatedAt         DateTime        @updatedAt @map("updated_at")
 
-  payments     Payment[]
-  events       OrderEvent[]
-  licenseStock LicenseStock?
+  payments        Payment[]
+  events          OrderEvent[]
+  licenseStock    LicenseStock?
+  macLicenseStock MacLicenseStock?
 
   @@index([providerSessionId])
   @@index([status, createdAt])
@@ -290,6 +291,14 @@ model Access {
   // licence Windows + Office recuperee automatiquement aupres de L'Expert du Numerique.
   licenseKey   String?  @map("license_key")
   installerUrl String?  @map("installer_url")
+  // Jumeaux de licenseKey/installerUrl pour un produit a livraison "licence-edn-mac" (voir
+  // lib/licences/mac-*) — jamais rempli en meme temps que les champs Windows ci-dessus, chaque
+  // produit n'utilise que sa propre paire. serializerUrl/guideUrl : les 2 fichiers specifiques
+  // au Pack Mac Office (pas d'equivalent cote Windows, deja regroupes dans installerUrl la-bas).
+  macLicenseKey    String? @map("mac_license_key")
+  macInstallerUrl  String? @map("mac_installer_url")
+  macSerializerUrl String? @map("mac_serializer_url")
+  macGuideUrl      String? @map("mac_guide_url")
 
   @@unique([profileId, productId])
   @@map("access")
@@ -312,6 +321,37 @@ model LicenseStock {
 
   @@index([receivedAt])
   @@map("license_stock")
+}
+
+/**
+ * Jumelle de LicenseStock pour le Pack Mac Office — stock separe meme si le fournisseur
+ * externe est le meme (EDN) : deux produits distincts, deux stocks distincts (voir
+ * lib/licences/mac-stock.ts). serializerUrl/guideUrl : les 2 fichiers specifiques au Mac, en
+ * plus de l'installeur Office (installerUrl) deja present cote Windows.
+ */
+model MacLicenseStock {
+  id              String    @id @default(uuid()) @db.Uuid
+  licenseKey      String    @map("license_key")
+  installerUrl    String    @map("installer_url")
+  serializerUrl   String    @map("serializer_url")
+  guideUrl        String    @map("guide_url")
+  assignedOrderId String?   @unique @map("assigned_order_id") @db.Uuid
+  assignedOrder   Order?    @relation(fields: [assignedOrderId], references: [id])
+  assignedAt      DateTime? @map("assigned_at")
+  receivedAt      DateTime  @default(now()) @map("received_at")
+
+  @@index([receivedAt])
+  @@map("mac_license_stock")
+}
+
+/// Alerte stock bas/epuise pour le Mac — jumelle de LicenseStockAlert, singleton separe (deux
+/// fournisseurs logiquement independants meme si meme partenaire EDN en pratique).
+model MacLicenseStockAlert {
+  id              String    @id @default("singleton")
+  lowNotifiedAt   DateTime? @map("low_notified_at")
+  emptyNotifiedAt DateTime? @map("empty_notified_at")
+
+  @@map("mac_license_stock_alerts")
 }
 
 /// Alerte stock bas/epuise — une seule ligne (singleton, un seul fournisseur EDN) : empeche de

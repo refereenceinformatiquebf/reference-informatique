@@ -78,13 +78,18 @@ export const DELIVERY_MODES = [
   "numerique",
   "manuel",
   "licence-edn",
+  "licence-edn-mac",
 ] as const;
 /**
- * - cle-physique : clé USB livrée chez le client (aucun accès en ligne à activer)
- * - numerique    : accès par l'espace client (guide PDF, liens, fichiers)
- * - manuel       : l'équipe contacte le client sur WhatsApp après paiement
- * - licence-edn  : licence d'activation récupérée automatiquement auprès d'un fournisseur externe
- *                  (voir lib/licences/) — clé + application d'activation, pas de leçon à suivre
+ * - cle-physique    : clé USB livrée chez le client (aucun accès en ligne à activer)
+ * - numerique       : accès par l'espace client (guide PDF, liens, fichiers)
+ * - manuel          : l'équipe contacte le client sur WhatsApp après paiement
+ * - licence-edn     : licence d'activation Windows + Office récupérée automatiquement auprès
+ *                     d'un fournisseur externe (voir lib/licences/) — clé + application
+ *                     d'activation, pas de leçon à suivre
+ * - licence-edn-mac : jumelle de licence-edn pour le Pack Mac Office — fournisseur, stock et
+ *                     page de licence séparés (voir lib/licences/mac-*), jamais mélangés avec
+ *                     le Windows même si le fournisseur externe est le même (EDN)
  */
 export type DeliveryMode = (typeof DELIVERY_MODES)[number];
 

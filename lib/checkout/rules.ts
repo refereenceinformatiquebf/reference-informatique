@@ -49,6 +49,8 @@ export function accessDestination(
     return `/espace-client/formations/${productSlug}`;
   if (delivery === "licence-edn")
     return `/espace-client/licences/${productSlug}`;
+  if (delivery === "licence-edn-mac")
+    return `/espace-client/licences-mac/${productSlug}`;
   // Une clé se livre : il n'y a rien à ouvrir en ligne, le client retrouve sa
   // commande (état de la livraison) et nos recommandations.
   if (delivery === "cle-physique") return "/espace-client?onglet=commandes";

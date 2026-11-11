@@ -985,7 +985,9 @@ export const PRODUCTS: Product[] = [
       "Qui vient d'acheter, d'installer ou de réinitialiser son PC",
       "Qui préfère payer une fois et garder son accès à vie plutôt que renouveler chaque année",
     ],
-    notForWho: ["Ordinateurs Mac (ce pack est conçu pour Windows)"],
+    notForWho: [
+      "Ordinateurs Mac (ce pack est conçu pour Windows — voir le Pack Activation Microsoft Office à vie — Mac)",
+    ],
     faq: [
       {
         question: "Que contient exactement ce pack ?",
@@ -1016,5 +1018,112 @@ export const PRODUCTS: Product[] = [
         "Windows 10/11 et Office 365 activés à vie : un seul paiement de 4 000 F, installation guidée en quelques minutes, antivirus gratuit offert.",
     },
     order: 20,
+  },
+
+  /* ------------------------ Pack Activation Microsoft Office à vie — Mac ------------------------ */
+  // NOTE : prix (4000) repris du pack Windows à titre provisoire — à confirmer avec le client
+  // avant publication (voir plan « Pack Mac Office »).
+  {
+    slug: "pack-activation-office-365-mac-a-vie",
+    name: "Pack Activation Microsoft Office à vie — Mac",
+    tagline:
+      "Word, Excel, PowerPoint et Outlook activés à vie sur votre Mac : un seul paiement, une installation guidée de quelques minutes, et plus jamais ce bandeau qui réclame un abonnement.",
+    summary:
+      "Microsoft Office activé à vie sur Mac : un seul paiement, installation guidée en quelques minutes, sans abonnement mensuel.",
+    kind: "pack",
+    price: 4000,
+    cover: { tone: "navy", motif: "logiciel" },
+    delivery: "licence-edn-mac",
+    facts: [
+      { icon: "eclair", label: "Prêt en quelques minutes" },
+      { icon: "ordinateur", label: "Word, Excel, PowerPoint sur Mac" },
+      { icon: "acces-a-vie", label: "À vie, sans abonnement" },
+      { icon: "support", label: "Guide + aide WhatsApp" },
+    ],
+    story: [
+      "Un rapport à rendre, un budget à boucler, une présentation à préparer pour demain : et ce bandeau qui s'affiche encore, « Votre essai a expiré » ou « Abonnez-vous pour continuer ». Sur Mac aussi, Microsoft Office mérite d'être à vous, pas loué au mois.",
+      "Ce pack réunit Microsoft Office complet sur Mac — Word pour écrire, Excel pour calculer, PowerPoint pour présenter, Outlook pour vos e-mails — activé une bonne fois pour toutes. Une seule petite application, guidée pas à pas : en quelques minutes, vous êtes prêt à travailler, sans compte Microsoft à créer ni carte bancaire à enregistrer pour un renouvellement automatique.",
+      "Et c'est pour la vie : un seul paiement, aucun renouvellement. Votre accès est prêt dès la confirmation du paiement, avec un guide d'installation et notre équipe sur WhatsApp si vous avez besoin d'un coup de main.",
+    ],
+    highlights: [
+      "Word, Excel, PowerPoint et Outlook réunis dans un seul pack, pour Mac",
+      "À vie : un seul paiement, aucun abonnement à renouveler",
+      "Simple : une seule installation, guidée pas à pas",
+      "Rapide : accès immédiat après paiement, prêt en quelques minutes",
+      "Guide d'installation détaillé et assistance sur WhatsApp",
+    ],
+    contents: [
+      {
+        title: "Ce que contient le pack",
+        items: [
+          {
+            name: "Word",
+            detail: "Rapports, courriers, CV, mémoires : écrivez sans limite",
+          },
+          {
+            name: "Excel",
+            detail: "Calculs, tableaux, budgets : gérez vos données facilement",
+          },
+          {
+            name: "PowerPoint",
+            detail:
+              "Des présentations professionnelles qui font bonne impression",
+          },
+          {
+            name: "Outlook",
+            detail: "Vos e-mails et votre agenda bien organisés",
+          },
+          {
+            name: "Application d'installation",
+            detail:
+              "L'installeur Office complet pour Mac et l'outil d'activation, avec votre licence personnelle et le guide pas à pas",
+          },
+        ],
+      },
+    ],
+    forWho: [
+      "Propriétaires de Mac qui ont besoin de Word, Excel et PowerPoint pour travailler",
+      "Étudiants, entrepreneurs et salariés qui veulent un Office complet sans abonnement mensuel",
+      "Qui vient d'acheter ou de réinitialiser son Mac",
+      "Qui préfère payer une fois et garder son accès à vie plutôt que renouveler chaque année",
+    ],
+    notForWho: [
+      "Ordinateurs Windows (ce pack est conçu pour Mac — voir le Pack Activation Windows 10/11 + Office 365 à vie)",
+    ],
+    faq: [
+      {
+        question: "Que contient exactement ce pack ?",
+        answer:
+          "Microsoft Office complet pour Mac — Word, Excel, PowerPoint et Outlook — activé à vie en un seul achat. Ce n'est pas un essai limité dans le temps : c'est une activation réelle et définitive.",
+      },
+      {
+        question: "Comment vais-je recevoir mon pack ?",
+        answer:
+          "Dès que votre paiement est confirmé, votre licence est générée automatiquement et apparaît dans votre espace client, rubrique « Mes licences » — avec l'installeur, l'outil d'activation et le guide pas à pas. Aucune attente.",
+      },
+      {
+        question: "Est-ce difficile à installer ?",
+        answer:
+          "Non. Il suffit d'installer Office puis l'outil d'activation fourni, et de suivre le guide étape par étape : comptez quelques minutes. Si une étape bloque, écrivez-nous sur WhatsApp, nous vous accompagnons.",
+      },
+      {
+        question: "Est-ce que ça expire ou faut-il le renouveler ?",
+        answer:
+          "Non, c'est à vie : pas d'abonnement, pas de renouvellement à prévoir.",
+      },
+      {
+        question: "J'ai un PC Windows, pas un Mac : ce pack me convient-il ?",
+        answer:
+          "Non — ce pack est spécifiquement conçu pour Mac. Pour Windows, voyez notre Pack Activation Windows 10/11 + Office 365 à vie, qui inclut en plus Windows.",
+      },
+      faqPaiementNumerique,
+      faqAcces,
+    ],
+    seo: {
+      title: "Activation Microsoft Office à vie sur Mac",
+      description:
+        "Microsoft Office (Word, Excel, PowerPoint, Outlook) activé à vie sur Mac : un seul paiement, installation guidée en quelques minutes.",
+    },
+    order: 21,
   },
 ];

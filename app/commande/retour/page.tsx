@@ -36,6 +36,7 @@ const PAID_MESSAGE = {
   manuel:
     "Votre paiement est confirmé. Notre équipe vous contacte sur WhatsApp pour vous remettre votre accès.",
   "licence-edn": "Votre licence d'activation est prête.",
+  "licence-edn-mac": "Votre licence Mac est prête.",
 } as const;
 
 export default async function CommandeRetourPage({

@@ -81,6 +81,24 @@ const STEPS: Record<DeliveryMode, { title: string; text: string }[]> = {
       text: `Une question pendant l'installation ? Écrivez-nous sur WhatsApp au ${SITE.phoneDisplay}.`,
     },
   ],
+  "licence-edn-mac": [
+    {
+      title: "Vous commandez",
+      text: "Par carte bancaire ou Mobile Money, sur une page de paiement sécurisée.",
+    },
+    {
+      title: "Votre licence est générée automatiquement",
+      text: "Dès la confirmation du paiement, aucune attente : votre clé personnelle est prête.",
+    },
+    {
+      title: "Vous l'installez en quelques minutes",
+      text: "L'installeur Office, l'outil d'activation et le guide sont dans votre espace client.",
+    },
+    {
+      title: "Vous êtes accompagné",
+      text: `Une question pendant l'installation ? Écrivez-nous sur WhatsApp au ${SITE.phoneDisplay}.`,
+    },
+  ],
 };
 
 export function HowItWorks({ mode }: { mode: DeliveryMode }) {

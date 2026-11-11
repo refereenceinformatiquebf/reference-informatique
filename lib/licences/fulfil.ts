@@ -7,6 +7,7 @@ import { sendLicenceReady } from "@/lib/email/send";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import { chooseFulfilmentOrder } from "./plan";
 import { claimFromLocalStock, claimLiveFallback } from "./stock";
+import { claimFromLocalMacStock, claimMacLiveFallback } from "./mac-stock";
 
 /**
  * Livraison d'une licence à un client qui a PAYÉ mais dont l'accès n'en a pas
@@ -242,6 +243,277 @@ export async function deliverPendingLicences(): Promise<DeliverySummary> {
       summary.failed += 1;
       console.error(
         `[licences] livraison impossible (accès ${pending.accessId}) :`,
+        error,
+      );
+    }
+  }
+  return summary;
+}
+
+/* ====================================================================== */
+/* ================================ MAC ================================ */
+/* ====================================================================== */
+/* Jumelle complète de ce qui précède, pour le Pack Mac Office — mêmes principes
+ * (idempotence, protection anti-course, stock local puis repli direct chez EDN), juste
+ * redirigée vers mac_license_stock / access.mac_license_key. */
+
+export type DeliveredMacLicence = {
+  licenseKey: string;
+  installerUrl: string;
+  serializerUrl: string;
+  guideUrl: string;
+};
+
+class MacLicenceRace extends Error {}
+
+export async function fulfilPendingMacLicenceInTx(
+  tx: Prisma.TransactionClient,
+  accessId: string,
+): Promise<DeliveredMacLicence | null> {
+  const access = await tx.access.findUnique({
+    where: { id: accessId },
+    select: {
+      id: true,
+      profileId: true,
+      productId: true,
+      macLicenseKey: true,
+      macInstallerUrl: true,
+      macSerializerUrl: true,
+      macGuideUrl: true,
+    },
+  });
+  if (!access) return null;
+  if (access.macLicenseKey) {
+    return {
+      licenseKey: access.macLicenseKey,
+      installerUrl: access.macInstallerUrl!,
+      serializerUrl: access.macSerializerUrl!,
+      guideUrl: access.macGuideUrl!,
+    };
+  }
+
+  const orders = await tx.order.findMany({
+    where: {
+      profileId: access.profileId,
+      productId: access.productId,
+      status: "PAYE",
+    },
+    orderBy: { paidAt: "asc" },
+    select: {
+      id: true,
+      macLicenseStock: {
+        select: {
+          licenseKey: true,
+          installerUrl: true,
+          serializerUrl: true,
+          guideUrl: true,
+        },
+      },
+    },
+  });
+  const plan = chooseFulfilmentOrder(
+    orders.map((order) => ({
+      id: order.id,
+      stock: order.macLicenseStock
+        ? {
+            licenseKey: order.macLicenseStock.licenseKey,
+            installerUrl: order.macLicenseStock.installerUrl,
+          }
+        : null,
+    })),
+  );
+  if (plan.kind === "none") return null;
+
+  let licence: DeliveredMacLicence | null = null;
+  if (plan.kind === "reuse") {
+    const full = orders.find((o) => o.macLicenseStock)?.macLicenseStock;
+    if (full)
+      licence = {
+        licenseKey: full.licenseKey,
+        installerUrl: full.installerUrl,
+        serializerUrl: full.serializerUrl,
+        guideUrl: full.guideUrl,
+      };
+  } else {
+    licence = await claimFromLocalMacStock(plan.orderId, tx);
+  }
+  if (!licence) return null;
+
+  const written = await tx.access.updateMany({
+    where: { id: access.id, macLicenseKey: null },
+    data: {
+      macLicenseKey: licence.licenseKey,
+      macInstallerUrl: licence.installerUrl,
+      macSerializerUrl: licence.serializerUrl,
+      macGuideUrl: licence.guideUrl,
+    },
+  });
+  if (written.count === 0) throw new MacLicenceRace();
+  return licence;
+}
+
+async function fulfilMacInTransaction(
+  accessId: string,
+): Promise<DeliveredMacLicence | null> {
+  try {
+    return await prisma.$transaction((tx) =>
+      fulfilPendingMacLicenceInTx(tx, accessId),
+    );
+  } catch (error) {
+    if (!(error instanceof MacLicenceRace)) throw error;
+    const access = await prisma.access.findUnique({
+      where: { id: accessId },
+      select: {
+        macLicenseKey: true,
+        macInstallerUrl: true,
+        macSerializerUrl: true,
+        macGuideUrl: true,
+      },
+    });
+    return access?.macLicenseKey
+      ? {
+          licenseKey: access.macLicenseKey,
+          installerUrl: access.macInstallerUrl!,
+          serializerUrl: access.macSerializerUrl!,
+          guideUrl: access.macGuideUrl!,
+        }
+      : null;
+  }
+}
+
+/** Pour la page « Ma licence Mac ». */
+export async function fulfilPendingMacLicence(
+  accessId: string,
+): Promise<DeliveredMacLicence | null> {
+  const access = await prisma.access.findUnique({
+    where: { id: accessId },
+    select: {
+      macLicenseKey: true,
+      macInstallerUrl: true,
+      macSerializerUrl: true,
+      macGuideUrl: true,
+      product: { select: { slug: true } },
+    },
+  });
+  if (!access) return null;
+  if (access.macLicenseKey) {
+    return {
+      licenseKey: access.macLicenseKey,
+      installerUrl: access.macInstallerUrl!,
+      serializerUrl: access.macSerializerUrl!,
+      guideUrl: access.macGuideUrl!,
+    };
+  }
+  const catalogProduct = await getProduct(access.product.slug);
+  if (catalogProduct?.delivery !== "licence-edn-mac") return null;
+  return fulfilMacInTransaction(accessId);
+}
+
+/* ------------------------------ Administration (Mac) ------------------------------ */
+
+export type PendingMacLicence = {
+  accessId: string;
+  orderId: string;
+  productName: string;
+  clientName: string;
+  clientEmail: string | null;
+  paidAt: Date | null;
+};
+
+export async function listPendingMacLicences(): Promise<PendingMacLicence[]> {
+  const licenceSlugs = (await getAllProducts())
+    .filter((product) => product.delivery === "licence-edn-mac")
+    .map((product) => product.slug);
+  if (licenceSlugs.length === 0) return [];
+
+  const accesses = await prisma.access.findMany({
+    where: { macLicenseKey: null, product: { slug: { in: licenceSlugs } } },
+    include: { profile: true, product: true },
+    orderBy: { grantedAt: "asc" },
+  });
+
+  const pending: PendingMacLicence[] = [];
+  for (const access of accesses) {
+    const paidOrder = await prisma.order.findFirst({
+      where: {
+        profileId: access.profileId,
+        productId: access.productId,
+        status: "PAYE",
+      },
+      orderBy: { paidAt: "asc" },
+      select: { id: true, paidAt: true },
+    });
+    if (!paidOrder) continue;
+    pending.push({
+      accessId: access.id,
+      orderId: paidOrder.id,
+      productName: access.product.name,
+      clientName: access.profile.name,
+      clientEmail: await getClientEmail(access.profile),
+      paidAt: paidOrder.paidAt,
+    });
+  }
+  return pending;
+}
+
+export async function deliverPendingMacLicences(): Promise<DeliverySummary> {
+  const summary: DeliverySummary = { delivered: 0, stillWaiting: 0, failed: 0 };
+
+  for (const pending of await listPendingMacLicences()) {
+    try {
+      let licence = await fulfilMacInTransaction(pending.accessId);
+
+      if (!licence && pending.clientEmail) {
+        const live = await claimMacLiveFallback(
+          pending.clientName,
+          pending.clientEmail,
+          pending.orderId,
+        );
+        if (!("error" in live)) {
+          const written = await prisma.access.updateMany({
+            where: { id: pending.accessId, macLicenseKey: null },
+            data: {
+              macLicenseKey: live.licenseKey,
+              macInstallerUrl: live.installerUrl,
+              macSerializerUrl: live.serializerUrl,
+              macGuideUrl: live.guideUrl,
+            },
+          });
+          if (written.count === 0) {
+            console.error(
+              "[licences] licence Mac obtenue mais l'accès était déjà livré :",
+              pending.orderId,
+            );
+          }
+          licence = live;
+        }
+      }
+
+      if (!licence) {
+        summary.stillWaiting += 1;
+        continue;
+      }
+      summary.delivered += 1;
+
+      if (pending.clientEmail) {
+        await sendLicenceReady({
+          to: pending.clientEmail,
+          clientName: pending.clientName,
+          productName: pending.productName,
+          orderId: pending.orderId,
+          ctaUrl: await trackingUrlFor(pending.orderId),
+          paidAt: pending.paidAt,
+        }).catch((error) =>
+          console.error(
+            "[licences] e-mail « licence Mac prête » non envoyé :",
+            error,
+          ),
+        );
+      }
+    } catch (error) {
+      summary.failed += 1;
+      console.error(
+        `[licences] livraison Mac impossible (accès ${pending.accessId}) :`,
         error,
       );
     }

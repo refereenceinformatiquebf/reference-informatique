@@ -21,6 +21,11 @@ import {
   claimLiveFallback,
   checkLowStock,
 } from "@/lib/licences/stock";
+import {
+  claimFromLocalMacStock,
+  claimMacLiveFallback,
+  checkLowMacStock,
+} from "@/lib/licences/mac-stock";
 import { audit } from "@/lib/admin/audit";
 import { trackingUrlFor } from "@/lib/checkout/access";
 import { sendMetaPurchaseEvent } from "@/lib/meta-capi";
@@ -126,6 +131,7 @@ export async function markOrderPaid(params: MarkOrderPaidParams) {
     : undefined;
   const needsDelivery = catalogProduct?.delivery === "cle-physique";
   const isLicenceProduct = catalogProduct?.delivery === "licence-edn";
+  const isMacLicenceProduct = catalogProduct?.delivery === "licence-edn-mac";
 
   const run = (): Promise<PaidOutcome> =>
     prisma.$transaction(async (tx): Promise<PaidOutcome> => {
@@ -181,6 +187,9 @@ export async function markOrderPaid(params: MarkOrderPaidParams) {
           const stock = isLicenceProduct
             ? await claimFromLocalStock(current.id, tx)
             : null;
+          const macStock = isMacLicenceProduct
+            ? await claimFromLocalMacStock(current.id, tx)
+            : null;
           await tx.access.upsert({
             where: {
               profileId_productId: {
@@ -196,6 +205,14 @@ export async function markOrderPaid(params: MarkOrderPaidParams) {
                 ? {
                     licenseKey: stock.licenseKey,
                     installerUrl: stock.installerUrl,
+                  }
+                : {}),
+              ...(macStock
+                ? {
+                    macLicenseKey: macStock.licenseKey,
+                    macInstallerUrl: macStock.installerUrl,
+                    macSerializerUrl: macStock.serializerUrl,
+                    macGuideUrl: macStock.guideUrl,
                   }
                 : {}),
             },
@@ -346,18 +363,88 @@ async function ensureLicenceFulfilled(
   return result;
 }
 
+/** Jumelle de ensureLicenceFulfilled pour le Pack Mac Office — voir ce commentaire pour le
+ * raisonnement complet (repli direct hors transaction si le stock local n'a rien fourni). */
+async function ensureMacLicenceFulfilled(
+  order: { id: string; profileId: string; productId: string | null },
+  catalogProduct: { delivery: string } | undefined,
+  clientName: string,
+  clientEmail: string | null,
+): Promise<{ licenseKey: string; installerUrl: string } | null> {
+  if (catalogProduct?.delivery !== "licence-edn-mac" || !order.productId)
+    return null;
+
+  const access = await prisma.access.findUnique({
+    where: {
+      profileId_productId: {
+        profileId: order.profileId,
+        productId: order.productId,
+      },
+    },
+  });
+  if (!access) return null;
+
+  if (access.macLicenseKey && access.macInstallerUrl) {
+    const milestone = await checkLowMacStock().catch(() => null);
+    if (milestone) {
+      const available = await prisma.macLicenseStock.count({
+        where: { assignedOrderId: null },
+      });
+      await sendLicenceStockAlert({ milestone, available }).catch((err) =>
+        console.error("[licences] alerte stock Mac non envoyée :", err),
+      );
+    }
+    return {
+      licenseKey: access.macLicenseKey,
+      installerUrl: access.macInstallerUrl,
+    };
+  }
+
+  if (!clientEmail) return null;
+
+  const result = await claimMacLiveFallback(clientName, clientEmail, order.id);
+  if ("error" in result) {
+    await audit(
+      null,
+      result.quotaReached ? "licence.quota_reached" : "licence.claim_failed",
+      "order",
+      order.id,
+      result.error,
+    );
+    return null;
+  }
+
+  await prisma.access.update({
+    where: { id: access.id },
+    data: {
+      macLicenseKey: result.licenseKey,
+      macInstallerUrl: result.installerUrl,
+      macSerializerUrl: result.serializerUrl,
+      macGuideUrl: result.guideUrl,
+    },
+  });
+  return { licenseKey: result.licenseKey, installerUrl: result.installerUrl };
+}
+
 async function notifyPaymentConfirmed(orderId: string) {
   const data = await loadOrderForEmail(orderId);
   if (!data) return;
   const { order, product, catalogProduct, email, shipping } = data;
   const delivery = catalogProduct?.delivery ?? "numerique";
 
-  const licence = await ensureLicenceFulfilled(
-    order,
-    catalogProduct,
-    order.profile.name,
-    email,
-  );
+  const licence =
+    (await ensureLicenceFulfilled(
+      order,
+      catalogProduct,
+      order.profile.name,
+      email,
+    )) ??
+    (await ensureMacLicenceFulfilled(
+      order,
+      catalogProduct,
+      order.profile.name,
+      email,
+    ));
   const trackUrl = await trackingUrlFor(order.id);
 
   const tasks: Promise<unknown>[] = [
@@ -522,7 +609,9 @@ export async function refundPaidOrder(params: {
         productName: product.name,
         amount: order.amount,
         orderId: order.id,
-        licence: (await getProduct(product.slug))?.delivery === "licence-edn",
+        licence: ["licence-edn", "licence-edn-mac"].includes(
+          (await getProduct(product.slug))?.delivery ?? "",
+        ),
         paidAt: order.paidAt,
       });
     });
