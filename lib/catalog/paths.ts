@@ -10,9 +10,11 @@
  * jamais écrire `/boutique/${slug}` à la main.
  */
 const PACK_ACTIVATION_SLUG = "pack-activation-windows11et10-et-office365-a-vie";
+const PACK_MAC_SLUG = "pack-activation-office-2024-mac-a-vie";
 
 export const ROOT_PATH_PRODUCT_SLUGS: ReadonlySet<string> = new Set([
   PACK_ACTIVATION_SLUG,
+  PACK_MAC_SLUG,
 ]);
 
 /**
@@ -27,6 +29,9 @@ const PRODUCT_SLUG_ALIASES: ReadonlyMap<string, string> = new Map([
   // Écrite avec « & » : valide en théorie, mais il casse les liens partagés
   // (WhatsApp, e-mail) et le plan du site XML — l'adresse officielle dit « et ».
   ["pack-activation-windows11&10-et-office365-a-vie", PACK_ACTIVATION_SLUG],
+  // Ancien slug du pack Mac, avant de préciser « Office 2024 » et de lui donner
+  // une adresse courte à la racine.
+  ["pack-activation-office-365-mac-a-vie", PACK_MAC_SLUG],
 ]);
 
 export function productPath(slug: string): string {

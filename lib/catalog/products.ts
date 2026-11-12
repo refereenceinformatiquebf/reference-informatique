@@ -1022,7 +1022,7 @@ export const PRODUCTS: Product[] = [
 
   /* ------------------------ Pack Activation Microsoft Office 2024 à vie — Mac ------------------------ */
   {
-    slug: "pack-activation-office-365-mac-a-vie",
+    slug: "pack-activation-office-2024-mac-a-vie",
     name: "Pack Activation Microsoft Office 2024 à vie — Mac",
     tagline:
       "Word, Excel, PowerPoint et Outlook — Microsoft Office 2024 — activés à vie sur votre Mac : un seul paiement, une installation guidée de quelques minutes, et plus jamais ce bandeau qui réclame un abonnement.",
@@ -1030,6 +1030,10 @@ export const PRODUCTS: Product[] = [
       "Microsoft Office 2024 activé à vie sur Mac : un seul paiement, installation guidée en quelques minutes, sans abonnement 365.",
     kind: "pack",
     price: 5000,
+    poster: {
+      src: "/produits/affiches/pack-activation-office-2024-mac-a-vie.webp",
+      alt: "Pack complet Microsoft Office 2024 activé à vie sur Mac : Word, Excel, PowerPoint et Outlook, guide d'installation inclus, assistance disponible, 5 000 FCFA.",
+    },
     cover: { tone: "navy", motif: "logiciel" },
     delivery: "licence-edn-mac",
     facts: [
