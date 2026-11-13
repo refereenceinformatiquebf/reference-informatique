@@ -12,16 +12,16 @@ import {
   SectionHeading,
 } from "@/components/ui/section";
 import { JsonLd } from "@/components/json-ld";
+import { ContactFab } from "@/components/shop/contact-fab";
 import { Price } from "@/components/shop/price";
 import { ProductCover } from "@/components/shop/product-cover";
-import { IconWhatsapp } from "@/components/icons";
 import { formatPrice } from "@/lib/format";
 import { discountPercent } from "@/lib/catalog";
 import { getVisibleProduct } from "@/lib/catalog/live";
 import { productPath } from "@/lib/catalog/paths";
 import { getVisitorCountry } from "@/lib/geo";
 import { getTestimonialForProduct } from "@/lib/testimonials";
-import { SITE, whatsappLink } from "@/lib/site";
+import { SITE } from "@/lib/site";
 import { fr } from "@/lib/typography";
 
 /**
@@ -177,21 +177,9 @@ export default async function MacPackPage() {
                   </p>
                 ) : null}
 
-                <div className="mt-5 flex flex-col gap-3">
+                <div className="mt-5">
                   <Button asChild size="lg" className="w-full">
                     <Link href={orderHref}>Commander maintenant</Link>
-                  </Button>
-                  <Button asChild variant="outline" className="w-full">
-                    <a
-                      href={whatsappLink(
-                        `Bonjour, j'ai une question sur « ${product.name} ».`,
-                      )}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <IconWhatsapp size={18} />
-                      Poser une question sur WhatsApp
-                    </a>
                   </Button>
                 </div>
               </div>
@@ -327,6 +315,14 @@ export default async function MacPackPage() {
           </Button>
         </div>
       </div>
+
+      <ContactFab
+        productSlug={product.slug}
+        productName={product.name}
+        priceLabel={formatPrice(product.price)}
+        value={product.price}
+        orderHref={orderHref}
+      />
     </div>
   );
 }
