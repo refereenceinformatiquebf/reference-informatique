@@ -3,9 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { FaqList } from "@/components/ui/faq-list";
 import {
   CheckList,
   Container,
@@ -14,14 +12,12 @@ import {
   SectionHeading,
 } from "@/components/ui/section";
 import { JsonLd } from "@/components/json-ld";
-import { HowItWorks } from "@/components/shop/how-it-works";
 import { Price } from "@/components/shop/price";
-import { ProductCard } from "@/components/shop/product-card";
 import { ProductCover } from "@/components/shop/product-cover";
-import { IconBouclier, IconWhatsapp } from "@/components/icons";
+import { IconWhatsapp } from "@/components/icons";
 import { formatPrice } from "@/lib/format";
-import { PRODUCT_KINDS, discountPercent } from "@/lib/catalog";
-import { getRelatedProducts, getVisibleProduct } from "@/lib/catalog/live";
+import { discountPercent } from "@/lib/catalog";
+import { getVisibleProduct } from "@/lib/catalog/live";
 import { productPath } from "@/lib/catalog/paths";
 import { getVisitorCountry } from "@/lib/geo";
 import { getTestimonialForProduct } from "@/lib/testimonials";
@@ -29,9 +25,10 @@ import { SITE, whatsappLink } from "@/lib/site";
 import { fr } from "@/lib/typography";
 
 /**
- * Jumelle de app/boutique/[slug]/page.tsx (même template générique, même
- * contenu de catalogue) pour le pack Mac Office — servi à une adresse courte
- * à la racine du site, comme le pack Windows (voir lib/catalog/paths.ts).
+ * Fiche du pack Mac Office, servie à une adresse courte à la racine du site,
+ * comme le pack Windows (voir lib/catalog/paths.ts). Dérivée de
+ * app/boutique/[slug]/page.tsx mais épurée : ni fil d'Ariane, ni étapes de
+ * livraison, ni FAQ, ni suggestions — seulement ce qui mène à la commande.
  * /boutique/<slug> redirige ici ; l'ancien slug (avant « Office 2024 ») aussi.
  */
 const SLUG = "pack-activation-office-2024-mac-a-vie";
@@ -72,9 +69,7 @@ export default async function MacPackPage() {
   const product = await getVisibleProduct(SLUG, country);
   if (!product) notFound();
 
-  const kind = PRODUCT_KINDS[product.kind];
   const percent = discountPercent(product);
-  const related = await getRelatedProducts(product, country, 3);
   const testimonial = await getTestimonialForProduct(product.slug);
   const orderHref = `/commande/${product.slug}`;
   const isKey = product.kind === "cle";
@@ -112,16 +107,7 @@ export default async function MacPackPage() {
       {/* ======================= En-tête de fiche ======================= */}
       <section className="bg-paper border-line border-b">
         <Container className="py-8 sm:py-10">
-          <Breadcrumb
-            items={[
-              { label: "Accueil", href: "/" },
-              { label: "Boutique", href: "/boutique" },
-              { label: kind.plural, href: `/boutique?famille=${product.kind}` },
-              { label: product.name },
-            ]}
-          />
-
-          <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-14">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-14">
             {/* Visuel */}
             <div className="lg:sticky lg:top-24 lg:self-start">
               <div className="border-line bg-paper-raised relative overflow-hidden rounded-xl border">
@@ -140,25 +126,20 @@ export default async function MacPackPage() {
                   <ProductCover product={product} />
                 )}
               </div>
-              {product.poster ? (
-                <p className="text-ink-faint mt-3 text-xs">
-                  Affiche de l&rsquo;offre. Les informations de cette page
-                  (prix, contenu, livraison) font foi.
-                </p>
-              ) : null}
             </div>
 
             {/* Informations et achat */}
             <div className="flex flex-col gap-6">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="neutral">{kind.label}</Badge>
-                {product.badge ? (
-                  <Badge variant="success">{fr(product.badge)}</Badge>
-                ) : null}
-                {isKey ? (
-                  <Badge variant="outline">Disponible au Burkina Faso</Badge>
-                ) : null}
-              </div>
+              {product.badge || isKey ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  {product.badge ? (
+                    <Badge variant="success">{fr(product.badge)}</Badge>
+                  ) : null}
+                  {isKey ? (
+                    <Badge variant="outline">Disponible au Burkina Faso</Badge>
+                  ) : null}
+                </div>
+              ) : null}
 
               <div>
                 <h1 className="text-ink text-[2rem] leading-[1.1] tracking-[-0.02em] sm:text-[2.5rem]">
@@ -213,12 +194,6 @@ export default async function MacPackPage() {
                     </a>
                   </Button>
                 </div>
-
-                <p className="text-ink-faint mt-4 flex items-start gap-2 text-xs leading-relaxed">
-                  <IconBouclier size={16} className="mt-px shrink-0" />
-                  Paiement sécurisé par carte bancaire ou Mobile Money. Nous ne
-                  voyons jamais vos codes.
-                </p>
               </div>
             </div>
           </div>
@@ -305,45 +280,13 @@ export default async function MacPackPage() {
 
       {/* ======================= Pour qui ======================= */}
       <section className="py-14 sm:py-20">
-        <Container className="grid grid-cols-1 gap-10 md:grid-cols-2">
-          <div>
-            <SectionHeading
-              as="h2"
-              eyebrow="Pour qui ?"
-              title="Ce produit est fait pour vous si…"
-            />
-            <CheckList items={product.forWho} className="mt-6" />
-          </div>
-          {product.notForWho && product.notForWho.length > 0 ? (
-            <div className="border-line bg-paper h-fit rounded-xl border p-6 sm:p-7">
-              <h2 className="font-display text-ink text-[1.375rem] leading-tight">
-                Ce qu&rsquo;il est bon de savoir
-              </h2>
-              <ul className="mt-4 flex flex-col gap-3">
-                {product.notForWho.map((note) => (
-                  <li
-                    key={note}
-                    className="text-ink-soft text-[0.9375rem] leading-relaxed"
-                  >
-                    {note}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-        </Container>
-      </section>
-
-      {/* ======================= Livraison ======================= */}
-      <section className="bg-paper border-line border-y py-14 sm:py-20">
         <Container>
           <SectionHeading
-            eyebrow="Après votre commande"
-            title="Comment vous le recevez"
+            as="h2"
+            eyebrow="Pour qui ?"
+            title="Ce produit est fait pour vous si…"
           />
-          <div className="mt-10">
-            <HowItWorks mode={product.delivery} />
-          </div>
+          <CheckList items={product.forWho} className="mt-6 max-w-2xl" />
         </Container>
       </section>
 
@@ -366,35 +309,6 @@ export default async function MacPackPage() {
                 </span>
               </figcaption>
             </figure>
-          </Container>
-        </section>
-      ) : null}
-
-      {/* ======================= FAQ ======================= */}
-      <section className="bg-paper border-line border-y py-14 sm:py-20">
-        <Container className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.6fr]">
-          <SectionHeading
-            eyebrow="Questions fréquentes"
-            title="Avant de commander"
-            lead="Une question qui n'est pas ici ? Écrivez-nous sur WhatsApp."
-          />
-          <FaqList items={product.faq} />
-        </Container>
-      </section>
-
-      {/* ======================= Suggestions ======================= */}
-      {related.length > 0 ? (
-        <section className="pt-14 pb-10 sm:pt-16 sm:pb-12">
-          <Container>
-            <SectionHeading
-              eyebrow="Pour aller plus loin"
-              title="Vous aimerez aussi"
-            />
-            <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {related.map((item, index) => (
-                <ProductCard key={item.slug} product={item} index={index} />
-              ))}
-            </div>
           </Container>
         </section>
       ) : null}
