@@ -92,15 +92,23 @@ export function supportWhatsappLink(message: string): string {
 }
 
 /**
+ * Produit livré par licence, Windows ou Mac : son client est dirigé vers
+ * l'assistance dédiée, jamais vers le numéro général du site.
+ */
+export function usesSupportLine(delivery: DeliveryMode | undefined): boolean {
+  return delivery === "licence-edn" || delivery === "licence-edn-mac";
+}
+
+/**
  * Lien WhatsApp à proposer à un client selon ce qu'il a acheté : l'assistance
- * dédiée pour un produit livré par licence (le pack), le numéro général du site
- * pour tout le reste. Un client du pack ne doit jamais voir le numéro général.
+ * dédiée pour un produit livré par licence (un pack), le numéro général du site
+ * pour tout le reste. Un client d'un pack ne doit jamais voir le numéro général.
  */
 export function whatsappLinkForDelivery(
   delivery: DeliveryMode | undefined,
   message: string,
 ): string {
-  return delivery === "licence-edn"
+  return usesSupportLine(delivery)
     ? supportWhatsappLink(message)
     : whatsappLink(message);
 }

@@ -18,7 +18,11 @@ import {
 import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
 import { isHoneypotFilled } from "@/lib/honeypot";
 import { whatsappLink } from "@/lib/site";
-import { supportOrderMessage, supportWhatsappLink } from "@/lib/support";
+import {
+  supportOrderMessage,
+  supportWhatsappLink,
+  usesSupportLine,
+} from "@/lib/support";
 import { formatPrice } from "@/lib/format";
 import { addOrderEvent } from "@/lib/orders";
 import { runAfterResponse } from "@/lib/after-response";
@@ -381,9 +385,10 @@ async function startWhatsappOrder(context: OrderContext): Promise<string> {
     return `${followUpUrl(order.id)}&deja=1`;
   }
 
-  // Pack livré par licence : le client écrit à l'assistance dédiée (jamais au
-  // numéro général du site), avec ses coordonnées et la référence de sa commande.
-  if (catalogProduct.delivery === "licence-edn") {
+  // Pack livré par licence (Windows ou Mac) : le client écrit à l'assistance
+  // dédiée (jamais au numéro général du site), avec ses coordonnées et la
+  // référence de sa commande.
+  if (usesSupportLine(catalogProduct.delivery)) {
     return supportWhatsappLink(
       supportOrderMessage({
         name: profile.name,

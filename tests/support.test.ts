@@ -13,6 +13,8 @@ import {
   supportPaidFromSalesPageMessage,
   supportPayOnWhatsappMessage,
   supportWhatsappLink,
+  usesSupportLine,
+  whatsappLinkForDelivery,
 } from "../lib/support";
 import { hidesCompanyContact } from "../lib/focus";
 import { SITE } from "../lib/site";
@@ -108,6 +110,38 @@ describe("messages d'assistance de la commande et de la page de vente", () => {
     ).searchParams.get("text");
     assert.equal(text, supportOrderMessage(order));
     assert.ok(text?.includes("\n"));
+  });
+});
+
+describe("numéro WhatsApp selon le mode de livraison", () => {
+  it("dirige les deux packs (Windows et Mac) vers l'assistance dédiée", () => {
+    assert.equal(usesSupportLine("licence-edn"), true);
+    assert.equal(usesSupportLine("licence-edn-mac"), true);
+    for (const delivery of ["licence-edn", "licence-edn-mac"] as const) {
+      assert.ok(
+        whatsappLinkForDelivery(delivery, "x").startsWith(
+          `https://wa.me/${SUPPORT_WHATSAPP}?text=`,
+        ),
+        delivery,
+      );
+    }
+  });
+
+  it("garde le numéro général pour les autres produits", () => {
+    for (const delivery of [
+      "numerique",
+      "cle-physique",
+      "manuel",
+      undefined,
+    ] as const) {
+      assert.equal(usesSupportLine(delivery), false, String(delivery));
+      assert.ok(
+        whatsappLinkForDelivery(delivery, "x").startsWith(
+          `https://wa.me/${SITE.whatsapp}?text=`,
+        ),
+        String(delivery),
+      );
+    }
   });
 });
 
